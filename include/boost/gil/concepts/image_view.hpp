@@ -24,7 +24,6 @@
 
 #if defined(BOOST_CLANG)
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedefs"
 #endif
 
@@ -40,7 +39,7 @@ namespace boost { namespace gil {
 /// \ingroup ImageViewConcept
 /// \brief N-dimensional range
 
-/// \defgroup ImageView2DConcept ImageView2DLocatorConcept
+/// \defgroup ImageView2DConcept ImageView2DConcept
 /// \ingroup ImageViewConcept
 /// \brief 2-dimensional range
 

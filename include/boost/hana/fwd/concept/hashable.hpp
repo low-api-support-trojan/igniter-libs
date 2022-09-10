@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-concepts
     //! @defgroup group-Hashable Hashable
     //! The `Hashable` concept represents objects that can be normalized to
@@ -63,6 +63,6 @@ namespace boost { namespace hana {
     //! types, and `signed long long` for signed integral types.
     template <typename T>
     struct Hashable;
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_CONCEPT_HASHABLE_HPP

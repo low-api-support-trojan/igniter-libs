@@ -23,7 +23,7 @@ Distributed under the Boost Software License, Version 1.0.
 #   endif
 #endif
 
-namespace boost { namespace hana { namespace detail {
+BOOST_HANA_NAMESPACE_BEGIN namespace detail {
     namespace td {
         template <std::size_t I, typename T>
         struct elt { using type = T; };
@@ -52,6 +52,6 @@ namespace boost { namespace hana { namespace detail {
         using type = typename decltype(td::get_elt<n>(Indexer{}))::type;
 #endif
     };
-} }} // end namespace boost::hana
+} BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DETAIL_TYPE_AT_HPP

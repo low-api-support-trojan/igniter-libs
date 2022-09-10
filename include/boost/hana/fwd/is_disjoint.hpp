@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns whether two `Searchable`s are disjoint.
     //! @ingroup group-Searchable
     //!
@@ -43,8 +43,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Ys&& ys) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr is_disjoint_t is_disjoint{};
+    constexpr is_disjoint_t is_disjoint{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_IS_DISJOINT_HPP

@@ -17,7 +17,6 @@
 #if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN2K
 
 #include <boost/winapi/basic_types.hpp>
-#include <boost/winapi/detail/header.hpp>
 
 #if !defined( BOOST_USE_WINDOWS_H )
 extern "C" {
@@ -26,7 +25,7 @@ typedef boost::winapi::VOID_ (BOOST_WINAPI_NTAPI_CC *WAITORTIMERCALLBACKFUNC)
     (boost::winapi::PVOID_, boost::winapi::BOOLEAN_);
 typedef WAITORTIMERCALLBACKFUNC WAITORTIMERCALLBACK;
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
 RegisterWaitForSingleObject(
     boost::winapi::PHANDLE_ phNewWaitObject,
     boost::winapi::HANDLE_ hObject,
@@ -42,12 +41,12 @@ RegisterWaitForSingleObject(
 #if !defined( BOOST_USE_WINDOWS_H ) || (defined(BOOST_WINAPI_IS_MINGW) && BOOST_USE_WINAPI_VERSION < BOOST_WINAPI_VERSION_WINXP)
 extern "C" {
 #if BOOST_WINAPI_PARTITION_DESKTOP
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
 UnregisterWait(boost::winapi::HANDLE_ WaitHandle);
 #endif
 
 #if BOOST_WINAPI_PARTITION_DESKTOP || BOOST_WINAPI_PARTITION_SYSTEM
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
 UnregisterWaitEx(
     boost::winapi::HANDLE_ WaitHandle,
     boost::winapi::HANDLE_ CompletionEvent);
@@ -125,8 +124,6 @@ BOOST_CONSTEXPR_OR_CONST ULONG_ wt_transfer_impersonation = WT_TRANSFER_IMPERSON
 
 }
 }
-
-#include <boost/winapi/detail/footer.hpp>
 
 #endif // BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN2K
 #endif // BOOST_WINAPI_THREAD_POOL_HPP_INCLUDED_

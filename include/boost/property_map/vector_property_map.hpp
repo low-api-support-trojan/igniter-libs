@@ -7,12 +7,11 @@
 // documentation.
 //
 
-#ifndef BOOST_PROPERTY_MAP_VECTOR_PROPERTY_MAP_HPP
-#define BOOST_PROPERTY_MAP_VECTOR_PROPERTY_MAP_HPP
+#ifndef VECTOR_PROPERTY_MAP_HPP_VP_2003_03_04
+#define VECTOR_PROPERTY_MAP_HPP_VP_2003_03_04
 
 #include <boost/property_map/property_map.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
-#include <iterator>
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
 namespace boost {
@@ -29,7 +28,7 @@ namespace boost {
         typedef typename std::iterator_traits< 
             typename std::vector<T>::iterator >::reference reference;
         typedef boost::lvalue_property_map_tag category;
-
+        
         vector_property_map(const IndexMap& index = IndexMap())
         : store(new std::vector<T>()), index(index)
         {}
@@ -58,15 +57,15 @@ namespace boost {
         {
             return store->end();
         }
-
+                 
         IndexMap&       get_index_map()       { return index; }
         const IndexMap& get_index_map() const { return index; }
-
+          
     public:
         // Copy ctor absent, default semantics is OK.
         // Assignment operator absent, default semantics is OK.
         // CONSIDER: not sure that assignment to 'index' is correct.
-
+        
         reference operator[](const key_type& v) const {
             typename property_traits<IndexMap>::value_type i = get(index, v);
             if (static_cast<unsigned>(i) >= store->size()) {
@@ -81,10 +80,10 @@ namespace boost {
         // store pointer to data, because if copy of property map resizes
         // the vector, the pointer to data will be invalidated. 
         // I wonder if class 'pmap_ref' is simply needed.
-        shared_ptr< std::vector<T> > store;
+        shared_ptr< std::vector<T> > store;        
         IndexMap index;
     };
-
+    
     template<typename T, typename IndexMap>
     vector_property_map<T, IndexMap>
     make_vector_property_map(IndexMap index)
@@ -94,11 +93,7 @@ namespace boost {
 }
 
 #ifdef BOOST_GRAPH_USE_MPI
-// Hide include from dependency trackers; the right fix
-// is not to have it at all, but who knows what'll break
-#define BOOST_VPMAP_HEADER_NAME <boost/property_map/parallel/vector_property_map.hpp>
-#include BOOST_VPMAP_HEADER_NAME
-#undef BOOST_VPMAP_HEADER_NAME
+#include <boost/property_map/parallel/vector_property_map.hpp>
 #endif
 
 #endif

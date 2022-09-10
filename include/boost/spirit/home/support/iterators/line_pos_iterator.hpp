@@ -11,7 +11,7 @@
 #define BOOST_SPIRIT_SUPPORT_LINE_POS_ITERATOR
 
 #include <boost/iterator/iterator_adaptor.hpp>
-#include <boost/range/iterator_range_core.hpp>
+#include <boost/range/iterator_range.hpp>
 
 namespace boost { namespace spirit
 {

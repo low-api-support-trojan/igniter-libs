@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns the value associated to the given key in a structure, or fail.
     //! @ingroup group-Searchable
     //!
@@ -60,8 +60,8 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(Xs&& xs, Key const& key) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr at_key_t at_key{};
+    constexpr at_key_t at_key{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_AT_KEY_HPP

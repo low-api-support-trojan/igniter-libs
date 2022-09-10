@@ -1,18 +1,17 @@
 ///////////////////////////////////////////////////////////////
-//  Copyright 2012 - 2021 John Maddock.
-//  Copyright 2021 Matt Borland.
-//  Distributed under the Boost Software License, Version 1.0.
-//  See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt
+//  Copyright 2012 John Maddock. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt
 
 #ifndef BOOST_MP_CPP_INT_CORE_HPP
 #define BOOST_MP_CPP_INT_CORE_HPP
 
-#include <cstdint>
-#include <type_traits>
-#include <limits>
-#include <boost/multiprecision/detail/standalone_config.hpp>
-#include <boost/multiprecision/detail/number_base.hpp>
-#include <boost/multiprecision/detail/assert.hpp>
+#include <boost/integer.hpp>
+#include <boost/integer_traits.hpp>
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/int.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/assert.hpp>
 
 namespace boost {
 namespace multiprecision {
@@ -21,86 +20,62 @@ namespace detail {
 
 //
 // These traits calculate the largest type in the list
-// [unsigned] long long, long, int, which has the specified number
-// of bits.  Note that int_t and uint_t find the first
+// [unsigned] boost::long_long_type, long, int, which has the specified number
+// of bits.  Note that intN_t and boost::int_t<N> find the first
 // member of the above list, not the last.  We want the last in the
 // list to ensure that mixed arithmetic operations are as efficient
 // as possible.
 //
-
-template <unsigned Bits>
-struct int_t
-{
-   using exact = typename std::conditional<Bits == sizeof(signed char) * CHAR_BIT, signed char,
-                 typename std::conditional<Bits == sizeof(short) * CHAR_BIT, short,
-                 typename std::conditional<Bits == sizeof(int) * CHAR_BIT, int,
-                 typename std::conditional<Bits == sizeof(long) * CHAR_BIT, long,
-                 typename std::conditional<Bits == sizeof(long long) * CHAR_BIT, long long, void
-                 >::type>::type>::type>::type>::type;
-   
-   static_assert(!std::is_same<void, exact>::value, "Number of bits does not match any standard data type. \
-      Please file an issue at https://github.com/boostorg/multiprecision/ referencing this error from cpp_int_config.hpp");
-};
-
-template <unsigned Bits>
-struct uint_t
-{
-   using exact = typename std::conditional<Bits == sizeof(unsigned char) * CHAR_BIT, unsigned char,
-                 typename std::conditional<Bits == sizeof(unsigned short) * CHAR_BIT, unsigned short,
-                 typename std::conditional<Bits == sizeof(unsigned int) * CHAR_BIT, unsigned int,
-                 typename std::conditional<Bits == sizeof(unsigned long) * CHAR_BIT, unsigned long,
-                 typename std::conditional<Bits == sizeof(unsigned long long) * CHAR_BIT, unsigned long long, void
-                 >::type>::type>::type>::type>::type;
-
-   static_assert(!std::is_same<void, exact>::value, "Number of bits does not match any standard data type. \
-      Please file an issue at https://github.com/boostorg/multiprecision/ referencing this error from cpp_int_config.hpp");
-};
-
 template <unsigned N>
 struct largest_signed_type
 {
-   using type = typename std::conditional<
-       1 + std::numeric_limits<long long>::digits == N,
-       long long,
-       typename std::conditional<
+   typedef typename mpl::if_c<
+       1 + std::numeric_limits<boost::long_long_type>::digits == N,
+       boost::long_long_type,
+       typename mpl::if_c<
            1 + std::numeric_limits<long>::digits == N,
            long,
-           typename std::conditional<
+           typename mpl::if_c<
                1 + std::numeric_limits<int>::digits == N,
                int,
-               typename int_t<N>::exact>::type>::type>::type;
+               typename boost::int_t<N>::exact>::type>::type>::type type;
 };
 
 template <unsigned N>
 struct largest_unsigned_type
 {
-   using type = typename std::conditional<
-       std::numeric_limits<unsigned long long>::digits == N,
-       unsigned long long,
-       typename std::conditional<
+   typedef typename mpl::if_c<
+       std::numeric_limits<boost::ulong_long_type>::digits == N,
+       boost::ulong_long_type,
+       typename mpl::if_c<
            std::numeric_limits<unsigned long>::digits == N,
            unsigned long,
-           typename std::conditional<
+           typename mpl::if_c<
                std::numeric_limits<unsigned int>::digits == N,
                unsigned int,
-               typename uint_t<N>::exact>::type>::type>::type;
+               typename boost::uint_t<N>::exact>::type>::type>::type type;
 };
 
 } // namespace detail
 
 #if defined(BOOST_HAS_INT128)
 
-using limb_type = detail::largest_unsigned_type<64>::type;
-using signed_limb_type = detail::largest_signed_type<64>::type;
-using double_limb_type = boost::multiprecision::uint128_type;
-using signed_double_limb_type = boost::multiprecision::int128_type;
-constexpr const limb_type                       max_block_10        = 1000000000000000000uLL;
-constexpr const limb_type                       digits_per_block_10 = 18;
+typedef detail::largest_unsigned_type<64>::type limb_type;
+typedef detail::largest_signed_type<64>::type   signed_limb_type;
+typedef boost::uint128_type                     double_limb_type;
+typedef boost::int128_type                      signed_double_limb_type;
+static const limb_type                          max_block_10        = 1000000000000000000uLL;
+static const limb_type                          digits_per_block_10 = 18;
 
 inline BOOST_MP_CXX14_CONSTEXPR limb_type block_multiplier(unsigned count)
 {
-   constexpr const limb_type values[digits_per_block_10] = {10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000, 1000000000000, 10000000000000, 100000000000000, 1000000000000000, 10000000000000000, 100000000000000000, 1000000000000000000};
-   BOOST_MP_ASSERT(count < digits_per_block_10);
+#ifdef BOOST_NO_CXX14_CONSTEXPR
+   static
+#else
+   constexpr
+#endif
+   const limb_type values[digits_per_block_10] = {10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000, 1000000000000, 10000000000000, 100000000000000, 1000000000000000, 10000000000000000, 100000000000000000, 1000000000000000000};
+   BOOST_ASSERT(count < digits_per_block_10);
    return values[count];
 }
 
@@ -125,23 +100,28 @@ namespace multiprecision {
 
 #else
 
-using limb_type = detail::largest_unsigned_type<32>::type;
-using signed_limb_type = detail::largest_signed_type<32>::type  ;
-using double_limb_type = detail::largest_unsigned_type<64>::type;
-using signed_double_limb_type = detail::largest_signed_type<64>::type  ;
-constexpr const limb_type                       max_block_10        = 1000000000;
-constexpr const limb_type                       digits_per_block_10 = 9;
+typedef detail::largest_unsigned_type<32>::type limb_type;
+typedef detail::largest_signed_type<32>::type   signed_limb_type;
+typedef detail::largest_unsigned_type<64>::type double_limb_type;
+typedef detail::largest_signed_type<64>::type   signed_double_limb_type;
+static const limb_type                          max_block_10        = 1000000000;
+static const limb_type                          digits_per_block_10 = 9;
 
 inline limb_type block_multiplier(unsigned count)
 {
-   constexpr const limb_type values[digits_per_block_10] = {10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
-   BOOST_MP_ASSERT(count < digits_per_block_10);
+#ifdef BOOST_NO_CXX14_CONSTEXPR
+   static
+#else
+   constexpr
+#endif
+   const limb_type values[digits_per_block_10] = {10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
+   BOOST_ASSERT(count < digits_per_block_10);
    return values[count];
 }
 
 #endif
 
-constexpr const unsigned bits_per_limb = sizeof(limb_type) * CHAR_BIT;
+static const unsigned bits_per_limb = sizeof(limb_type) * CHAR_BIT;
 
 template <class T>
 inline BOOST_MP_CXX14_CONSTEXPR void minmax(const T& a, const T& b, T& aa, T& bb)
@@ -174,5 +154,12 @@ enum cpp_int_check_type
 
 } // namespace multiprecision
 } // namespace boost
+
+//
+// Figure out whether to support user-defined-literals or not:
+//
+#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_USER_DEFINED_LITERALS) && !defined(BOOST_NO_CXX11_CONSTEXPR)
+#define BOOST_MP_USER_DEFINED_LITERALS
+#endif
 
 #endif // BOOST_MP_CPP_INT_CORE_HPP

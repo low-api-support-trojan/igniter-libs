@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Associative operation of a `Ring`.
     //! @ingroup group-Ring
     //!
@@ -56,8 +56,8 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(X&& x, Y&& y) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr mult_t mult{};
+    constexpr mult_t mult{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_MULT_HPP

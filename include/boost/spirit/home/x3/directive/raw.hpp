@@ -4,14 +4,14 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
-#ifndef BOOST_SPIRIT_X3_DIRECTIVE_RAW_HPP
-#define BOOST_SPIRIT_X3_DIRECTIVE_RAW_HPP
+#if !defined(SPIRIT_X3_RAW_APRIL_9_2007_0912AM)
+#define SPIRIT_X3_RAW_APRIL_9_2007_0912AM
 
 #include <boost/spirit/home/x3/core/skip_over.hpp>
 #include <boost/spirit/home/x3/core/parser.hpp>
 #include <boost/spirit/home/x3/support/traits/move_to.hpp>
 #include <boost/spirit/home/x3/support/traits/pseudo_attribute.hpp>
-#include <boost/range/iterator_range_core.hpp>
+#include <boost/range/iterator_range.hpp>
 
 namespace boost { namespace spirit { namespace x3
 {
@@ -25,10 +25,10 @@ namespace boost { namespace spirit { namespace x3
     {
         typedef unary_parser<Subject, raw_directive<Subject> > base_type;
         typedef raw_attribute_type attribute_type;
-        static bool const handles_container = true;
+        static bool const handles_container = Subject::handles_container;
         typedef Subject subject_type;
 
-        constexpr raw_directive(Subject const& subject)
+        raw_directive(Subject const& subject)
           : base_type(subject) {}
 
         template <typename Iterator, typename Context
@@ -58,14 +58,14 @@ namespace boost { namespace spirit { namespace x3
     struct raw_gen
     {
         template <typename Subject>
-        constexpr raw_directive<typename extension::as_parser<Subject>::value_type>
+        raw_directive<typename extension::as_parser<Subject>::value_type>
         operator[](Subject const& subject) const
         {
             return { as_parser(subject) };
         }
     };
 
-    constexpr auto raw = raw_gen{};
+    auto const raw = raw_gen{};
 
     namespace traits
     {

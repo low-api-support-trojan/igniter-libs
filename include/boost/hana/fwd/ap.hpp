@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Lifted application.
     //! @ingroup group-Applicative
     //!
@@ -74,8 +74,8 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(F&& f, Xs&& ...xs) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr ap_t ap{};
+    constexpr ap_t ap{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_AP_HPP

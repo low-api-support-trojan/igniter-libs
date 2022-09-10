@@ -19,7 +19,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/unpack.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs>
     constexpr auto length_t::operator()(Xs const& xs) const {
@@ -52,6 +52,6 @@ namespace boost { namespace hana {
             return hana::unpack(xs, detail::argn{});
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_LENGTH_HPP

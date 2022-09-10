@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/detail/config.hpp>
 #include <cstdint>
-#include <cstddef>
 
 // Based on https://github.com/vog/sha1
 /*

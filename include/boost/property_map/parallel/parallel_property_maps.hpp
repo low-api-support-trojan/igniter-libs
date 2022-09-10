@@ -19,6 +19,7 @@
 #include <boost/config.hpp>
 #include <boost/static_assert.hpp>
 #include <cstddef>
+#include <boost/detail/iterator.hpp>
 #include <boost/concept_archetype.hpp>
 #include <boost/mpl/assert.hpp>
 #include <boost/mpl/or.hpp>
@@ -221,7 +222,7 @@ public:
                              const index_map_type& id)
     : inherited(id.process_group(), id.global(), 
                 local_iterator_map(cc, n, id.base())) { }
-};
+};                                            
 
 }
 

@@ -322,15 +322,15 @@ public:
     }
 
 private:
-    basic_param_ptr clone() const BOOST_OVERRIDE
+    virtual basic_param_ptr clone() const
     {
         return basic_param_ptr( new parameter( *this ) );
     }
-    void    produce_argument( cstring token, bool , arguments_store& store ) const BOOST_OVERRIDE
+    virtual void    produce_argument( cstring token, bool , arguments_store& store ) const
     {
         m_arg_factory.produce_argument( token, this->p_name, store );
     }
-    void    produce_default( arguments_store& store ) const BOOST_OVERRIDE
+    virtual void    produce_default( arguments_store& store ) const
     {
         if( !this->p_has_default_value )
             return;
@@ -366,12 +366,12 @@ public:
     }
 
 private:
-    basic_param_ptr clone() const BOOST_OVERRIDE
+    virtual basic_param_ptr clone() const
     {
         return basic_param_ptr( new option( *this ) );
     }
 
-    void    produce_argument( cstring token, bool negative_form, arguments_store& store ) const BOOST_OVERRIDE
+    virtual void    produce_argument( cstring token, bool negative_form, arguments_store& store ) const
     {
         if( token.empty() )
             store.set( p_name, !negative_form );
@@ -383,11 +383,11 @@ private:
         }
     }
 
-    void    produce_default( arguments_store& store ) const BOOST_OVERRIDE
+    virtual void    produce_default( arguments_store& store ) const
     {
         m_arg_factory.produce_default( p_name, store );
     }
-    void    cla_name_help( std::ostream& ostr, cstring cla_tag, cstring negation_prefix_, bool use_color = true ) const BOOST_OVERRIDE
+    virtual void    cla_name_help( std::ostream& ostr, cstring cla_tag, cstring negation_prefix_, bool use_color = true ) const
     {
         namespace utils = unit_test::utils;
         namespace ut_detail = unit_test::ut_detail;
@@ -398,7 +398,7 @@ private:
         }
         ostr << cla_tag;
     }
-    void    value_help( std::ostream& ostr ) const BOOST_OVERRIDE
+    virtual void    value_help( std::ostream& ostr ) const
     {
         if( p_value_hint.empty() )
             ostr << "<boolean value>";
@@ -441,12 +441,12 @@ public:
     }
 
 private:
-    basic_param_ptr clone() const BOOST_OVERRIDE
+    virtual basic_param_ptr clone() const
     {
         return basic_param_ptr( new enum_parameter( *this ) );
     }
 
-    void    value_help( std::ostream& ostr ) const BOOST_OVERRIDE
+    virtual void    value_help( std::ostream& ostr ) const
     {
         if( this->p_value_hint.empty() ) {
             ostr << "<";
@@ -498,7 +498,7 @@ public:
     bool                    is_empty() const    { return m_parameters.empty(); }
     /// Returns map of all the registered parameter
     storage_type const&     all() const         { return m_parameters; }
-    /// Returns true if parameter with specified name is registered
+    /// Returns true if parameter with psecified name is registered
     bool                    has( cstring name ) const
     {
         return m_parameters.find( name ) != m_parameters.end();

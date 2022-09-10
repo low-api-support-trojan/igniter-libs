@@ -25,7 +25,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs, typename F>
     constexpr auto scan_left_t::operator()(Xs&& xs, F const& f) const {
@@ -128,6 +128,6 @@ namespace boost { namespace hana {
                                               f, std::make_index_sequence<Len>{});
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_SCAN_LEFT_HPP

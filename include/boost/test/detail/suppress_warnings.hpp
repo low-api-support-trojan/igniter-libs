@@ -36,6 +36,5 @@
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wvariadic-macros"
 # pragma GCC diagnostic ignored "-Wmissing-declarations"
-// # pragma GCC diagnostic ignored "-Wattributes"
 #endif
 

@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Insert a value between each pair of elements in a finite sequence.
     //! @ingroup group-Sequence
     //!
@@ -50,8 +50,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Z&& z) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr intersperse_t intersperse{};
+    constexpr intersperse_t intersperse{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_INTERSPERSE_HPP

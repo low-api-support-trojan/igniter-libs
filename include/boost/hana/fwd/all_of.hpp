@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns whether all the keys of the structure satisfy the `predicate`.
     //! @ingroup group-Searchable
     //!
@@ -47,8 +47,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Pred&& pred) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr all_of_t all_of{};
+    constexpr all_of_t all_of{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_ALL_OF_HPP

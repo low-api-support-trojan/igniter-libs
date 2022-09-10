@@ -29,9 +29,9 @@
 #include <boost/random/detail/uniform_int_float.hpp>
 #include <boost/random/detail/signed_unsigned_tools.hpp>
 #include <boost/random/traits.hpp>
-#include <boost/type_traits/integral_constant.hpp>
+#include <boost/mpl/bool.hpp>
 #ifdef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
-#include <boost/type_traits/conditional.hpp>
+#include <boost/mpl/if.hpp>
 #endif
 
 namespace boost {
@@ -49,7 +49,7 @@ namespace detail {
 template<class Engine, class T>
 T generate_uniform_int(
     Engine& eng, T min_value, T max_value,
-    boost::true_type /** is_integral<Engine::result_type> */)
+    boost::mpl::true_ /** is_integral<Engine::result_type> */)
 {
     typedef T result_type;
     typedef typename boost::random::traits::make_unsigned_or_unbounded<T>::type range_type;
@@ -167,7 +167,7 @@ T generate_uniform_int(
                 eng,
                 static_cast<range_type>(0),
                 static_cast<range_type>(range/mult),
-                boost::true_type());
+                boost::mpl::true_());
         if(std::numeric_limits<range_type>::is_bounded && ((std::numeric_limits<range_type>::max)() / mult < result_increment)) {
           // The multiplcation would overflow.  Reject immediately.
           continue;
@@ -187,7 +187,7 @@ T generate_uniform_int(
       }
     } else {                   // brange > range
 #ifdef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
-      typedef typename conditional<
+      typedef typename mpl::if_c<
          std::numeric_limits<range_type>::is_specialized && std::numeric_limits<base_unsigned>::is_specialized
          && (std::numeric_limits<range_type>::digits >= std::numeric_limits<base_unsigned>::digits),
          range_type, base_unsigned>::type mixed_range_type;
@@ -234,10 +234,10 @@ T generate_uniform_int(
 template<class Engine, class T>
 inline T generate_uniform_int(
     Engine& eng, T min_value, T max_value,
-    boost::false_type /** is_integral<Engine::result_type> */)
+    boost::mpl::false_ /** is_integral<Engine::result_type> */)
 {
     uniform_int_float<Engine> wrapper(eng);
-    return generate_uniform_int(wrapper, min_value, max_value, boost::true_type());
+    return generate_uniform_int(wrapper, min_value, max_value, boost::mpl::true_());
 }
 
 template<class Engine, class T>

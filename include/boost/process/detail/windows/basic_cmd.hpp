@@ -30,17 +30,14 @@ inline std::string build_args(const std::string & exe, std::vector<std::string> 
 {
     std::string st = exe;
 
-    //put in quotes if it has spaces or double quotes
-    if(!exe.empty())
+    //put in quotes if it has spaces
     {
-        auto it = st.find_first_of(" \"");
+        boost::replace_all(st, "\"", "\\\"");
 
-        if(it != st.npos)//contains spaces.
+        auto it = std::find(st.begin(), st.end(), ' ');
+
+        if (it != st.end())//contains spaces.
         {
-            // double existing quotes
-            boost::replace_all(st, "\"", "\"\"");
-
-            // surround with quotes
             st.insert(st.begin(), '"');
             st += '"';
         }
@@ -48,18 +45,15 @@ inline std::string build_args(const std::string & exe, std::vector<std::string> 
 
     for (auto & arg : data)
     {
-        if(!arg.empty())
-        {
-            auto it = arg.find_first_of(" \"");//contains space or double quotes?
-            if(it != arg.npos)//yes
-            {
-                // double existing quotes
-                boost::replace_all(arg, "\"", "\"\"");
+        boost::replace_all(arg, "\"", "\\\"");
 
-                // surround with quotes
-                arg.insert(arg.begin(), '"');
-                arg += '"';
-            }
+        auto it = std::find(arg.begin(), arg.end(), ' ');//contains space?
+        if (it != arg.end())//ok, contains spaces.
+        {
+            //the first one is put directly onto the output,
+            //because then I don't have to copy the whole string
+            arg.insert(arg.begin(), '"');
+            arg += '"'; //thats the post one.
         }
 
         if (!st.empty())//first one does not need a preceeding space
@@ -74,36 +68,30 @@ inline std::wstring build_args(const std::wstring & exe, std::vector<std::wstrin
 {
     std::wstring st = exe;
 
-    //put in quotes if it has spaces or double quotes
-    if(!exe.empty())
+    //put in quotes if it has spaces
     {
-        auto it = st.find_first_of(L" \"");
+        boost::replace_all(st, L"\"", L"\\\"");
 
-        if(it != st.npos)//contains spaces or double quotes.
+        auto it = std::find(st.begin(), st.end(), L' ');
+
+        if (it != st.end())//contains spaces.
         {
-            // double existing quotes
-            boost::replace_all(st, L"\"", L"\"\"");
-
-            // surround with quotes
             st.insert(st.begin(), L'"');
             st += L'"';
         }
     }
 
-    for(auto & arg : data)
+    for (auto & arg : data)
     {
-        if(!arg.empty())
-        {
-            auto it = arg.find_first_of(L" \"");//contains space or double quotes?
-            if(it != arg.npos)//yes
-            {
-                // double existing quotes
-                boost::replace_all(arg, L"\"", L"\"\"");
+        boost::replace_all(arg, L"\"", L"\\\"");
 
-                // surround with quotes
-                arg.insert(arg.begin(), L'"');
-                arg += '"';
-            }
+        auto it = std::find(arg.begin(), arg.end(), L' ');//contains space?
+        if (it != arg.end())//ok, contains spaces.
+        {
+            //the first one is put directly onto the output,
+            //because then I don't have to copy the whole string
+            arg.insert(arg.begin(), L'"');
+            arg += L'"'; //thats the post one.
         }
 
         if (!st.empty())//first one does not need a preceeding space

@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Insert several values at a given index in a sequence.
     //! @ingroup group-Sequence
     //!
@@ -50,8 +50,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, N&& n, Elements&& elements) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr insert_range_t insert_range{};
+    constexpr insert_range_t insert_range{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_INSERT_RANGE_HPP

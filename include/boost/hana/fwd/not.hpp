@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Negates a `Logical`.
     //! @ingroup group-Logical
     //!
@@ -40,8 +40,8 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(X&& x) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr not_t not_{};
+    constexpr not_t not_{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_NOT_HPP

@@ -1,6 +1,6 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2015-2020, Oracle and/or its affiliates.
+// Copyright (c) 2015-2018, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -12,7 +12,6 @@
 #define BOOST_GEOMETRY_STRATEGIES_NORMALIZE_HPP
 
 #include <cstddef>
-#include <type_traits>
 
 #include <boost/numeric/conversion/cast.hpp>
 
@@ -230,11 +229,14 @@ struct spherical_point
         detail::normalize_point
             <
                 PointIn, PointOut,
-                (! std::is_same
+                boost::mpl::not_
                     <
-                        typename cs_tag<PointIn>::type,
-                        spherical_polar_tag
-                    >::value)
+                        boost::is_same
+                            <
+                                typename cs_tag<PointIn>::type,
+                                spherical_polar_tag
+                            >
+                    >::value
             >::apply(point_in, point_out);
     }
 };
@@ -247,11 +249,14 @@ struct spherical_box
         detail::normalize_box
             <
                 BoxIn, BoxOut,
-                (! std::is_same
+                boost::mpl::not_
                     <
-                        typename cs_tag<BoxIn>::type,
-                        spherical_polar_tag
-                    >::value)
+                        boost::is_same
+                            <
+                                typename cs_tag<BoxIn>::type,
+                                spherical_polar_tag
+                            >
+                    >::value
             >::apply(box_in, box_out);
     }
 };

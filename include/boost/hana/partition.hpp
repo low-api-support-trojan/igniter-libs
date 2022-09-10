@@ -28,7 +28,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs, typename Pred>
     constexpr auto partition_t::operator()(Xs&& xs, Pred&& pred) const {
@@ -111,6 +111,6 @@ namespace boost { namespace hana {
             );
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_PARTITION_HPP

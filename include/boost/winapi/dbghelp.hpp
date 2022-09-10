@@ -28,8 +28,6 @@
 
 #if BOOST_WINAPI_PARTITION_DESKTOP
 
-#include <boost/winapi/detail/header.hpp>
-
 // Some symbols declared below are not present in all versions of Windows SDK, MinGW and MinGW-w64.
 // dbghelp.h/imagehlp.h define the API_VERSION_NUMBER macro which we use to detect its version.
 // When the macro is not available we can only guess based on the compiler version or SDK type.
@@ -52,7 +50,7 @@ extern "C" {
 
 struct API_VERSION;
 
-BOOST_WINAPI_IMPORT boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC
 UnDecorateSymbolName(
     boost::winapi::LPCSTR_ DecoratedName,
     boost::winapi::LPSTR_ UnDecoratedName,
@@ -60,7 +58,7 @@ UnDecorateSymbolName(
     boost::winapi::DWORD_ Flags);
 
 #if defined( BOOST_WINAPI_DETAIL_HAS_UNDECORATESYMBOLNAMEW )
-BOOST_WINAPI_IMPORT boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC
 UnDecorateSymbolNameW(
     boost::winapi::LPCWSTR_ DecoratedName,
     boost::winapi::LPWSTR_ UnDecoratedName,
@@ -68,7 +66,7 @@ UnDecorateSymbolNameW(
     boost::winapi::DWORD_ Flags);
 #endif
 
-BOOST_WINAPI_IMPORT API_VERSION* BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT API_VERSION* BOOST_WINAPI_WINAPI_CC
 ImagehlpApiVersion(BOOST_WINAPI_DETAIL_VOID);
 
 } // extern "C"
@@ -168,8 +166,6 @@ BOOST_FORCEINLINE DWORD_ undecorate_symbol_name(
 
 }
 }
-
-#include <boost/winapi/detail/footer.hpp>
 
 #endif // BOOST_WINAPI_PARTITION_DESKTOP
 #endif // BOOST_WINAPI_DBGHELP_HPP_INCLUDED_

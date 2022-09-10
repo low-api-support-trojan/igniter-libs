@@ -17,7 +17,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <type_traits>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Tag representing `hana::integral_constant`.
     //! @relates hana::integral_constant
     template <typename T>
@@ -244,6 +244,6 @@ namespace boost { namespace hana {
         using hana_tag = integral_constant_tag<T>;
     };
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DETAIL_INTEGRAL_CONSTANT_HPP

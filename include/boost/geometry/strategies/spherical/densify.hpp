@@ -1,6 +1,6 @@
 // Boost.Geometry
 
-// Copyright (c) 2017-2021, Oracle and/or its affiliates.
+// Copyright (c) 2017-2019, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -58,11 +58,6 @@ template
 class spherical
 {
 public:
-    typedef typename strategy_detail::get_radius
-        <
-            RadiusTypeOrSphere
-        >::type radius_type;
-
     // For consistency with area strategy the radius is set to 1
     inline spherical()
         : m_radius(1.0)
@@ -118,13 +113,11 @@ public:
         }
     }
 
-    inline radius_type radius() const
-    {
-        return m_radius;
-    }
-
 private:
-    radius_type m_radius;
+    typename strategy_detail::get_radius
+        <
+            RadiusTypeOrSphere
+        >::type m_radius;
 };
 
 

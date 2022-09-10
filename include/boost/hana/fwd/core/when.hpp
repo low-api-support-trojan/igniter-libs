@@ -13,7 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-core
     //! Enable a partial specialization only if a boolean condition is true.
     //!
@@ -69,6 +69,6 @@ namespace boost { namespace hana {
         core_detail::always_true<Dummy...>::value
     >;
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_CORE_WHEN_HPP

@@ -2361,32 +2361,32 @@ struct coroutine
 template< typename R >
 typename pull_coroutine< R >::iterator
 begin( pull_coroutine< R > & c)
-{ return coroutines::range_begin( c); }
+{ return boost::begin( c); }
 
 template< typename R >
 typename pull_coroutine< R >::const_iterator
 begin( pull_coroutine< R > const& c)
-{ return coroutines::range_begin( c); }
+{ return boost::begin( c); }
 
 template< typename R >
 typename pull_coroutine< R >::iterator
 end( pull_coroutine< R > & c)
-{ return coroutines::range_end( c); }
+{ return boost::end( c); }
 
 template< typename R >
 typename pull_coroutine< R >::const_iterator
 end( pull_coroutine< R > const& c)
-{ return coroutines::range_end( c); }
+{ return boost::end( c); }
 
 template< typename R >
 typename push_coroutine< R >::iterator
 begin( push_coroutine< R > & c)
-{ return coroutines::range_begin( c); }
+{ return boost::begin( c); }
 
 template< typename R >
 typename push_coroutine< R >::iterator
 end( push_coroutine< R > & c)
-{ return coroutines::range_end( c); }
+{ return boost::end( c); }
 
 }
 

@@ -8,13 +8,14 @@
 #define BOOST_HISTOGRAM_DETAIL_FILL_N_HPP
 
 #include <algorithm>
+#include <boost/assert.hpp>
 #include <boost/histogram/axis/option.hpp>
 #include <boost/histogram/axis/traits.hpp>
 #include <boost/histogram/detail/axes.hpp>
 #include <boost/histogram/detail/detect.hpp>
 #include <boost/histogram/detail/fill.hpp>
 #include <boost/histogram/detail/linearize.hpp>
-#include <boost/histogram/detail/nonmember_container_access.hpp>
+#include <boost/histogram/detail/non_member_container_access.hpp>
 #include <boost/histogram/detail/optional_index.hpp>
 #include <boost/histogram/detail/span.hpp>
 #include <boost/histogram/detail/static_if.hpp>
@@ -24,8 +25,6 @@
 #include <boost/mp11/utility.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/variant2/variant.hpp>
-#include <cassert>
-#include <initializer_list>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -39,6 +38,9 @@ namespace dtl = boost::histogram::detail;
 template <class Axes, class T>
 using is_convertible_to_any_value_type =
     mp11::mp_any_of_q<value_types<Axes>, mp11::mp_bind_front<std::is_convertible, T>>;
+
+template <class... Ts>
+void fold(Ts&&...) noexcept {} // helper to enable operator folding
 
 template <class T>
 auto to_ptr_size(const T& x) {
@@ -62,7 +64,7 @@ struct index_visitor {
   using index_type = Index;
   using pointer = index_type*;
   using value_type = axis::traits::value_type<Axis>;
-  using Opt = axis::traits::get_options<Axis>;
+  using Opt = axis::traits::static_options<Axis>;
 
   Axis& axis_;
   const std::size_t stride_, start_, size_; // start and size of value collection
@@ -101,18 +103,12 @@ struct index_visitor {
   template <class T>
   void call_1(std::true_type, const T& value) const {
     // T is compatible value; fill single value N times
-
-    // Optimization: We call call_2 only once and then add the index shift onto the
-    // whole array of indices, because it is always the same. This also works if the
-    // axis grows during this operation. There are no shifts to apply if the zero-point
-    // changes.
-    const auto before = *begin_;
-    call_2(IsGrowing{}, begin_, value);
-    if (is_valid(*begin_)) {
-      // since index can be std::size_t or optional_index, must do conversion here
+    index_type idx{*begin_};
+    call_2(IsGrowing{}, &idx, value);
+    if (is_valid(idx)) {
       const auto delta =
-          static_cast<std::intptr_t>(*begin_) - static_cast<std::intptr_t>(before);
-      for (auto it = begin_ + 1; it != begin_ + size_; ++it) *it += delta;
+          static_cast<std::intptr_t>(idx) - static_cast<std::intptr_t>(*begin_);
+      for (auto&& i : make_span(begin_, size_)) i += delta;
     } else
       std::fill(begin_, begin_ + size_, invalid_index);
   }
@@ -135,9 +131,7 @@ void fill_n_indices(Index* indices, const std::size_t start, const std::size_t s
     *eit++ = axis::traits::extent(a);
   }); // LCOV_EXCL_LINE: gcc-8 is missing this line for no reason
 
-  // TODO this seems to always take the path for growing axes, even if Axes is vector
-  // of variant and types actually held are not growing axes?
-  // index offset must be zero for growing axes
+  // offset must be zero for growing axes
   using IsGrowing = has_growing_axis<Axes>;
   std::fill(indices, indices + size, IsGrowing::value ? 0 : offset);
   for_each_axis(axes, [&, stride = static_cast<std::size_t>(1),
@@ -164,22 +158,21 @@ void fill_n_indices(Index* indices, const std::size_t start, const std::size_t s
 template <class S, class Index, class... Ts>
 void fill_n_storage(S& s, const Index idx, Ts&&... p) noexcept {
   if (is_valid(idx)) {
-    assert(idx < s.size());
-    fill_storage_element(s[idx], *p.first...);
+    BOOST_ASSERT(idx < s.size());
+    fill_storage_3(s[idx], *p.first...);
   }
-  // operator folding emulation
-  (void)std::initializer_list<int>{(p.second ? (++p.first, 0) : 0)...};
+  fold((p.second ? ++p.first : 0)...);
 }
 
 template <class S, class Index, class T, class... Ts>
 void fill_n_storage(S& s, const Index idx, weight_type<T>&& w, Ts&&... ps) noexcept {
   if (is_valid(idx)) {
-    assert(idx < s.size());
-    fill_storage_element(s[idx], weight(*w.value.first), *ps.first...);
+    BOOST_ASSERT(idx < s.size());
+    fill_storage_3(s[idx], weight_type<decltype(*w.value.first)>{*w.value.first},
+                   *ps.first...);
   }
   if (w.value.second) ++w.value.first;
-  // operator folding emulation
-  (void)std::initializer_list<int>{(ps.second ? (++ps.first, 0) : 0)...};
+  fold((ps.second ? ++ps.first : 0)...);
 }
 
 // general Nd treatment
@@ -242,7 +235,6 @@ void fill_n_1(const std::size_t offset, S& storage, A& axes, const std::size_t v
   for_each_axis(axes,
                 [&](const auto& ax) { all_inclusive &= axis::traits::inclusive(ax); });
   if (axes_rank(axes) == 1) {
-    // Optimization: benchmark shows that this makes filling dynamic 1D histogram faster
     axis::visit(
         [&](auto& ax) {
           std::tuple<decltype(ax)> axes{ax};
@@ -264,7 +256,7 @@ std::size_t get_total_size(const A& axes, const dtl::span<const T, N>& values) {
   // supported cases (T = value type; CT = containter of T; V<T, CT, ...> = variant):
   // - span<CT, N>: for any histogram, N == rank
   // - span<V<T, CT>, N>: for any histogram, N == rank
-  assert(axes_rank(axes) == values.size());
+  BOOST_ASSERT(axes_rank(axes) == values.size());
   constexpr auto unset = static_cast<std::size_t>(-1);
   std::size_t size = unset;
   for_each_axis(axes, [&size, vit = values.begin()](const auto& ax) mutable {

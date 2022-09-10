@@ -15,7 +15,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/detail/nested_than_fwd.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns a `Logical` representing whether `x` is less than or
     //! equal to `y`.
     //! @ingroup group-Orderable
@@ -47,8 +47,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(X&& x, Y&& y) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr less_equal_t less_equal{};
+    constexpr less_equal_t less_equal{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_LESS_EQUAL_HPP

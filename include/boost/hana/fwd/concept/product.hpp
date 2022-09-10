@@ -13,7 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-concepts
     //! @defgroup group-Product Product
     //! Represents types that are generic containers of two elements.
@@ -98,6 +98,6 @@ namespace boost { namespace hana {
     //! [1]: http://en.wikipedia.org/wiki/Product_(category_theory)
     template <typename P>
     struct Product;
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_CONCEPT_PRODUCT_HPP

@@ -1,6 +1,6 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2014-2021, Oracle and/or its affiliates.
+// Copyright (c) 2014-2019, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -14,11 +14,7 @@
 #include <algorithm>
 #include <deque>
 
-#include <boost/range/begin.hpp>
-#include <boost/range/empty.hpp>
-#include <boost/range/end.hpp>
-#include <boost/range/size.hpp>
-#include <boost/range/value_type.hpp>
+#include <boost/range.hpp>
 
 #include <boost/geometry/core/assert.hpp>
 #include <boost/geometry/core/closure.hpp>
@@ -81,21 +77,22 @@ inline bool check_segment_indices(Turn const& turn,
 template
 <
     typename Geometry,
-    typename Strategy,
+    typename EqPPStrategy,
     typename Tag = typename tag<Geometry>::type
 >
 class is_acceptable_turn
     : not_implemented<Geometry>
 {};
 
-template <typename Linestring, typename Strategy>
-class is_acceptable_turn<Linestring, Strategy, linestring_tag>
+template <typename Linestring, typename EqPPStrategy>
+class is_acceptable_turn<Linestring, EqPPStrategy, linestring_tag>
 {
 public:
-    is_acceptable_turn(Linestring const& linestring, Strategy const& strategy)
+    is_acceptable_turn(Linestring const& linestring)
         : m_linestring(linestring)
-        , m_is_closed(geometry::detail::equals::equals_point_point(
-                          range::front(linestring), range::back(linestring), strategy))
+        , m_is_closed(geometry::detail::equals::equals_point_point(range::front(linestring),
+                                                                   range::back(linestring),
+                                                                   EqPPStrategy()))
     {}
 
     template <typename Turn>
@@ -113,45 +110,63 @@ private:
     bool const m_is_closed;
 };
 
-template <typename MultiLinestring, typename Strategy>
-class is_acceptable_turn<MultiLinestring, Strategy, multi_linestring_tag>
+template <typename MultiLinestring, typename EqPPStrategy>
+class is_acceptable_turn<MultiLinestring, EqPPStrategy, multi_linestring_tag>
 {
 private:
+    template <typename Point1, typename Point2>
+    static inline bool equals_point_point(Point1 const& point1, Point2 const& point2)
+    {
+        return geometry::detail::equals::equals_point_point(point1, point2,
+                                                            EqPPStrategy());
+    }
+
     template <typename Point, typename Linestring>
-    inline bool is_boundary_point_of(Point const& point, Linestring const& linestring) const
+    static inline bool is_boundary_point_of(Point const& point,
+                                            Linestring const& linestring)
     {
         BOOST_GEOMETRY_ASSERT(boost::size(linestring) > 1);
-        using geometry::detail::equals::equals_point_point;
-        return ! equals_point_point(range::front(linestring), range::back(linestring), m_strategy)
-            && (equals_point_point(point, range::front(linestring), m_strategy)
-                || equals_point_point(point, range::back(linestring), m_strategy));
+        return
+            !equals_point_point(range::front(linestring), range::back(linestring))
+            &&
+            (equals_point_point(point, range::front(linestring))
+             || equals_point_point(point, range::back(linestring)));
     }
 
     template <typename Turn, typename Linestring>
-    inline bool is_closing_point_of(Turn const& turn, Linestring const& linestring) const
+    static inline bool is_closing_point_of(Turn const& turn,
+                                           Linestring const& linestring)
     {
         BOOST_GEOMETRY_ASSERT(boost::size(linestring) > 1);
-        using geometry::detail::equals::equals_point_point;
-        return turn.method == overlay::method_none
-            && check_segment_indices(turn, boost::size(linestring) - 2)
-            && equals_point_point(range::front(linestring), range::back(linestring), m_strategy)
-            && turn.operations[0].fraction.is_zero();
+        return
+            turn.method == overlay::method_none
+            &&
+            check_segment_indices(turn, boost::size(linestring) - 2)
+            &&
+            equals_point_point(range::front(linestring), range::back(linestring))
+            &&
+            turn.operations[0].fraction.is_zero();
+            ;
     }
 
     template <typename Linestring1, typename Linestring2>
-    inline bool have_same_boundary_points(Linestring1 const& ls1, Linestring2 const& ls2) const
+    static inline bool have_same_boundary_points(Linestring1 const& ls1,
+                                                 Linestring2 const& ls2)
     {
-        using geometry::detail::equals::equals_point_point;
-        return equals_point_point(range::front(ls1), range::front(ls2), m_strategy)
-             ? equals_point_point(range::back(ls1), range::back(ls2), m_strategy)
-             : (equals_point_point(range::front(ls1), range::back(ls2), m_strategy)
-                && equals_point_point(range::back(ls1), range::front(ls2), m_strategy));
+        return
+            equals_point_point(range::front(ls1), range::front(ls2))
+            ?
+            equals_point_point(range::back(ls1), range::back(ls2))
+            :
+            (equals_point_point(range::front(ls1), range::back(ls2))
+             &&
+                equals_point_point(range::back(ls1), range::front(ls2)))
+            ;
     }
 
 public:
-    is_acceptable_turn(MultiLinestring const& multilinestring, Strategy const& strategy)
+    is_acceptable_turn(MultiLinestring const& multilinestring)
         : m_multilinestring(multilinestring)
-        , m_strategy(strategy)
     {}
 
     template <typename Turn>
@@ -182,7 +197,6 @@ public:
 
 private:
     MultiLinestring const& m_multilinestring;
-    Strategy const& m_strategy;
 };
 
 
@@ -203,10 +217,11 @@ inline bool has_self_intersections(Linear const& linear, Strategy const& strateg
 
     typedef is_acceptable_turn
         <
-            Linear, Strategy
+            Linear,
+            typename Strategy::equals_point_point_strategy_type
         > is_acceptable_turn_type;
 
-    is_acceptable_turn_type predicate(linear, strategy);
+    is_acceptable_turn_type predicate(linear);
     detail::overlay::predicate_based_interrupt_policy
         <
             is_acceptable_turn_type
@@ -238,8 +253,14 @@ struct is_simple_linestring
     {
         simplicity_failure_policy policy;
         return ! boost::empty(linestring)
-            && ! detail::is_valid::has_duplicates<Linestring>::apply(linestring, policy, strategy)
-            && ! detail::is_valid::has_spikes<Linestring>::apply(linestring, policy, strategy);
+            && ! detail::is_valid::has_duplicates
+                    <
+                        Linestring, closed, typename Strategy::cs_tag
+                    >::apply(linestring, policy)
+            && ! detail::is_valid::has_spikes
+                    <
+                        Linestring, closed
+                    >::apply(linestring, policy, strategy.get_side_strategy());
     }
 };
 
@@ -250,7 +271,10 @@ struct is_simple_linestring<Linestring, true>
     static inline bool apply(Linestring const& linestring,
                              Strategy const& strategy)
     {
-        return is_simple_linestring<Linestring, false>::apply(linestring, strategy)
+        return is_simple_linestring
+                <
+                    Linestring, false
+                >::apply(linestring, strategy)
             && ! has_self_intersections(linestring, strategy);
     }
 };

@@ -21,7 +21,7 @@
 #include <boost/spirit/home/karma/delimit_out.hpp>
 #include <boost/spirit/home/karma/auxiliary/lazy.hpp>
 #include <boost/spirit/home/karma/stream/detail/format_manip.hpp>
-#include <boost/spirit/home/karma/detail/generate_to.hpp>
+#include <boost/spirit/home/karma/stream/detail/iterator_sink.hpp>
 #include <boost/spirit/home/karma/detail/get_casetag.hpp>
 #include <boost/spirit/home/karma/detail/extract_from.hpp>
 #include <boost/fusion/include/at.hpp>
@@ -29,7 +29,8 @@
 #include <boost/fusion/include/cons.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_same.hpp>
-#include <ostream>
+
+#include <iosfwd>
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace boost { namespace spirit
@@ -112,32 +113,6 @@ namespace boost { namespace spirit { namespace karma
     using spirit::stream_type;
     using spirit::wstream_type;
 
-namespace detail
-{
-    template <typename OutputIterator, typename Char, typename CharEncoding
-      , typename Tag>
-    struct psbuf : std::basic_streambuf<Char>
-    {
-        psbuf(OutputIterator& sink) : sink_(sink) {}
-
-        // silence MSVC warning C4512: assignment operator could not be generated
-        BOOST_DELETED_FUNCTION(psbuf& operator=(psbuf const&))
-
-    protected:
-        typename psbuf::int_type overflow(typename psbuf::int_type ch) BOOST_OVERRIDE
-        {
-            if (psbuf::traits_type::eq_int_type(ch, psbuf::traits_type::eof()))
-                return psbuf::traits_type::not_eof(ch);
-
-            return detail::generate_to(sink_, psbuf::traits_type::to_char_type(ch),
-                                       CharEncoding(), Tag()) ? ch : psbuf::traits_type::eof();
-        }
-
-    private:
-        OutputIterator& sink_;
-    };
-}
-
     ///////////////////////////////////////////////////////////////////////////
     template <typename Char, typename CharEncoding, typename Tag>
     struct any_stream_generator
@@ -157,6 +132,10 @@ namespace detail
         static bool generate(OutputIterator& sink, Context& context
           , Delimiter const& d, Attribute const& attr)
         {
+            typedef karma::detail::iterator_sink<
+                OutputIterator, Char, CharEncoding, Tag
+            > sink_device;
+
             if (!traits::has_optional_value(attr))
                 return false;
 
@@ -164,8 +143,7 @@ namespace detail
             typedef typename attribute<Context>::type attribute_type;
 
             {
-                detail::psbuf<OutputIterator, Char, CharEncoding, Tag> pseudobuf(sink);
-                std::basic_ostream<Char> ostr(&pseudobuf);
+                boost::iostreams::stream<sink_device> ostr(sink);
                 ostr << traits::extract_from<attribute_type>(attr, context) << std::flush;
 
                 if (!ostr.good())
@@ -190,6 +168,9 @@ namespace detail
             typedef karma::detail::output_iterator<
                 karma::ostream_iterator<T, Char, Traits>, Properties
             > output_iterator;
+            typedef karma::detail::iterator_sink<
+                output_iterator, Char, CharEncoding, Tag
+            > sink_device;
 
             if (!traits::has_optional_value(attr))
                 return false;
@@ -198,8 +179,7 @@ namespace detail
             typedef typename attribute<Context>::type attribute_type;
 
             {
-                detail::psbuf<output_iterator, Char, CharEncoding, Tag> pseudobuf(sink);
-                std::basic_ostream<Char> ostr(&pseudobuf);
+                boost::iostreams::stream<sink_device> ostr(sink);
                 ostr.imbue(sink.get_ostream().getloc());
                 ostr << traits::extract_from<attribute_type>(attr, context) 
                      << std::flush;
@@ -256,8 +236,11 @@ namespace detail
         bool generate(OutputIterator& sink, Context&, Delimiter const& d
           , Attribute const&) const
         {
-            detail::psbuf<OutputIterator, Char, CharEncoding, Tag> pseudobuf(sink);
-            std::basic_ostream<Char> ostr(&pseudobuf);
+            typedef karma::detail::iterator_sink<
+                OutputIterator, Char, CharEncoding, Tag
+            > sink_device;
+
+            boost::iostreams::stream<sink_device> ostr(sink);
             ostr << t_ << std::flush;             // use existing operator<<()
 
             if (ostr.good()) 
@@ -278,10 +261,12 @@ namespace detail
             typedef karma::detail::output_iterator<
                 karma::ostream_iterator<T1, Char, Traits>, Properties
             > output_iterator;
+            typedef karma::detail::iterator_sink<
+                output_iterator, Char, CharEncoding, Tag
+            > sink_device;
 
             {
-                detail::psbuf<output_iterator, Char, CharEncoding, Tag> pseudobuf(sink);
-                std::basic_ostream<Char> ostr(&pseudobuf);
+                boost::iostreams::stream<sink_device> ostr(sink);
                 ostr.imbue(sink.get_ostream().getloc());
                 ostr << t_ << std::flush;             // use existing operator<<()
 

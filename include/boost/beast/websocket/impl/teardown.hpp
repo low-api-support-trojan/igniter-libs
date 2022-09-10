@@ -56,7 +56,6 @@ public:
             s.get_executor())
         , s_(s)
         , role_(role)
-        , nb_(false)
     {
         (*this)({}, 0, false);
     }
@@ -86,16 +85,9 @@ public:
                 if(ec == net::error::would_block)
                 {
                     BOOST_ASIO_CORO_YIELD
-                    {
-                        BOOST_ASIO_HANDLER_LOCATION((
-                            __FILE__, __LINE__,
-                            "websocket::tcp::async_teardown"
-                        ));
-
-                        s_.async_wait(
-                            net::socket_base::wait_read,
-                                beast::detail::bind_continuation(std::move(*this)));
-                    }
+                    s_.async_wait(
+                        net::socket_base::wait_read,
+                            beast::detail::bind_continuation(std::move(*this)));
                     continue;
                 }
                 if(ec)
@@ -121,15 +113,8 @@ public:
             if(! cont)
             {
                 BOOST_ASIO_CORO_YIELD
-                {
-                    BOOST_ASIO_HANDLER_LOCATION((
-                        __FILE__, __LINE__,
-                        "websocket::tcp::async_teardown"
-                        ));
-
-                    net::post(bind_front_handler(
-                        std::move(*this), ec));
-                }
+                net::post(bind_front_handler(
+                    std::move(*this), ec));
             }
             {
                 error_code ignored;

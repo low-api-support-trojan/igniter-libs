@@ -12,8 +12,14 @@
 namespace boost {
 namespace safe_numerics {
 
-template<class T>
-using Integer = std::integral_constant<bool, Numeric<T>() && std::numeric_limits<T>::is_integer>;
+template <class T>
+class Integer : public Numeric<T> {
+    // integer types must have the corresponding numeric trait.
+    static_assert(
+        std::numeric_limits<T>::is_integer,
+        "Fails to fulfill requirements for an integer type"
+    );
+};
 
 } // safe_numerics
 } // boost

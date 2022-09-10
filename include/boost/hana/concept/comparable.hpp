@@ -19,7 +19,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/equal.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     template <typename T>
     struct Comparable
         : hana::integral_constant<bool,
@@ -27,6 +27,6 @@ namespace boost { namespace hana {
                                    typename tag_of<T>::type>>::value
         >
     { };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_CONCEPT_COMPARABLE_HPP

@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Add an extra layer of comonadic context to a comonadic value.
     //! @ingroup group-Comonad
     //!
@@ -50,8 +50,8 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(W_&& w) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr duplicate_t duplicate{};
+    constexpr duplicate_t duplicate{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_DUPLICATE_HPP

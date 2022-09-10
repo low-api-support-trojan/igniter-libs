@@ -94,7 +94,7 @@ namespace boost { namespace mpl {
 #endif
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     namespace ext { namespace boost { namespace mpl {
         using vector_tag = ::boost::mpl::sequence_tag< ::boost::mpl::vector<>>::type;
     }}}
@@ -196,6 +196,6 @@ namespace boost { namespace hana {
             return typename decltype(vector_type)::type{};
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_EXT_BOOST_MPL_VECTOR_HPP

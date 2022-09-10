@@ -15,7 +15,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/detail/nested_by_fwd.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Removes all consecutive duplicate elements from a Sequence.
     //! @ingroup group-Sequence
     //!
@@ -84,8 +84,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Predicate&& predicate) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr unique_t unique{};
+    constexpr unique_t unique{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_UNIQUE_HPP

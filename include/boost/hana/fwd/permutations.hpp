@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Return a sequence of all the permutations of the given sequence.
     //! @ingroup group-Sequence
     //!
@@ -43,8 +43,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr permutations_t permutations{};
+    constexpr permutations_t permutations{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_PERMUTATIONS_HPP

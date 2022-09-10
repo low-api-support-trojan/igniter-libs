@@ -493,16 +493,6 @@
     (d,vseq1,vseq2,be1,be2,type) \
 /**/
 
-#define BOOST_VMD_DETAIL_EQUAL_OV0(vseq1,vseq2) \
-    BOOST_VMD_DETAIL_EQUAL_EMPTY \
-        ( \
-        vseq1, \
-        , \
-        BOOST_VMD_IS_EMPTY(vseq1), \
-        1, \
-        ) \
-/**/
-
 #define BOOST_VMD_DETAIL_EQUAL_OV1(vseq1,vseq2) \
     BOOST_VMD_DETAIL_EQUAL_EMPTY \
         ( \
@@ -521,17 +511,6 @@
         BOOST_VMD_IS_EMPTY(vseq1), \
         BOOST_VMD_IS_EMPTY(vseq2), \
         type \
-        ) \
-/**/
-
-#define BOOST_VMD_DETAIL_EQUAL_D_OV0(d,vseq1,vseq2) \
-    BOOST_VMD_DETAIL_EQUAL_EMPTY_D \
-        ( \
-        d, \
-        vseq1, \
-        , \
-        BOOST_VMD_IS_EMPTY(vseq1), \
-        1, \
         ) \
 /**/
 

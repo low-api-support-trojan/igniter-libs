@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Sequentially compose two monadic actions, discarding any value
     //! produced by the first but not its effects.
     //! @ingroup group-Monad
@@ -45,8 +45,8 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(Before&& before, Xs&& xs) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr then_t then{};
+    constexpr then_t then{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_THEN_HPP

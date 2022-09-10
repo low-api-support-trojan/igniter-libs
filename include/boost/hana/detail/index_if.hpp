@@ -20,7 +20,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana { namespace detail {
+BOOST_HANA_NAMESPACE_BEGIN namespace detail {
     template <std::size_t i, std::size_t N, bool Done>
     struct index_if_helper;
 
@@ -50,6 +50,6 @@ namespace boost { namespace hana { namespace detail {
         using type = typename index_if_helper<0, sizeof...(Xs), false>
             ::template f<Pred, Xs...>;
     };
-} }} // end namespace boost::hana
+} BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DETAIL_INDEX_IF_HPP

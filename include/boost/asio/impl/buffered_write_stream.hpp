@@ -2,7 +2,7 @@
 // impl/buffered_write_stream.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2021 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2019 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -15,7 +15,8 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include <boost/asio/associator.hpp>
+#include <boost/asio/associated_allocator.hpp>
+#include <boost/asio/associated_executor.hpp>
 #include <boost/asio/detail/handler_alloc_helpers.hpp>
 #include <boost/asio/detail/handler_cont_helpers.hpp>
 #include <boost/asio/detail/handler_invoke_helpers.hpp>
@@ -77,7 +78,7 @@ namespace detail
         const std::size_t bytes_written)
     {
       storage_.consume(bytes_written);
-      BOOST_ASIO_MOVE_OR_LVALUE(WriteHandler)(handler_)(ec, bytes_written);
+      handler_(ec, bytes_written);
     }
 
   //private:
@@ -86,29 +87,19 @@ namespace detail
   };
 
   template <typename WriteHandler>
-  inline asio_handler_allocate_is_deprecated
-  asio_handler_allocate(std::size_t size,
+  inline void* asio_handler_allocate(std::size_t size,
       buffered_flush_handler<WriteHandler>* this_handler)
   {
-#if defined(BOOST_ASIO_NO_DEPRECATED)
-    boost_asio_handler_alloc_helpers::allocate(size, this_handler->handler_);
-    return asio_handler_allocate_is_no_longer_used();
-#else // defined(BOOST_ASIO_NO_DEPRECATED)
     return boost_asio_handler_alloc_helpers::allocate(
         size, this_handler->handler_);
-#endif // defined(BOOST_ASIO_NO_DEPRECATED)
   }
 
   template <typename WriteHandler>
-  inline asio_handler_deallocate_is_deprecated
-  asio_handler_deallocate(void* pointer, std::size_t size,
+  inline void asio_handler_deallocate(void* pointer, std::size_t size,
       buffered_flush_handler<WriteHandler>* this_handler)
   {
     boost_asio_handler_alloc_helpers::deallocate(
         pointer, size, this_handler->handler_);
-#if defined(BOOST_ASIO_NO_DEPRECATED)
-    return asio_handler_deallocate_is_no_longer_used();
-#endif // defined(BOOST_ASIO_NO_DEPRECATED)
   }
 
   template <typename WriteHandler>
@@ -120,27 +111,19 @@ namespace detail
   }
 
   template <typename Function, typename WriteHandler>
-  inline asio_handler_invoke_is_deprecated
-  asio_handler_invoke(Function& function,
+  inline void asio_handler_invoke(Function& function,
       buffered_flush_handler<WriteHandler>* this_handler)
   {
     boost_asio_handler_invoke_helpers::invoke(
         function, this_handler->handler_);
-#if defined(BOOST_ASIO_NO_DEPRECATED)
-    return asio_handler_invoke_is_no_longer_used();
-#endif // defined(BOOST_ASIO_NO_DEPRECATED)
   }
 
   template <typename Function, typename WriteHandler>
-  inline asio_handler_invoke_is_deprecated
-  asio_handler_invoke(const Function& function,
+  inline void asio_handler_invoke(const Function& function,
       buffered_flush_handler<WriteHandler>* this_handler)
   {
     boost_asio_handler_invoke_helpers::invoke(
         function, this_handler->handler_);
-#if defined(BOOST_ASIO_NO_DEPRECATED)
-    return asio_handler_invoke_is_no_longer_used();
-#endif // defined(BOOST_ASIO_NO_DEPRECATED)
   }
 
   template <typename Stream>
@@ -150,8 +133,7 @@ namespace detail
     typedef typename remove_reference<
       Stream>::type::lowest_layer_type::executor_type executor_type;
 
-    explicit initiate_async_buffered_flush(
-        typename remove_reference<Stream>::type& next_layer)
+    explicit initiate_async_buffered_flush(Stream& next_layer)
       : next_layer_(next_layer)
     {
     }
@@ -176,24 +158,35 @@ namespace detail
     }
 
   private:
-    typename remove_reference<Stream>::type& next_layer_;
+    Stream& next_layer_;
   };
 } // namespace detail
 
 #if !defined(GENERATING_DOCUMENTATION)
 
-template <template <typename, typename> class Associator,
-    typename WriteHandler, typename DefaultCandidate>
-struct associator<Associator,
-    detail::buffered_flush_handler<WriteHandler>,
-    DefaultCandidate>
-  : Associator<WriteHandler, DefaultCandidate>
+template <typename WriteHandler, typename Allocator>
+struct associated_allocator<
+    detail::buffered_flush_handler<WriteHandler>, Allocator>
 {
-  static typename Associator<WriteHandler, DefaultCandidate>::type get(
-      const detail::buffered_flush_handler<WriteHandler>& h,
-      const DefaultCandidate& c = DefaultCandidate()) BOOST_ASIO_NOEXCEPT
+  typedef typename associated_allocator<WriteHandler, Allocator>::type type;
+
+  static type get(const detail::buffered_flush_handler<WriteHandler>& h,
+      const Allocator& a = Allocator()) BOOST_ASIO_NOEXCEPT
   {
-    return Associator<WriteHandler, DefaultCandidate>::get(h.handler_, c);
+    return associated_allocator<WriteHandler, Allocator>::get(h.handler_, a);
+  }
+};
+
+template <typename WriteHandler, typename Executor>
+struct associated_executor<
+    detail::buffered_flush_handler<WriteHandler>, Executor>
+{
+  typedef typename associated_executor<WriteHandler, Executor>::type type;
+
+  static type get(const detail::buffered_flush_handler<WriteHandler>& h,
+      const Executor& ex = Executor()) BOOST_ASIO_NOEXCEPT
+  {
+    return associated_executor<WriteHandler, Executor>::get(h.handler_, ex);
   }
 };
 
@@ -281,7 +274,7 @@ namespace detail
       if (ec)
       {
         const std::size_t length = 0;
-        BOOST_ASIO_MOVE_OR_LVALUE(WriteHandler)(handler_)(ec, length);
+        handler_(ec, length);
       }
       else
       {
@@ -294,7 +287,7 @@ namespace detail
         storage_.resize(orig_size + length);
         const std::size_t bytes_copied = boost::asio::buffer_copy(
             storage_.data() + orig_size, buffers_, length);
-        BOOST_ASIO_MOVE_OR_LVALUE(WriteHandler)(handler_)(ec, bytes_copied);
+        handler_(ec, bytes_copied);
       }
     }
 
@@ -305,31 +298,21 @@ namespace detail
   };
 
   template <typename ConstBufferSequence, typename WriteHandler>
-  inline asio_handler_allocate_is_deprecated
-  asio_handler_allocate(std::size_t size,
+  inline void* asio_handler_allocate(std::size_t size,
       buffered_write_some_handler<
         ConstBufferSequence, WriteHandler>* this_handler)
   {
-#if defined(BOOST_ASIO_NO_DEPRECATED)
-    boost_asio_handler_alloc_helpers::allocate(size, this_handler->handler_);
-    return asio_handler_allocate_is_no_longer_used();
-#else // defined(BOOST_ASIO_NO_DEPRECATED)
     return boost_asio_handler_alloc_helpers::allocate(
         size, this_handler->handler_);
-#endif // defined(BOOST_ASIO_NO_DEPRECATED)
   }
 
   template <typename ConstBufferSequence, typename WriteHandler>
-  inline asio_handler_deallocate_is_deprecated
-  asio_handler_deallocate(void* pointer, std::size_t size,
+  inline void asio_handler_deallocate(void* pointer, std::size_t size,
       buffered_write_some_handler<
         ConstBufferSequence, WriteHandler>* this_handler)
   {
     boost_asio_handler_alloc_helpers::deallocate(
         pointer, size, this_handler->handler_);
-#if defined(BOOST_ASIO_NO_DEPRECATED)
-    return asio_handler_deallocate_is_no_longer_used();
-#endif // defined(BOOST_ASIO_NO_DEPRECATED)
   }
 
   template <typename ConstBufferSequence, typename WriteHandler>
@@ -343,30 +326,22 @@ namespace detail
 
   template <typename Function, typename ConstBufferSequence,
       typename WriteHandler>
-  inline asio_handler_invoke_is_deprecated
-  asio_handler_invoke(Function& function,
+  inline void asio_handler_invoke(Function& function,
       buffered_write_some_handler<
         ConstBufferSequence, WriteHandler>* this_handler)
   {
     boost_asio_handler_invoke_helpers::invoke(
         function, this_handler->handler_);
-#if defined(BOOST_ASIO_NO_DEPRECATED)
-    return asio_handler_invoke_is_no_longer_used();
-#endif // defined(BOOST_ASIO_NO_DEPRECATED)
   }
 
   template <typename Function, typename ConstBufferSequence,
       typename WriteHandler>
-  inline asio_handler_invoke_is_deprecated
-  asio_handler_invoke(const Function& function,
+  inline void asio_handler_invoke(const Function& function,
       buffered_write_some_handler<
         ConstBufferSequence, WriteHandler>* this_handler)
   {
     boost_asio_handler_invoke_helpers::invoke(
         function, this_handler->handler_);
-#if defined(BOOST_ASIO_NO_DEPRECATED)
-    return asio_handler_invoke_is_no_longer_used();
-#endif // defined(BOOST_ASIO_NO_DEPRECATED)
   }
 
   template <typename Stream>
@@ -376,8 +351,7 @@ namespace detail
     typedef typename remove_reference<
       Stream>::type::lowest_layer_type::executor_type executor_type;
 
-    explicit initiate_async_buffered_write_some(
-        typename remove_reference<Stream>::type& next_layer)
+    explicit initiate_async_buffered_write_some(Stream& next_layer)
       : next_layer_(next_layer)
     {
     }
@@ -416,26 +390,43 @@ namespace detail
     }
 
   private:
-    typename remove_reference<Stream>::type& next_layer_;
+    Stream& next_layer_;
   };
 } // namespace detail
 
 #if !defined(GENERATING_DOCUMENTATION)
 
-template <template <typename, typename> class Associator,
-    typename ConstBufferSequence, typename WriteHandler,
-    typename DefaultCandidate>
-struct associator<Associator,
+template <typename ConstBufferSequence,
+    typename WriteHandler, typename Allocator>
+struct associated_allocator<
     detail::buffered_write_some_handler<ConstBufferSequence, WriteHandler>,
-    DefaultCandidate>
-  : Associator<WriteHandler, DefaultCandidate>
+    Allocator>
 {
-  static typename Associator<WriteHandler, DefaultCandidate>::type get(
+  typedef typename associated_allocator<WriteHandler, Allocator>::type type;
+
+  static type get(
       const detail::buffered_write_some_handler<
         ConstBufferSequence, WriteHandler>& h,
-      const DefaultCandidate& c = DefaultCandidate()) BOOST_ASIO_NOEXCEPT
+      const Allocator& a = Allocator()) BOOST_ASIO_NOEXCEPT
   {
-    return Associator<WriteHandler, DefaultCandidate>::get(h.handler_, c);
+    return associated_allocator<WriteHandler, Allocator>::get(h.handler_, a);
+  }
+};
+
+template <typename ConstBufferSequence,
+    typename WriteHandler, typename Executor>
+struct associated_executor<
+    detail::buffered_write_some_handler<ConstBufferSequence, WriteHandler>,
+    Executor>
+{
+  typedef typename associated_executor<WriteHandler, Executor>::type type;
+
+  static type get(
+      const detail::buffered_write_some_handler<
+        ConstBufferSequence, WriteHandler>& h,
+      const Executor& ex = Executor()) BOOST_ASIO_NOEXCEPT
+  {
+    return associated_executor<WriteHandler, Executor>::get(h.handler_, ex);
   }
 };
 

@@ -140,8 +140,8 @@ using buffers_iterator_type =
     argument-dependent lookup. The call `beast::buffer_bytes(b)` is
     equivalent to performing:
     @code
-    using net::buffer_size;
-    return buffer_size(b);
+    using namespace net;
+    buffer_bytes(b);
     @endcode
     In addition this handles types which are convertible to
     `net::const_buffer`; these are not handled by `net::buffer_size`.

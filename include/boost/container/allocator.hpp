@@ -174,10 +174,10 @@ class allocator
    {}
 
    //!Allocates memory for an array of count elements.
-   //!Throws bad_alloc if there is no enough memory
+   //!Throws std::bad_alloc if there is no enough memory
    //!If Version is 2, this allocated memory can only be deallocated
    //!with deallocate() or (for Version == 2) deallocate_many()
-   BOOST_CONTAINER_ATTRIBUTE_NODISCARD pointer allocate(size_type count, const void * hint= 0)
+   pointer allocate(size_type count, const void * hint= 0)
    {
       (void)hint;
       if(count > size_type(-1)/(2u*sizeof(T)))
@@ -205,21 +205,19 @@ class allocator
 
    //!An allocator always compares to true, as memory allocated with one
    //!instance can be deallocated by another instance
-   BOOST_CONTAINER_ATTRIBUTE_NODISCARD
-      friend bool operator==(const allocator &, const allocator &) BOOST_NOEXCEPT_OR_NOTHROW
+   friend bool operator==(const allocator &, const allocator &) BOOST_NOEXCEPT_OR_NOTHROW
    {  return true;   }
 
    //!An allocator always compares to false, as memory allocated with one
    //!instance can be deallocated by another instance
-   BOOST_CONTAINER_ATTRIBUTE_NODISCARD BOOST_CONTAINER_FORCEINLINE
-      friend bool operator!=(const allocator &, const allocator &) BOOST_NOEXCEPT_OR_NOTHROW
+   BOOST_CONTAINER_FORCEINLINE friend bool operator!=(const allocator &, const allocator &) BOOST_NOEXCEPT_OR_NOTHROW
    {  return false;   }
 
    //!An advanced function that offers in-place expansion shrink to fit and new allocation
    //!capabilities. Memory allocated with this function can only be deallocated with deallocate()
    //!or deallocate_many().
    //!This function is available only with Version == 2
-   BOOST_CONTAINER_ATTRIBUTE_NODISCARD pointer allocation_command(allocation_type command,
+   pointer allocation_command(allocation_type command,
                          size_type limit_size,
                          size_type &prefer_in_recvd_out_size,
                          pointer &reuse)
@@ -238,7 +236,7 @@ class allocator
    //!Memory must not have been allocated with
    //!allocate_one or allocate_individual.
    //!This function is available only with Version == 2
-   BOOST_CONTAINER_ATTRIBUTE_NODISCARD size_type size(pointer p) const BOOST_NOEXCEPT_OR_NOTHROW
+   size_type size(pointer p) const BOOST_NOEXCEPT_OR_NOTHROW
    {
       BOOST_STATIC_ASSERT(( Version > 1 ));
       return dlmalloc_size(p);
@@ -248,7 +246,7 @@ class allocator
    //!must be deallocated only with deallocate_one().
    //!Throws bad_alloc if there is no enough memory
    //!This function is available only with Version == 2
-   BOOST_CONTAINER_ATTRIBUTE_NODISCARD BOOST_CONTAINER_FORCEINLINE pointer allocate_one()
+   BOOST_CONTAINER_FORCEINLINE pointer allocate_one()
    {
       BOOST_STATIC_ASSERT(( Version > 1 ));
       return this->allocate(1);
@@ -275,8 +273,7 @@ class allocator
 
    //!Deallocates memory allocated with allocate_one() or allocate_individual().
    //!This function is available only with Version == 2
-   BOOST_CONTAINER_FORCEINLINE
-      void deallocate_individual(multiallocation_chain &chain) BOOST_NOEXCEPT_OR_NOTHROW
+   BOOST_CONTAINER_FORCEINLINE void deallocate_individual(multiallocation_chain &chain) BOOST_NOEXCEPT_OR_NOTHROW
    {
       BOOST_STATIC_ASSERT(( Version > 1 ));
       return this->deallocate_many(chain);
@@ -290,7 +287,7 @@ class allocator
       BOOST_STATIC_ASSERT(( Version > 1 ));
       dlmalloc_memchain ch;
       BOOST_CONTAINER_MEMCHAIN_INIT(&ch);
-      if(!dlmalloc_multialloc_nodes(n_elements, elem_size*sizeof(T), BOOST_CONTAINER_DL_MULTIALLOC_DEFAULT_CONTIGUOUS, &ch)){
+      if(!dlmalloc_multialloc_nodes(n_elements, elem_size*sizeof(T), DL_MULTIALLOC_DEFAULT_CONTIGUOUS, &ch)){
          boost::container::throw_bad_alloc();
       }
       chain.incorporate_after(chain.before_begin()
@@ -298,7 +295,7 @@ class allocator
                              ,(T*)BOOST_CONTAINER_MEMCHAIN_LASTMEM(&ch)
                              ,BOOST_CONTAINER_MEMCHAIN_SIZE(&ch) );
 /*
-      if(!dlmalloc_multialloc_nodes(n_elements, elem_size*sizeof(T), BOOST_CONTAINER_DL_MULTIALLOC_DEFAULT_CONTIGUOUS, reinterpret_cast<dlmalloc_memchain *>(&chain))){
+      if(!dlmalloc_multialloc_nodes(n_elements, elem_size*sizeof(T), DL_MULTIALLOC_DEFAULT_CONTIGUOUS, reinterpret_cast<dlmalloc_memchain *>(&chain))){
          boost::container::throw_bad_alloc();
       }*/
    }
@@ -311,7 +308,7 @@ class allocator
       BOOST_STATIC_ASSERT(( Version > 1 ));
       dlmalloc_memchain ch;
       BOOST_CONTAINER_MEMCHAIN_INIT(&ch);
-      if(!dlmalloc_multialloc_arrays(n_elements, elem_sizes, sizeof(T), BOOST_CONTAINER_DL_MULTIALLOC_DEFAULT_CONTIGUOUS, &ch)){
+      if(!dlmalloc_multialloc_arrays(n_elements, elem_sizes, sizeof(T), DL_MULTIALLOC_DEFAULT_CONTIGUOUS, &ch)){
          boost::container::throw_bad_alloc();
       }
       chain.incorporate_after(chain.before_begin()
@@ -319,7 +316,7 @@ class allocator
                              ,(T*)BOOST_CONTAINER_MEMCHAIN_LASTMEM(&ch)
                              ,BOOST_CONTAINER_MEMCHAIN_SIZE(&ch) );
       /*
-      if(!dlmalloc_multialloc_arrays(n_elements, elem_sizes, sizeof(T), BOOST_CONTAINER_DL_MULTIALLOC_DEFAULT_CONTIGUOUS, reinterpret_cast<dlmalloc_memchain *>(&chain))){
+      if(!dlmalloc_multialloc_arrays(n_elements, elem_sizes, sizeof(T), DL_MULTIALLOC_DEFAULT_CONTIGUOUS, reinterpret_cast<dlmalloc_memchain *>(&chain))){
          boost::container::throw_bad_alloc();
       }*/
    }

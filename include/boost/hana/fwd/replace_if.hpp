@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Replace all the elements of a structure satisfying a `predicate`
     //! with a fixed value.
     //! @ingroup group-Functor
@@ -56,8 +56,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Pred&& pred, Value&& value) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr replace_if_t replace_if{};
+    constexpr replace_if_t replace_if{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_REPLACE_IF_HPP

@@ -26,7 +26,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <cstddef>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     namespace detail {
         template <typename T>
         struct is_fusion_sequence {
@@ -74,6 +74,6 @@ namespace boost { namespace hana {
     struct Sequence<S, when<detail::is_fusion_sequence<S>::value>> {
         static constexpr bool value = true;
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_EXT_BOOST_FUSION_DETAIL_COMMON_HPP

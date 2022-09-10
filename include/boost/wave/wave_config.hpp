@@ -10,11 +10,10 @@
     LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
 
-#if !defined(BOOST_WAVE_CONFIG_HPP_F143F90A_A63F_4B27_AC41_9CA4F14F538D_INCLUDED)
-#define BOOST_WAVE_CONFIG_HPP_F143F90A_A63F_4B27_AC41_9CA4F14F538D_INCLUDED
+#if !defined(WAVE_CONFIG_HPP_F143F90A_A63F_4B27_AC41_9CA4F14F538D_INCLUDED)
+#define WAVE_CONFIG_HPP_F143F90A_A63F_4B27_AC41_9CA4F14F538D_INCLUDED
 
 #include <boost/config.hpp>
-#include <boost/config/pragma_message.hpp>
 #include <boost/detail/workaround.hpp>
 #include <boost/version.hpp>
 #include <boost/spirit/include/classic_version.hpp>
@@ -39,14 +38,6 @@
 //
 #if !defined(BOOST_WAVE_SUPPORT_VARIADICS_PLACEMARKERS)
 #define BOOST_WAVE_SUPPORT_VARIADICS_PLACEMARKERS 1
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
-//  Decide whether to support the C++20 __VA_OPT__ variadics feature
-//
-//
-#if !defined(BOOST_WAVE_SUPPORT_VA_OPT) && BOOST_WAVE_SUPPORT_VARIADICS_PLACEMARKERS
-#define BOOST_WAVE_SUPPORT_VA_OPT 1
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,45 +92,6 @@
 #define BOOST_WAVE_SUPPORT_CPP0X 1
 #undef BOOST_WAVE_SUPPORT_VARIADICS_PLACEMARKERS
 #define BOOST_WAVE_SUPPORT_VARIADICS_PLACEMARKERS 1
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
-//  Decide whether to support C++17
-//
-#if !defined(BOOST_WAVE_SUPPORT_CPP1Z)
-#  define BOOST_WAVE_SUPPORT_CPP1Z 1
-#  undef BOOST_WAVE_SUPPORT_CPP0X
-#  define BOOST_WAVE_SUPPORT_CPP0X 1
-#  undef BOOST_WAVE_SUPPORT_VARIADICS_PLACEMARKERS
-#  define BOOST_WAVE_SUPPORT_VARIADICS_PLACEMARKERS 1
-#  if !defined(BOOST_WAVE_SUPPORT_HAS_INCLUDE)
-#    define BOOST_WAVE_SUPPORT_HAS_INCLUDE 1
-#  endif
-#elif BOOST_WAVE_SUPPORT_CPP1Z == 0
-#  undef BOOST_WAVE_SUPPORT_HAS_INCLUDE
-#  define BOOST_WAVE_SUPPORT_HAS_INCLUDE 0
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
-//  Decide whether to support C++20
-//
-#if !defined(BOOST_WAVE_SUPPORT_CPP2A)
-#  define BOOST_WAVE_SUPPORT_CPP2A 1
-#  undef BOOST_WAVE_SUPPORT_CPP0X
-#  define BOOST_WAVE_SUPPORT_CPP0X 1
-#  undef BOOST_WAVE_SUPPORT_VARIADICS_PLACEMARKERS
-#  define BOOST_WAVE_SUPPORT_VARIADICS_PLACEMARKERS 1
-#  undef BOOST_WAVE_SUPPORT_CPP1Z
-#  define BOOST_WAVE_SUPPORT_CPP1Z 1
-#  if !defined(BOOST_WAVE_SUPPORT_HAS_INCLUDE)
-#    define BOOST_WAVE_SUPPORT_HAS_INCLUDE 1
-#  endif
-#  if !defined(BOOST_WAVE_SUPPORT_VA_OPT)
-#    define BOOST_WAVE_SUPPORT_VA_OPT 1
-#  endif
-#elif BOOST_WAVE_SUPPORT_CPP2A == 0
-#  undef BOOST_WAVE_SUPPORT_VA_OPT
-#  define BOOST_WAVE_SUPPORT_VA_OPT 0
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -308,7 +260,6 @@
 #define BOOST_SPIRIT_DEBUG_FLAGS_CHLIT_GRAMMAR          0x0010
 #define BOOST_SPIRIT_DEBUG_FLAGS_DEFINED_GRAMMAR        0x0020
 #define BOOST_SPIRIT_DEBUG_FLAGS_PREDEF_MACROS_GRAMMAR  0x0040
-#define BOOST_SPIRIT_DEBUG_FLAGS_HAS_INCLUDE_GRAMMAR    0x0080
 
 #if !defined(BOOST_SPIRIT_DEBUG_FLAGS_CPP)
 #define BOOST_SPIRIT_DEBUG_FLAGS_CPP    0    // default is no debugging
@@ -517,18 +468,6 @@ namespace boost { namespace wave
 #endif  // BOOST_VERSION
 
 ///////////////////////////////////////////////////////////////////////////////
-//  Deprecate C++03
-///////////////////////////////////////////////////////////////////////////////
-
-#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) || defined(BOOST_NO_CXX11_RVALUE_REFERENCES) \
-    || defined(BOOST_NO_CXX11_HDR_THREAD) \
-    || defined(BOOST_NO_CXX11_HDR_MUTEX) || defined(BOOST_NO_CXX11_HDR_REGEX)
-
-BOOST_PRAGMA_MESSAGE("C++03 support is deprecated in Boost.Wave 1.74 and will be removed in Boost.Wave 1.77.")
-
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
 //  Compatibility macros
 //  (ensure interface compatibility to older Wave versions)
 ///////////////////////////////////////////////////////////////////////////////
@@ -536,11 +475,18 @@ BOOST_PRAGMA_MESSAGE("C++03 support is deprecated in Boost.Wave 1.74 and will be
 ///////////////////////////////////////////////////////////////////////////////
 //  The preprocessing hook signatures changed after the Boost V1.34.0 release
 //
-//  The old hook signatures are no longer available as of Boost 1.76.
+//  To use the preprocessing hook signatures as released with Boost V1.34.0
+//  you need to define the BOOST_WAVE_USE_DEPRECIATED_PREPROCESSING_HOOKS
+//  constant to something not equal zero.
 //
-#if defined(BOOST_WAVE_USE_DEPRECIATED_PREPROCESSING_HOOKS) && \
-    BOOST_WAVE_USE_DEPRECIATED_PREPROCESSING_HOOKS != 0
-#error "The old preprocessing hooks were deprecated in Boost 1.35 and removed in 1.76."
+//  To force using the new interface define this constant to zero.
+//
+#if !defined(BOOST_WAVE_USE_DEPRECIATED_PREPROCESSING_HOOKS)
+#if BOOST_VERSION < 103500  // before Boost V1.35.0
+#define BOOST_WAVE_USE_DEPRECIATED_PREPROCESSING_HOOKS 1
+#else
+#define BOOST_WAVE_USE_DEPRECIATED_PREPROCESSING_HOOKS 0
+#endif
 #endif
 
-#endif // !defined(BOOST_WAVE_CONFIG_HPP_F143F90A_A63F_4B27_AC41_9CA4F14F538D_INCLUDED)
+#endif // !defined(WAVE_CONFIG_HPP_F143F90A_A63F_4B27_AC41_9CA4F14F538D_INCLUDED)

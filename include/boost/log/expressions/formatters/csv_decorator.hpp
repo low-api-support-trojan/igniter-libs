@@ -114,10 +114,10 @@ struct csv_decorator_gen
  * For wide-character formatting there is the similar \c wcsv_decor decorator generator object.
  */
 #ifdef BOOST_LOG_USE_CHAR
-BOOST_INLINE_VARIABLE const aux::csv_decorator_gen< char > csv_decor = {};
+const aux::csv_decorator_gen< char > csv_decor = {};
 #endif
 #ifdef BOOST_LOG_USE_WCHAR_T
-BOOST_INLINE_VARIABLE const aux::csv_decorator_gen< wchar_t > wcsv_decor = {};
+const aux::csv_decorator_gen< wchar_t > wcsv_decor = {};
 #endif
 
 /*!

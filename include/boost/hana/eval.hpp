@@ -18,7 +18,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/functional/id.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Expr>
     constexpr decltype(auto) eval_t::operator()(Expr&& expr) const {
@@ -52,6 +52,6 @@ namespace boost { namespace hana {
         static constexpr decltype(auto) apply(Expr&& expr)
         { return eval_helper(static_cast<Expr&&>(expr), int{}); }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_EVAL_HPP

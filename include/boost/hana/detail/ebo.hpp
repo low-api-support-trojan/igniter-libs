@@ -105,11 +105,11 @@ namespace _hana {
     { return static_cast<V&&>(x.data_); }
 } // end namespace _hana
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     namespace detail {
         using ::_hana::ebo;
         using ::_hana::ebo_get;
     }
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DETAIL_EBO_HPP

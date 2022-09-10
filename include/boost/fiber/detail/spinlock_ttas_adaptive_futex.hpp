@@ -7,7 +7,6 @@
 #ifndef BOOST_FIBERS_SPINLOCK_TTAS_ADAPTIVE_FUTEX_H
 #define BOOST_FIBERS_SPINLOCK_TTAS_ADAPTIVE_FUTEX_H
 
-#include <algorithm>
 #include <atomic>
 #include <cmath>
 #include <random>

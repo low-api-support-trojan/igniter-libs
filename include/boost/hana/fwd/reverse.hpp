@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Reverse a sequence.
     //! @ingroup group-Sequence
     //!
@@ -42,8 +42,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr reverse_t reverse{};
+    constexpr reverse_t reverse{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_REVERSE_HPP

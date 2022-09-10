@@ -94,13 +94,13 @@ public:
     {
     }
 
-    format_description(BOOST_RV_REF(format_description) that) BOOST_NOEXCEPT
+    format_description(BOOST_RV_REF(format_description) that)
     {
         literal_chars.swap(that.literal_chars);
         format_elements.swap(that.format_elements);
     }
 
-    format_description& operator= (format_description that) BOOST_NOEXCEPT
+    format_description& operator= (format_description that)
     {
         literal_chars.swap(that.literal_chars);
         format_elements.swap(that.format_elements);

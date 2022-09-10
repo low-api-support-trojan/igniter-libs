@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/detail/decay.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-functional
     //! Pick one of several functions to call based on overload resolution.
     //!
@@ -81,8 +81,8 @@ namespace boost { namespace hana {
         }
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr make_overload_t overload{};
+    constexpr make_overload_t overload{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FUNCTIONAL_OVERLOAD_HPP

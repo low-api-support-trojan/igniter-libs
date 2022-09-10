@@ -21,7 +21,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <cstddef>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs, typename N>
     constexpr decltype(auto) at_t::operator()(Xs&& xs, N const& n) const {
@@ -52,6 +52,6 @@ namespace boost { namespace hana {
     constexpr decltype(auto) at_c(Xs&& xs) {
         return hana::at(static_cast<Xs&&>(xs), hana::size_t<n>{});
     }
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_AT_HPP

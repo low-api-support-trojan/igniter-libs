@@ -15,7 +15,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/detail/nested_to_fwd.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns a `Logical` representing whether `x` is not equal to `y`.
     //! @ingroup group-Comparable
     //!
@@ -63,8 +63,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(X&& x, Y&& y) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr not_equal_t not_equal{};
+    constexpr not_equal_t not_equal{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_NOT_EQUAL_HPP

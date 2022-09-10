@@ -2,8 +2,8 @@
 
 // Copyright (c) 2008-2012 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2017-2020.
-// Modifications copyright (c) 2017-2020, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2017, 2018.
+// Modifications copyright (c) 2017-2018, Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -15,16 +15,11 @@
 
 
 #include <string>
-#include <type_traits>
-
-#include <boost/smart_ptr/shared_ptr.hpp>
-#include <boost/throw_exception.hpp>
 
 #include <boost/geometry/algorithms/convert.hpp>
 #include <boost/geometry/algorithms/detail/convert_point_to_point.hpp>
 
 #include <boost/geometry/core/coordinate_dimension.hpp>
-#include <boost/geometry/core/static_assert.hpp>
 
 #include <boost/geometry/srs/projections/dpar.hpp>
 #include <boost/geometry/srs/projections/exception.hpp>
@@ -37,6 +32,13 @@
 #include <boost/geometry/srs/projections/spar.hpp>
 
 #include <boost/geometry/views/detail/indexed_point_view.hpp>
+
+#include <boost/mpl/assert.hpp>
+#include <boost/mpl/if.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <boost/throw_exception.hpp>
+#include <boost/type_traits/is_integral.hpp>
+#include <boost/type_traits/is_same.hpp>
 
 
 namespace boost { namespace geometry
@@ -51,21 +53,22 @@ namespace detail
 
 template <typename G1, typename G2>
 struct same_tags
-    : std::is_same
+{
+    static const bool value = boost::is_same
         <
             typename geometry::tag<G1>::type,
             typename geometry::tag<G2>::type
-        >
-{};
+        >::value;
+};
 
 template <typename CT>
 struct promote_to_double
 {
-    typedef std::conditional_t
+    typedef typename boost::mpl::if_c
         <
-            std::is_integral<CT>::value || std::is_same<CT, float>::value,
+            boost::is_integral<CT>::value || boost::is_same<CT, float>::value,
             double, CT
-        > type;
+        >::type type;
 };
 
 // Copy coordinates of dimensions >= MinDim
@@ -75,9 +78,9 @@ inline void copy_higher_dimensions(Point1 const& point1, Point2 & point2)
     static const std::size_t dim1 = geometry::dimension<Point1>::value;
     static const std::size_t dim2 = geometry::dimension<Point2>::value;
     static const std::size_t lesser_dim = dim1 < dim2 ? dim1 : dim2;
-    BOOST_GEOMETRY_STATIC_ASSERT((lesser_dim >= MinDim),
-        "The dimension of Point1 or Point2 is too small.",
-        Point1, Point2);
+    BOOST_MPL_ASSERT_MSG((lesser_dim >= MinDim),
+                         THE_DIMENSION_OF_POINTS_IS_TOO_SMALL,
+                         (Point1, Point2));
 
     geometry::detail::conversion::point_to_point
         <
@@ -322,9 +325,9 @@ struct dynamic_parameters<srs::dpar::parameters<T> >
 template <typename Proj, typename CT>
 class proj_wrapper
 {
-    BOOST_GEOMETRY_STATIC_ASSERT_FALSE(
-        "Unknown projection definition.",
-        Proj);
+    BOOST_MPL_ASSERT_MSG((false),
+                         UNKNOWN_PROJECTION_DEFINITION,
+                         (Proj));
 };
 
 template <typename CT>
@@ -338,16 +341,12 @@ class proj_wrapper<srs::dynamic, CT>
     typedef projections::detail::dynamic_wrapper_b<calc_t, parameters_type> vprj_t;
 
 public:
-    template
-    <
-        typename Params,
-        std::enable_if_t
-            <
-                dynamic_parameters<Params>::is_specialized,
-                int
-            > = 0
-    >
-    proj_wrapper(Params const& params)
+    template <typename Params>
+    proj_wrapper(Params const& params,
+                 typename boost::enable_if_c
+                    <
+                        dynamic_parameters<Params>::is_specialized
+                    >::type * = 0)
         : m_ptr(create(dynamic_parameters<Params>::apply(params)))
     {}
 
@@ -416,11 +415,11 @@ private:
     projection_type m_proj;
 };
 
-template <typename ...Ps, typename CT>
-class proj_wrapper<srs::spar::parameters<Ps...>, CT>
-    : public static_proj_wrapper_base<srs::spar::parameters<Ps...>, CT>
+template <BOOST_GEOMETRY_PROJECTIONS_DETAIL_TYPENAME_PX, typename CT>
+class proj_wrapper<srs::spar::parameters<BOOST_GEOMETRY_PROJECTIONS_DETAIL_PX>, CT>
+    : public static_proj_wrapper_base<srs::spar::parameters<BOOST_GEOMETRY_PROJECTIONS_DETAIL_PX>, CT>
 {
-    typedef srs::spar::parameters<Ps...>
+    typedef srs::spar::parameters<BOOST_GEOMETRY_PROJECTIONS_DETAIL_PX>
         static_parameters_type;
     typedef static_proj_wrapper_base
         <
@@ -459,10 +458,9 @@ public:
     template <typename LL, typename XY>
     inline bool forward(LL const& ll, XY& xy) const
     {
-        BOOST_GEOMETRY_STATIC_ASSERT(
-            (projections::detail::same_tags<LL, XY>::value),
-            "Not supported combination of Geometries.",
-            LL, XY);
+        BOOST_MPL_ASSERT_MSG((projections::detail::same_tags<LL, XY>::value),
+                             NOT_SUPPORTED_COMBINATION_OF_GEOMETRIES,
+                             (LL, XY));
 
         concepts::check_concepts_and_equal_dimensions<LL const, XY>();
 
@@ -477,10 +475,9 @@ public:
     template <typename XY, typename LL>
     inline bool inverse(XY const& xy, LL& ll) const
     {
-        BOOST_GEOMETRY_STATIC_ASSERT(
-            (projections::detail::same_tags<XY, LL>::value),
-            "Not supported combination of Geometries.",
-            XY, LL);
+        BOOST_MPL_ASSERT_MSG((projections::detail::same_tags<XY, LL>::value),
+                             NOT_SUPPORTED_COMBINATION_OF_GEOMETRIES,
+                             (XY, LL));
 
         concepts::check_concepts_and_equal_dimensions<XY const, LL>();
 
@@ -533,16 +530,12 @@ public:
         <tt>srs::proj4("+proj=labrd +ellps=intl +lon_0=46d26'13.95E +lat_0=18d54S +azi=18d54 +k_0=.9995 +x_0=400000 +y_0=800000")</tt>
         for the Madagascar projection.
     */
-    template
-    <
-        typename DynamicParameters,
-        std::enable_if_t
-            <
-                projections::dynamic_parameters<DynamicParameters>::is_specialized,
-                int
-            > = 0
-    >
-    projection(DynamicParameters const& dynamic_parameters)
+    template <typename DynamicParameters>
+    projection(DynamicParameters const& dynamic_parameters,
+               typename boost::enable_if_c
+                <
+                    projections::dynamic_parameters<DynamicParameters>::is_specialized
+                >::type * = 0)
         : base_t(dynamic_parameters)
     {}
 };

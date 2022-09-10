@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Take elements from a sequence while the `predicate` is satisfied.
     //! @ingroup group-Sequence
     //!
@@ -49,8 +49,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Pred&& pred) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr take_while_t take_while{};
+    constexpr take_while_t take_while{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_TAKE_WHILE_HPP

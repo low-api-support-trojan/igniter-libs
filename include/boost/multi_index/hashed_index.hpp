@@ -1,4 +1,4 @@
-/* Copyright 2003-2021 Joaquin M Lopez Munoz.
+/* Copyright 2003-2018 Joaquin M Lopez Munoz.
  * Distributed under the Boost Software License, Version 1.0.
  * (See accompanying file LICENSE_1_0.txt or copy at
  * http://www.boost.org/LICENSE_1_0.txt)
@@ -17,26 +17,22 @@
 #include <algorithm>
 #include <boost/call_traits.hpp>
 #include <boost/core/addressof.hpp>
-#include <boost/core/no_exceptions_support.hpp>
+#include <boost/detail/no_exceptions_support.hpp>
 #include <boost/detail/workaround.hpp>
 #include <boost/foreach_fwd.hpp>
 #include <boost/limits.hpp>
 #include <boost/move/core.hpp>
-#include <boost/move/utility_core.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/push_front.hpp>
 #include <boost/multi_index/detail/access_specifier.hpp>
-#include <boost/multi_index/detail/adl_swap.hpp>
 #include <boost/multi_index/detail/allocator_traits.hpp>
 #include <boost/multi_index/detail/auto_space.hpp>
 #include <boost/multi_index/detail/bucket_array.hpp>
 #include <boost/multi_index/detail/do_not_copy_elements_tag.hpp>
 #include <boost/multi_index/detail/hash_index_iterator.hpp>
 #include <boost/multi_index/detail/index_node_base.hpp>
-#include <boost/multi_index/detail/invalidate_iterators.hpp>
 #include <boost/multi_index/detail/modify_key_adaptor.hpp>
-#include <boost/multi_index/detail/node_handle.hpp>
 #include <boost/multi_index/detail/promotes_arg.hpp>
 #include <boost/multi_index/detail/safe_mode.hpp>
 #include <boost/multi_index/detail/scope_guard.hpp>
@@ -83,17 +79,18 @@ namespace detail{
  * Category tags defined in hash_index_node.hpp.
  */
 
-#if defined(BOOST_MSVC)
-#pragma warning(push)
-#pragma warning(disable:4355) /* this used in base member initializer list */
-#endif
-
 template<
   typename KeyFromValue,typename Hash,typename Pred,
   typename SuperMeta,typename TagList,typename Category
 >
 class hashed_index:
   BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS SuperMeta::type
+
+#if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
+  ,public safe_mode::safe_container<
+    hashed_index<KeyFromValue,Hash,Pred,SuperMeta,TagList,Category> >
+#endif
+
 { 
 #if defined(BOOST_MULTI_INDEX_ENABLE_INVARIANT_CHECKING)&&\
     BOOST_WORKAROUND(__MWERKS__,<=0x3003)
@@ -105,22 +102,15 @@ class hashed_index:
 #pragma parse_mfunc_templ off
 #endif
 
-#if !defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS)
-  /* cross-index access */
-
-  template <typename,typename,typename> friend class index_base;
-#endif
-
   typedef typename SuperMeta::type               super;
 
 protected:
   typedef hashed_index_node<
-    typename super::index_node_type>             index_node_type;
+    typename super::node_type,Category>          node_type;
 
 private:
-  typedef typename index_node_type::
-    template node_alg<Category>::type            node_alg;
-  typedef typename index_node_type::impl_type    node_impl_type;
+  typedef typename node_type::node_alg           node_alg;
+  typedef typename node_type::impl_type          node_impl_type;
   typedef typename node_impl_type::pointer       node_impl_pointer;
   typedef typename node_impl_type::base_pointer  node_impl_base_pointer;
   typedef bucket_array<
@@ -130,7 +120,7 @@ public:
   /* types */
 
   typedef typename KeyFromValue::result_type     key_type;
-  typedef typename index_node_type::value_type   value_type;
+  typedef typename node_type::value_type         value_type;
   typedef KeyFromValue                           key_from_value;
   typedef Hash                                   hasher;
   typedef Pred                                   key_equal;
@@ -152,25 +142,22 @@ public:
 #if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
   typedef safe_mode::safe_iterator<
     hashed_index_iterator<
-      index_node_type,bucket_array_type,
-      Category,
-      hashed_index_global_iterator_tag> >        iterator;
+      node_type,bucket_array_type,
+      hashed_index_global_iterator_tag>,
+    hashed_index>                                iterator;
 #else
   typedef hashed_index_iterator<
-    index_node_type,bucket_array_type,
-    Category,hashed_index_global_iterator_tag>   iterator;
+    node_type,bucket_array_type,
+    hashed_index_global_iterator_tag>            iterator;
 #endif
 
   typedef iterator                               const_iterator;
 
   typedef hashed_index_iterator<
-    index_node_type,bucket_array_type,
-    Category,hashed_index_local_iterator_tag>    local_iterator;
+    node_type,bucket_array_type,
+    hashed_index_local_iterator_tag>             local_iterator;
   typedef local_iterator                         const_local_iterator;
 
-  typedef typename super::final_node_handle_type node_type;
-  typedef detail::insert_return_type<
-    iterator,node_type>                          insert_return_type;
   typedef TagList                                tag_list;
 
 protected:
@@ -196,16 +183,19 @@ protected:
 
 private:
 #if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
-  typedef safe_mode::safe_container<iterator> safe_container;
+  typedef safe_mode::safe_container<
+    hashed_index>                             safe_super;
 #endif
 
   typedef typename call_traits<value_type>::param_type value_param_type;
   typedef typename call_traits<
     key_type>::param_type                              key_param_type;
 
-  /* needed to avoid commas in some macros */
+  /* Needed to avoid commas in BOOST_MULTI_INDEX_OVERLOADS_TO_VARTEMPL
+   * expansion.
+   */
 
-  typedef std::pair<iterator,bool>                     pair_return_type;
+  typedef std::pair<iterator,bool>                     emplace_return_type;
 
 public:
 
@@ -244,17 +234,9 @@ public:
   /* iterators */
 
   iterator begin()BOOST_NOEXCEPT
-  {
-    return make_iterator(
-      index_node_type::from_impl(header()->next()->prior()));
-  
-  }
+    {return make_iterator(node_type::from_impl(header()->next()->prior()));}
   const_iterator begin()const BOOST_NOEXCEPT
-  {
-    return make_iterator(
-      index_node_type::from_impl(header()->next()->prior()));
-  }
-
+    {return make_iterator(node_type::from_impl(header()->next()->prior()));}
   iterator       end()BOOST_NOEXCEPT{return make_iterator(header());}
   const_iterator end()const BOOST_NOEXCEPT{return make_iterator(header());}
   const_iterator cbegin()const BOOST_NOEXCEPT{return begin();}
@@ -262,20 +244,18 @@ public:
 
   iterator iterator_to(const value_type& x)
   {
-    return make_iterator(
-      node_from_value<index_node_type>(boost::addressof(x)));
+    return make_iterator(node_from_value<node_type>(boost::addressof(x)));
   }
 
   const_iterator iterator_to(const value_type& x)const
   {
-    return make_iterator(
-      node_from_value<index_node_type>(boost::addressof(x)));
+    return make_iterator(node_from_value<node_type>(boost::addressof(x)));
   }
 
   /* modifiers */
 
   BOOST_MULTI_INDEX_OVERLOADS_TO_VARTEMPL(
-    pair_return_type,emplace,emplace_impl)
+    emplace_return_type,emplace,emplace_impl)
 
   BOOST_MULTI_INDEX_OVERLOADS_TO_VARTEMPL_EXTRA_ARG(
     iterator,emplace_hint,emplace_hint_impl,iterator,position)
@@ -328,42 +308,6 @@ public:
   }
 #endif
 
-  insert_return_type insert(BOOST_RV_REF(node_type) nh)
-  {
-    if(nh)BOOST_MULTI_INDEX_CHECK_EQUAL_ALLOCATORS(*this,nh);
-    BOOST_MULTI_INDEX_HASHED_INDEX_CHECK_INVARIANT;
-    std::pair<final_node_type*,bool> p=this->final_insert_nh_(nh);
-    return insert_return_type(make_iterator(p.first),p.second,boost::move(nh));
-  }
-
-  iterator insert(const_iterator position,BOOST_RV_REF(node_type) nh)
-  {
-    BOOST_MULTI_INDEX_CHECK_VALID_ITERATOR(position);
-    BOOST_MULTI_INDEX_CHECK_IS_OWNER(position,*this);
-    if(nh)BOOST_MULTI_INDEX_CHECK_EQUAL_ALLOCATORS(*this,nh);
-    BOOST_MULTI_INDEX_HASHED_INDEX_CHECK_INVARIANT;
-    std::pair<final_node_type*,bool> p=this->final_insert_nh_(
-      nh,static_cast<final_node_type*>(position.get_node()));
-    return make_iterator(p.first);
-  }
-
-  node_type extract(const_iterator position)
-  {
-    BOOST_MULTI_INDEX_CHECK_VALID_ITERATOR(position);
-    BOOST_MULTI_INDEX_CHECK_DEREFERENCEABLE_ITERATOR(position);
-    BOOST_MULTI_INDEX_CHECK_IS_OWNER(position,*this);
-    BOOST_MULTI_INDEX_HASHED_INDEX_CHECK_INVARIANT;
-    return this->final_extract_(
-      static_cast<final_node_type*>(position.get_node()));
-  }
-
-  node_type extract(key_param_type x)
-  {
-    iterator position=find(x);
-    if(position==end())return node_type();
-    else return extract(position);
-  }
-
   iterator erase(iterator position)
   {
     BOOST_MULTI_INDEX_CHECK_VALID_ITERATOR(position);
@@ -381,13 +325,13 @@ public:
     std::size_t buc=buckets.position(hash_(k));
     for(node_impl_pointer x=buckets.at(buc)->prior();
         x!=node_impl_pointer(0);x=node_alg::next_to_inspect(x)){
-      if(eq_(k,key(index_node_type::from_impl(x)->value()))){
+      if(eq_(k,key(node_type::from_impl(x)->value()))){
         node_impl_pointer y=end_of_range(x);
         size_type         s=0;
         do{
           node_impl_pointer z=node_alg::after(x);
           this->final_erase_(
-            static_cast<final_node_type*>(index_node_type::from_impl(x)));
+            static_cast<final_node_type*>(node_type::from_impl(x)));
           x=z;
           ++s;
         }while(x!=y);
@@ -510,73 +454,6 @@ public:
     this->final_swap_(x.final());
   }
 
-  template<typename Index>
-  BOOST_MULTI_INDEX_ENABLE_IF_MERGEABLE(hashed_index,Index,void)
-  merge(Index& x)
-  {
-    merge(x,x.begin(),x.end());
-  }
-
-  template<typename Index>
-  BOOST_MULTI_INDEX_ENABLE_IF_MERGEABLE(hashed_index,Index,void)
-  merge(BOOST_RV_REF(Index) x){merge(static_cast<Index&>(x));}
-
-  template<typename Index>
-  BOOST_MULTI_INDEX_ENABLE_IF_MERGEABLE(hashed_index,Index,pair_return_type)
-  merge(Index& x,BOOST_DEDUCED_TYPENAME Index::iterator i)
-  {
-    BOOST_MULTI_INDEX_CHECK_VALID_ITERATOR(i);
-    BOOST_MULTI_INDEX_CHECK_DEREFERENCEABLE_ITERATOR(i);
-    BOOST_MULTI_INDEX_CHECK_IS_OWNER(i,x);
-    BOOST_MULTI_INDEX_CHECK_EQUAL_ALLOCATORS(*this,x);
-    BOOST_MULTI_INDEX_HASHED_INDEX_CHECK_INVARIANT;
-    if(x.end().get_node()==this->header()){ /* same container */
-      return std::pair<iterator,bool>(
-        make_iterator(static_cast<final_node_type*>(i.get_node())),true);
-    }
-    else{
-      std::pair<final_node_type*,bool> p=this->final_transfer_(
-        x,static_cast<final_node_type*>(i.get_node()));
-      return std::pair<iterator,bool>(make_iterator(p.first),p.second);
-    }
-  }
-
-  template<typename Index>
-  BOOST_MULTI_INDEX_ENABLE_IF_MERGEABLE(hashed_index,Index,pair_return_type)
-  merge(BOOST_RV_REF(Index) x,BOOST_DEDUCED_TYPENAME Index::iterator i)
-  {
-    return merge(static_cast<Index&>(x),i);
-  }
-
-  template<typename Index>
-  BOOST_MULTI_INDEX_ENABLE_IF_MERGEABLE(hashed_index,Index,void)
-  merge(
-    Index& x,
-    BOOST_DEDUCED_TYPENAME Index::iterator first,
-    BOOST_DEDUCED_TYPENAME Index::iterator last)
-  {
-    BOOST_MULTI_INDEX_CHECK_VALID_ITERATOR(first);
-    BOOST_MULTI_INDEX_CHECK_VALID_ITERATOR(last);
-    BOOST_MULTI_INDEX_CHECK_IS_OWNER(first,x);
-    BOOST_MULTI_INDEX_CHECK_IS_OWNER(last,x);
-    BOOST_MULTI_INDEX_CHECK_VALID_RANGE(first,last);
-    BOOST_MULTI_INDEX_CHECK_EQUAL_ALLOCATORS(*this,x);
-    BOOST_MULTI_INDEX_HASHED_INDEX_CHECK_INVARIANT;
-    if(x.end().get_node()!=this->header()){ /* different containers */
-      this->final_transfer_range_(x,first,last);
-    }
-  }
-
-  template<typename Index>
-  BOOST_MULTI_INDEX_ENABLE_IF_MERGEABLE(hashed_index,Index,void)
-  merge(
-    BOOST_RV_REF(Index) x,
-    BOOST_DEDUCED_TYPENAME Index::iterator first,
-    BOOST_DEDUCED_TYPENAME Index::iterator last)
-  {
-    merge(static_cast<Index&>(x),first,last);
-  }
-
   /* observers */
 
   key_from_value key_extractor()const{return key;}
@@ -629,22 +506,6 @@ public:
   }
 
   template<typename CompatibleKey>
-  bool contains(const CompatibleKey& k)const
-  {
-    return contains(k,hash_,eq_);
-  }
-
-  template<
-    typename CompatibleKey,typename CompatibleHash,typename CompatiblePred
-  >
-  bool contains(
-    const CompatibleKey& k,
-    const CompatibleHash& hash,const CompatiblePred& eq)const
-  {
-    return find(k,hash,eq)!=end();
-  }
-
-  template<typename CompatibleKey>
   std::pair<iterator,iterator> equal_range(const CompatibleKey& k)const
   {
     return equal_range(k,hash_,eq_);
@@ -694,7 +555,7 @@ public:
   {
     node_impl_pointer x=buckets.at(n)->prior();
     if(x==node_impl_pointer(0))return end(n);
-    return make_local_iterator(index_node_type::from_impl(x));
+    return make_local_iterator(node_type::from_impl(x));
   }
 
   local_iterator end(size_type n)
@@ -713,13 +574,13 @@ public:
   local_iterator local_iterator_to(const value_type& x)
   {
     return make_local_iterator(
-      node_from_value<index_node_type>(boost::addressof(x)));
+      node_from_value<node_type>(boost::addressof(x)));
   }
 
   const_local_iterator local_iterator_to(const value_type& x)const
   {
     return make_local_iterator(
-      node_from_value<index_node_type>(boost::addressof(x)));
+      node_from_value<node_type>(boost::addressof(x)));
   }
 
   /* hash policy */
@@ -756,11 +617,6 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     eq_(tuples::get<3>(args_list.get_head())),
     buckets(al,header()->impl(),tuples::get<0>(args_list.get_head())),
     mlf(1.0f)
-
-#if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
-    ,safe(*this)
-#endif
-
   {
     calculate_max_load();
   }
@@ -768,17 +624,17 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
   hashed_index(
     const hashed_index<KeyFromValue,Hash,Pred,SuperMeta,TagList,Category>& x):
     super(x),
+
+#if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
+    safe_super(),
+#endif
+
     key(x.key),
     hash_(x.hash_),
     eq_(x.eq_),
     buckets(x.get_allocator(),header()->impl(),x.buckets.size()),
     mlf(x.mlf),
     max_load(x.max_load)
-
-#if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
-    ,safe(*this)
-#endif
-
   {
     /* Copy ctor just takes the internal configuration objects from x. The rest
      * is done in subsequent call to copy_().
@@ -789,16 +645,16 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     const hashed_index<KeyFromValue,Hash,Pred,SuperMeta,TagList,Category>& x,
     do_not_copy_elements_tag):
     super(x,do_not_copy_elements_tag()),
+
+#if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
+    safe_super(),
+#endif
+
     key(x.key),
     hash_(x.hash_),
     eq_(x.eq_),
     buckets(x.get_allocator(),header()->impl(),0),
     mlf(1.0f)
-
-#if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
-    ,safe(*this)
-#endif
-
   {
      calculate_max_load();
   }
@@ -809,33 +665,33 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
   }
 
 #if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
-  iterator make_iterator(index_node_type* node)
+  iterator make_iterator(node_type* node)
   {
-    return iterator(node,&safe);
+    return iterator(node,this);
   }
 
-  const_iterator make_iterator(index_node_type* node)const
+  const_iterator make_iterator(node_type* node)const
   {
-    return const_iterator(node,const_cast<safe_container*>(&safe));
+    return const_iterator(node,const_cast<hashed_index*>(this));
   }
 #else
-  iterator make_iterator(index_node_type* node)
+  iterator make_iterator(node_type* node)
   {
     return iterator(node);
   }
 
-  const_iterator make_iterator(index_node_type* node)const
+  const_iterator make_iterator(node_type* node)const
   {
     return const_iterator(node);
   }
 #endif
 
-  local_iterator make_local_iterator(index_node_type* node)
+  local_iterator make_local_iterator(node_type* node)
   {
     return local_iterator(node);
   }
 
-  const_local_iterator make_local_iterator(index_node_type* node)const
+  const_local_iterator make_local_iterator(node_type* node)const
   {
     return const_local_iterator(node);
   }
@@ -858,8 +714,8 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
       do{
         node_impl_pointer prev_org=org->prior(),
                           prev_cpy=
-          static_cast<index_node_type*>(map.find(static_cast<final_node_type*>(
-            index_node_type::from_impl(prev_org))))->impl();
+          static_cast<node_type*>(map.find(static_cast<final_node_type*>(
+            node_type::from_impl(prev_org))))->impl();
         cpy->prior()=prev_cpy;
         if(node_alg::is_first_of_bucket(org)){
           node_impl_base_pointer buc_org=prev_org->next(),
@@ -890,8 +746,8 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
       do{
         node_impl_pointer next_org=node_alg::after(org),
                           next_cpy=
-          static_cast<index_node_type*>(map.find(static_cast<final_node_type*>(
-            index_node_type::from_impl(next_org))))->impl();
+          static_cast<node_type*>(map.find(static_cast<final_node_type*>(
+            node_type::from_impl(next_org))))->impl();
         if(node_alg::is_first_of_bucket(next_org)){
           node_impl_base_pointer buc_org=org->next(),
                                  buc_cpy=
@@ -907,17 +763,15 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
           else{
             cpy->next()=
               node_impl_type::base_pointer_from(
-                static_cast<index_node_type*>(
-                  map.find(static_cast<final_node_type*>(
-                    index_node_type::from_impl(
-                      node_impl_type::pointer_from(org->next())))))->impl());
+                static_cast<node_type*>(map.find(static_cast<final_node_type*>(
+                  node_type::from_impl(
+                    node_impl_type::pointer_from(org->next())))))->impl());
           }
 
           if(next_org->prior()!=org){
             next_cpy->prior()=
-              static_cast<index_node_type*>(
-                map.find(static_cast<final_node_type*>(
-                  index_node_type::from_impl(next_org->prior()))))->impl();
+              static_cast<node_type*>(map.find(static_cast<final_node_type*>(
+                node_type::from_impl(next_org->prior()))))->impl();
           }
           else{
             next_cpy->prior()=cpy;
@@ -941,18 +795,17 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     link_info   pos(buckets.at(buc));
     if(!link_point(v,pos)){
       return static_cast<final_node_type*>(
-        index_node_type::from_impl(node_impl_type::pointer_from(pos)));
+        node_type::from_impl(node_impl_type::pointer_from(pos)));
     }
 
     final_node_type* res=super::insert_(v,x,variant);
-    if(res==x)link(static_cast<index_node_type*>(x),pos);
+    if(res==x)link(static_cast<node_type*>(x),pos);
     return res;
   }
 
   template<typename Variant>
   final_node_type* insert_(
-    value_param_type v,index_node_type* position,
-    final_node_type*& x,Variant variant)
+    value_param_type v,node_type* position,final_node_type*& x,Variant variant)
   {
     reserve_for_insert(size()+1);
 
@@ -960,22 +813,21 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     link_info   pos(buckets.at(buc));
     if(!link_point(v,pos)){
       return static_cast<final_node_type*>(
-        index_node_type::from_impl(node_impl_type::pointer_from(pos)));
+        node_type::from_impl(node_impl_type::pointer_from(pos)));
     }
 
     final_node_type* res=super::insert_(v,position,x,variant);
-    if(res==x)link(static_cast<index_node_type*>(x),pos);
+    if(res==x)link(static_cast<node_type*>(x),pos);
     return res;
   }
 
-  template<typename Dst>
-  void extract_(index_node_type* x,Dst dst)
+  void erase_(node_type* x)
   {
     unlink(x);
-    super::extract_(x,dst.next());
+    super::erase_(x);
 
 #if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
-    transfer_iterators(dst.get(),x);
+    detach_iterators(x);
 #endif
   }
 
@@ -989,7 +841,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     for(node_impl_pointer x_end=header()->impl(),x=x_end->prior();x!=x_end;){
       node_impl_pointer y=x->prior();
       this->final_delete_node_(
-        static_cast<final_node_type*>(index_node_type::from_impl(x)));
+        static_cast<final_node_type*>(node_type::from_impl(x)));
       x=y;
     }
   }
@@ -1008,7 +860,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
         first->next()->prior()=first;
       }
       this->final_delete_node_(
-        static_cast<final_node_type*>(index_node_type::from_impl(x)));
+        static_cast<final_node_type*>(node_type::from_impl(x)));
       x=y;
     }
   }
@@ -1019,27 +871,25 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     buckets.clear(header()->impl());
 
 #if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
-    safe.detach_dereferenceable_iterators();
+    safe_super::detach_dereferenceable_iterators();
 #endif
   }
 
-  template<typename BoolConstant>
   void swap_(
-    hashed_index<KeyFromValue,Hash,Pred,SuperMeta,TagList,Category>& x,
-    BoolConstant swap_allocators)
+    hashed_index<KeyFromValue,Hash,Pred,SuperMeta,TagList,Category>& x)
   {
-    adl_swap(key,x.key);
-    adl_swap(hash_,x.hash_);
-    adl_swap(eq_,x.eq_);
-    buckets.swap(x.buckets,swap_allocators);
+    std::swap(key,x.key);
+    std::swap(hash_,x.hash_);
+    std::swap(eq_,x.eq_);
+    buckets.swap(x.buckets);
     std::swap(mlf,x.mlf);
     std::swap(max_load,x.max_load);
 
 #if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
-    safe.swap(x.safe);
+    safe_super::swap(x);
 #endif
 
-    super::swap_(x,swap_allocators);
+    super::swap_(x);
   }
 
   void swap_elements_(
@@ -1050,14 +900,14 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     std::swap(max_load,x.max_load);
 
 #if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
-    safe.swap(x.safe);
+    safe_super::swap(x);
 #endif
 
     super::swap_elements_(x);
   }
 
   template<typename Variant>
-  bool replace_(value_param_type v,index_node_type* x,Variant variant)
+  bool replace_(value_param_type v,node_type* x,Variant variant)
   {
     if(eq_(key(v),key(x->value()))){
       return super::replace_(v,x,variant);
@@ -1083,7 +933,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     BOOST_CATCH_END
   }
 
-  bool modify_(index_node_type* x)
+  bool modify_(node_type* x)
   {
     std::size_t buc;
     bool        b; 
@@ -1092,7 +942,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
       b=in_place(x->impl(),key(x->value()),buc);
     }
     BOOST_CATCH(...){
-      extract_(x,invalidate_iterators());
+      erase_(x);
       BOOST_RETHROW;
     }
     BOOST_CATCH_END
@@ -1101,7 +951,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
       BOOST_TRY{
         link_info pos(buckets.at(buc));
         if(!link_point(x->value(),pos)){
-          super::extract_(x,invalidate_iterators());
+          super::erase_(x);
 
 #if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
           detach_iterators(x);
@@ -1111,7 +961,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
         link(x,pos);
       }
       BOOST_CATCH(...){
-        super::extract_(x,invalidate_iterators());
+        super::erase_(x);
 
 #if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
       detach_iterators(x);
@@ -1145,7 +995,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     BOOST_CATCH_END
   }
 
-  bool modify_rollback_(index_node_type* x)
+  bool modify_rollback_(node_type* x)
   {
     std::size_t buc=find_bucket(x->value());
     if(in_place(x->impl(),key(x->value()),buc)){
@@ -1171,7 +1021,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     BOOST_CATCH_END
   }
 
-  bool check_rollback_(index_node_type* x)const
+  bool check_rollback_(node_type* x)const
   {
     std::size_t buc=find_bucket(x->value());
     return in_place(x->impl(),key(x->value()),buc)&&super::check_rollback_(x);
@@ -1209,7 +1059,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
       if(it2==it2_last)return false;
 
       const_iterator it_last=make_iterator(
-        index_node_type::from_impl(end_of_range(it.get_node()->impl())));
+        node_type::from_impl(end_of_range(it.get_node()->impl())));
       if(std::distance(it,it_last)!=std::distance(it2,it2_last))return false;
 
       /* From is_permutation code in
@@ -1287,7 +1137,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
 #endif
 
 private:
-  index_node_type* header()const{return this->final_header();}
+  node_type* header()const{return this->final_header();}
 
   std::size_t find_bucket(value_param_type v)const
   {
@@ -1320,7 +1170,7 @@ private:
   {
     for(node_impl_pointer x=pos->prior();x!=node_impl_pointer(0);
         x=node_alg::after_local(x)){
-      if(eq_(key(v),key(index_node_type::from_impl(x)->value()))){
+      if(eq_(key(v),key(node_type::from_impl(x)->value()))){
         pos=node_impl_type::base_pointer_from(x);
         return false;
       }
@@ -1333,7 +1183,7 @@ private:
   {
     for(node_impl_pointer x=pos.first->prior();x!=node_impl_pointer(0);
         x=node_alg::next_to_inspect(x)){
-      if(eq_(key(v),key(index_node_type::from_impl(x)->value()))){
+      if(eq_(key(v),key(node_type::from_impl(x)->value()))){
         pos.first=node_impl_type::base_pointer_from(x);
         pos.last=node_impl_type::base_pointer_from(last_of_range(x));
         return true;
@@ -1361,8 +1211,8 @@ private:
       node_impl_pointer yy=node_impl_type::pointer_from(y);
       return
         eq_(
-          key(index_node_type::from_impl(x)->value()),
-          key(index_node_type::from_impl(yy)->value()))?yy:x;
+          key(node_type::from_impl(x)->value()),
+          key(node_type::from_impl(yy)->value()))?yy:x;
     }
     else if(z->prior()==x)               /* last of bucket */
       return x;
@@ -1388,8 +1238,8 @@ private:
     if(z==x){                      /* range of size 1 or 2 */
       node_impl_pointer yy=node_impl_type::pointer_from(y);
       if(!eq_(
-           key(index_node_type::from_impl(x)->value()),
-           key(index_node_type::from_impl(yy)->value())))yy=x;
+           key(node_type::from_impl(x)->value()),
+           key(node_type::from_impl(yy)->value())))yy=x;
       return yy->next()->prior()==yy?
                node_impl_type::pointer_from(yy->next()):
                yy->next()->prior();
@@ -1402,18 +1252,17 @@ private:
                z->next()->prior();
   }
 
-  void link(index_node_type* x,const link_info& pos)
+  void link(node_type* x,const link_info& pos)
   {
     link(x,pos,Category());
   }
 
-  void link(index_node_type* x,node_impl_base_pointer pos,hashed_unique_tag)
+  void link(node_type* x,node_impl_base_pointer pos,hashed_unique_tag)
   {
     node_alg::link(x->impl(),pos,header()->impl());
   }
 
-  void link(
-    index_node_type* x,const link_info_non_unique& pos,hashed_non_unique_tag)
+  void link(node_type* x,const link_info_non_unique& pos,hashed_non_unique_tag)
   {
     if(pos.last==node_impl_base_pointer(0)){
       node_alg::link(x->impl(),pos.first,header()->impl());
@@ -1426,14 +1275,14 @@ private:
     }
   }
 
-  void unlink(index_node_type* x)
+  void unlink(node_type* x)
   {
     node_alg::unlink(x->impl());
   }
 
   typedef typename node_alg::unlink_undo unlink_undo;
 
-  void unlink(index_node_type* x,unlink_undo& undo)
+  void unlink(node_type* x,unlink_undo& undo)
   {
     node_alg::unlink(x->impl(),undo);
   }
@@ -1476,7 +1325,7 @@ private:
           node_impl_pointer x=end_->prior();
 
           /* only this can possibly throw */
-          std::size_t h=hash_(key(index_node_type::from_impl(x)->value()));
+          std::size_t h=hash_(key(node_type::from_impl(x)->value()));
 
           hashes.data()[i]=h;
           node_ptrs.data()[i]=x;
@@ -1529,7 +1378,7 @@ private:
           if(x==end_)break;
 
           /* only this can possibly throw */
-          std::size_t h=hash_(key(index_node_type::from_impl(x)->value()));
+          std::size_t h=hash_(key(node_type::from_impl(x)->value()));
 
           hashes.data()[i]=h;
           node_ptrs.data()[i]=x;
@@ -1583,7 +1432,7 @@ private:
     for(node_impl_pointer y=buckets.at(buc)->prior();
         y!=node_impl_pointer(0);y=node_alg::after_local(y)){
       if(y==x)found=true;
-      else if(eq_(k,key(index_node_type::from_impl(y)->value())))return false;
+      else if(eq_(k,key(node_type::from_impl(y)->value())))return false;
     }
     return found;
   }
@@ -1600,13 +1449,13 @@ private:
           /* in place <-> equal to some other member of the group */
           return eq_(
             k,
-            key(index_node_type::from_impl(
+            key(node_type::from_impl(
               node_impl_type::pointer_from(y->next()))->value()));
         }
         else{
           node_impl_pointer z=
             node_alg::after_local(y->next()->prior()); /* end of range */
-          if(eq_(k,key(index_node_type::from_impl(y)->value()))){
+          if(eq_(k,key(node_type::from_impl(y)->value()))){
             if(found)return false; /* x lies outside */
             do{
               if(y==x)return true;
@@ -1628,7 +1477,7 @@ private:
           range_size=1;
           found=true;
         }
-        else if(eq_(k,key(index_node_type::from_impl(y)->value()))){
+        else if(eq_(k,key(node_type::from_impl(y)->value()))){
           if(range_size==0&&found)return false;
           if(range_size==1&&!found)return false;
           if(range_size==2)return false;
@@ -1646,17 +1495,10 @@ private:
   }
 
 #if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
-  void detach_iterators(index_node_type* x)
+  void detach_iterators(node_type* x)
   {
     iterator it=make_iterator(x);
     safe_mode::detach_equivalent_iterators(it);
-  }
-
-  template<typename Dst>
-  void transfer_iterators(Dst& dst,index_node_type* x)
-  {
-    iterator it=make_iterator(x);
-    safe_mode::transfer_equivalent_iterators(dst,it);
   }
 #endif
 
@@ -1703,8 +1545,8 @@ private:
     std::size_t buc=buckets.position(hash(k));
     for(node_impl_pointer x=buckets.at(buc)->prior();
         x!=node_impl_pointer(0);x=node_alg::next_to_inspect(x)){
-      if(eq(k,key(index_node_type::from_impl(x)->value()))){
-        return make_iterator(index_node_type::from_impl(x));
+      if(eq(k,key(node_type::from_impl(x)->value()))){
+        return make_iterator(node_type::from_impl(x));
       }
     }
     return end();
@@ -1730,7 +1572,7 @@ private:
     std::size_t buc=buckets.position(hash(k));
     for(node_impl_pointer x=buckets.at(buc)->prior();
         x!=node_impl_pointer(0);x=node_alg::next_to_inspect(x)){
-      if(eq(k,key(index_node_type::from_impl(x)->value()))){
+      if(eq(k,key(node_type::from_impl(x)->value()))){
         size_type         res=0;
         node_impl_pointer y=end_of_range(x);
         do{
@@ -1763,10 +1605,10 @@ private:
     std::size_t buc=buckets.position(hash(k));
     for(node_impl_pointer x=buckets.at(buc)->prior();
         x!=node_impl_pointer(0);x=node_alg::next_to_inspect(x)){
-      if(eq(k,key(index_node_type::from_impl(x)->value()))){
+      if(eq(k,key(node_type::from_impl(x)->value()))){
         return std::pair<iterator,iterator>(
-          make_iterator(index_node_type::from_impl(x)),
-          make_iterator(index_node_type::from_impl(end_of_range(x))));
+          make_iterator(node_type::from_impl(x)),
+          make_iterator(node_type::from_impl(end_of_range(x))));
       }
     }
     return std::pair<iterator,iterator>(end(),end());
@@ -1778,20 +1620,12 @@ private:
   bucket_array_type            buckets;
   float                        mlf;
   size_type                    max_load;
-
-#if defined(BOOST_MULTI_INDEX_ENABLE_SAFE_MODE)
-  safe_container               safe;
-#endif
-
+      
 #if defined(BOOST_MULTI_INDEX_ENABLE_INVARIANT_CHECKING)&&\
     BOOST_WORKAROUND(__MWERKS__,<=0x3003)
 #pragma parse_mfunc_templ reset
 #endif
 };
-
-#if defined(BOOST_MSVC)
-#pragma warning(pop) /* C4355 */
-#endif
 
 /* comparison */
 
@@ -1847,7 +1681,7 @@ struct hashed_unique
   template<typename Super>
   struct node_class
   {
-    typedef detail::hashed_index_node<Super> type;
+    typedef detail::hashed_index_node<Super,detail::hashed_unique_tag> type;
   };
 
   template<typename SuperMeta>
@@ -1872,7 +1706,8 @@ struct hashed_non_unique
   template<typename Super>
   struct node_class
   {
-    typedef detail::hashed_index_node<Super> type;
+    typedef detail::hashed_index_node<
+      Super,detail::hashed_non_unique_tag> type;
   };
 
   template<typename SuperMeta>

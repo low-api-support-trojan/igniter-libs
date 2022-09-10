@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Collapse two levels of monadic structure into a single level.
     //! @ingroup group-Monad
     //!
@@ -56,8 +56,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr flatten_t flatten{};
+    constexpr flatten_t flatten{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_FLATTEN_HPP

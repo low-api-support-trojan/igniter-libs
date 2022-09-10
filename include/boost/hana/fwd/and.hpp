@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Return whether all the arguments are true-valued.
     //! @ingroup group-Logical
     //!
@@ -46,8 +46,8 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(X&& x, Y&& ...y) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr and_t and_{};
+    constexpr and_t and_{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_AND_HPP

@@ -19,7 +19,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-functional
     //! Return an equivalent function that can also be applied in infix
     //! notation.
@@ -178,8 +178,8 @@ namespace boost { namespace hana {
         }
     } // end namespace infix_detail
 
-    BOOST_HANA_INLINE_VARIABLE constexpr infix_detail::make_infix<false, false> infix{};
+    constexpr infix_detail::make_infix<false, false> infix{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FUNCTIONAL_INFIX_HPP

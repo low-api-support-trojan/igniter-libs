@@ -33,7 +33,8 @@ namespace impl
         template <typename ParserT, typename LeafCountT>
         struct count {
 
-            BOOST_STATIC_CONSTANT(int, value = (LeafCountT::value + 1));
+            // __BORLANDC__ == 0x0561 isn't happy with BOOST_STATIC_CONSTANT
+            enum { value = (LeafCountT::value + 1) };
         };
     };
 
@@ -46,8 +47,9 @@ namespace impl
             typedef typename ParserT::subject_t             subject_t;
             typedef typename subject_t::parser_category_t   subject_category_t;
 
-            BOOST_STATIC_CONSTANT(int, value = (nodes<subject_category_t>
-                ::template count<subject_t, LeafCountT>::value + 1));
+            // __BORLANDC__ == 0x0561 isn't happy with BOOST_STATIC_CONSTANT
+            enum { value = (nodes<subject_category_t>
+                ::template count<subject_t, LeafCountT>::value + 1) };
         };
     };
 
@@ -60,8 +62,9 @@ namespace impl
             typedef typename ParserT::subject_t             subject_t;
             typedef typename subject_t::parser_category_t   subject_category_t;
 
-            BOOST_STATIC_CONSTANT(int, value = (nodes<subject_category_t>
-                ::template count<subject_t, LeafCountT>::value + 1));
+            // __BORLANDC__ == 0x0561 isn't happy with BOOST_STATIC_CONSTANT
+            enum { value = (nodes<subject_category_t>
+                ::template count<subject_t, LeafCountT>::value + 1) };
         };
     };
 
@@ -78,14 +81,14 @@ namespace impl
 
             typedef count self_t;
 
-            BOOST_STATIC_CONSTANT(int,
+            // __BORLANDC__ == 0x0561 isn't happy with BOOST_STATIC_CONSTANT
+            enum {
                 leftcount = (nodes<left_category_t>
-                    ::template count<left_t, LeafCountT>::value));
-            BOOST_STATIC_CONSTANT(int,
+                    ::template count<left_t, LeafCountT>::value),
                 rightcount = (nodes<right_category_t>
-                    ::template count<right_t, LeafCountT>::value));
-            BOOST_STATIC_CONSTANT(int,
-                value = ((self_t::leftcount) + (self_t::rightcount) + 1));
+                    ::template count<right_t, LeafCountT>::value),
+                value = ((self_t::leftcount) + (self_t::rightcount) + 1)
+            };
         };
     };
 
@@ -105,7 +108,8 @@ namespace impl
         template <typename ParserT, typename LeafCountT>
         struct count {
 
-            BOOST_STATIC_CONSTANT(int, value = (LeafCountT::value + 1));
+            // __BORLANDC__ == 0x0561 isn't happy with BOOST_STATIC_CONSTANT
+            enum { value = (LeafCountT::value + 1) };
         };
     };
 
@@ -118,8 +122,9 @@ namespace impl
             typedef typename ParserT::subject_t             subject_t;
             typedef typename subject_t::parser_category_t   subject_category_t;
 
-            BOOST_STATIC_CONSTANT(int, value = (leafs<subject_category_t>
-                ::template count<subject_t, LeafCountT>::value));
+            // __BORLANDC__ == 0x0561 isn't happy with BOOST_STATIC_CONSTANT
+            enum { value = (leafs<subject_category_t>
+                ::template count<subject_t, LeafCountT>::value) };
         };
     };
 
@@ -132,8 +137,9 @@ namespace impl
             typedef typename ParserT::subject_t             subject_t;
             typedef typename subject_t::parser_category_t   subject_category_t;
 
-            BOOST_STATIC_CONSTANT(int, value = (leafs<subject_category_t>
-                ::template count<subject_t, LeafCountT>::value));
+            // __BORLANDC__ == 0x0561 isn't happy with BOOST_STATIC_CONSTANT
+            enum { value = (leafs<subject_category_t>
+                ::template count<subject_t, LeafCountT>::value) };
         };
     };
 
@@ -150,14 +156,14 @@ namespace impl
 
             typedef count self_t;
 
-            BOOST_STATIC_CONSTANT(int,
+            // __BORLANDC__ == 0x0561 isn't happy with BOOST_STATIC_CONSTANT
+            enum {
                 leftcount = (leafs<left_category_t>
-                    ::template count<left_t, LeafCountT>::value));
-            BOOST_STATIC_CONSTANT(int,
+                    ::template count<left_t, LeafCountT>::value),
                 rightcount = (leafs<right_category_t>
-                    ::template count<right_t, LeafCountT>::value));
-            BOOST_STATIC_CONSTANT(int,
-                value = (self_t::leftcount + self_t::rightcount));
+                    ::template count<right_t, LeafCountT>::value),
+                value = (self_t::leftcount + self_t::rightcount)
+            };
         };
     };
 

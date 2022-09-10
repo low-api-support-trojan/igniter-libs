@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Identity of the `Ring` multiplication.
     //! @ingroup group-Ring
     //!
@@ -40,8 +40,8 @@ namespace boost { namespace hana {
     };
 
     template <typename R>
-    BOOST_HANA_INLINE_VARIABLE constexpr one_t<R> one{};
+    constexpr one_t<R> one{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_ONE_HPP

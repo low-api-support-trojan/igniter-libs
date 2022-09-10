@@ -19,13 +19,13 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/detail/integral_constant.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     template <typename S>
     struct Struct
         : hana::integral_constant<bool,
             !is_default<accessors_impl<typename tag_of<S>::type>>::value
         >
     { };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_CONCEPT_STRUCT_HPP

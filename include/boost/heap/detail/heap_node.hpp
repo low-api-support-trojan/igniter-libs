@@ -11,7 +11,6 @@
 
 #include <boost/assert.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/core/allocator_access.hpp>
 #include <boost/intrusive/list.hpp>
 #include <boost/type_traits/conditional.hpp>
 
@@ -83,12 +82,6 @@ std::size_t count_nodes(const Node * n)
     return 1 + count_list_nodes<Node, typename Node::child_list>(n->children);
 }
 
-template<class Node>
-void destroy_node(Node& node)
-{
-    node.~Node();
-}
-
 
 /* node cloner
  *
@@ -105,21 +98,35 @@ template <typename Node,
           typename Alloc>
 struct node_cloner
 {
+#ifndef BOOST_NO_CXX11_ALLOCATOR
+    typedef std::allocator_traits<Alloc> allocator_traits;
+#endif
+
     node_cloner(Alloc & allocator):
         allocator(allocator)
     {}
 
     Node * operator() (NodeBase const & node)
     {
+#ifdef BOOST_NO_CXX11_ALLOCATOR
         Node * ret = allocator.allocate(1);
         new (ret) Node(static_cast<Node const &>(node), allocator);
+#else
+        Node * ret = allocator_traits::allocate(allocator, 1);
+        allocator_traits::construct(allocator, ret, static_cast<Node const &>(node), allocator);
+#endif
         return ret;
     }
 
     Node * operator() (NodeBase const & node, Node * parent)
     {
+#ifdef BOOST_NO_CXX11_ALLOCATOR
         Node * ret = allocator.allocate(1);
         new (ret) Node(static_cast<Node const &>(node), allocator, parent);
+#else
+        Node * ret = allocator_traits::allocate(allocator, 1);
+        allocator_traits::construct(allocator, ret, static_cast<Node const &>(node), allocator, parent);
+#endif
         return ret;
     }
 
@@ -138,7 +145,12 @@ template <typename Node,
           typename Alloc>
 struct node_disposer
 {
-    typedef typename boost::allocator_pointer<Alloc>::type node_pointer;
+#ifdef BOOST_NO_CXX11_ALLOCATOR
+    typedef typename Alloc::pointer node_pointer;
+#else
+    typedef std::allocator_traits<Alloc> allocator_traits;
+    typedef typename allocator_traits::pointer node_pointer;
+#endif
 
     node_disposer(Alloc & alloc):
         alloc_(alloc)
@@ -148,8 +160,13 @@ struct node_disposer
     {
         node_pointer n = static_cast<node_pointer>(base);
         n->clear_subtree(alloc_);
-        boost::heap::detail::destroy_node(*n);
+#ifdef BOOST_NO_CXX11_ALLOCATOR
+        alloc_.destroy(n);
         alloc_.deallocate(n, 1);
+#else
+        allocator_traits::destroy(alloc_, n);
+        allocator_traits::deallocate(alloc_, n, 1);
+#endif
     }
 
     Alloc & alloc_;

@@ -13,7 +13,6 @@
 #include <stdarg.h>
 #include <boost/winapi/basic_types.hpp>
 #include <boost/winapi/get_last_error.hpp>
-#include <boost/winapi/detail/header.hpp>
 
 #ifdef BOOST_HAS_PRAGMA_ONCE
 #pragma once
@@ -22,7 +21,7 @@
 #if !defined( BOOST_USE_WINDOWS_H )
 extern "C" {
 #if !defined( BOOST_NO_ANSI_APIS )
-BOOST_WINAPI_IMPORT boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC
 FormatMessageA(
     boost::winapi::DWORD_ dwFlags,
     boost::winapi::LPCVOID_ lpSource,
@@ -33,7 +32,7 @@ FormatMessageA(
     va_list *Arguments);
 #endif
 
-BOOST_WINAPI_IMPORT_EXCEPT_WM boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC
 FormatMessageW(
     boost::winapi::DWORD_ dwFlags,
     boost::winapi::LPCVOID_ lpSource,
@@ -44,7 +43,7 @@ FormatMessageW(
     va_list *Arguments);
 
 #if BOOST_WINAPI_PARTITION_DESKTOP || BOOST_WINAPI_PARTITION_SYSTEM
-BOOST_WINAPI_IMPORT boost::winapi::UINT_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::UINT_ BOOST_WINAPI_WINAPI_CC
 SetErrorMode(boost::winapi::UINT_ uMode);
 #endif
 } // extern "C"
@@ -73,7 +72,7 @@ BOOST_CONSTEXPR_OR_CONST WORD_ SUBLANG_DEFAULT_=               SUBLANG_DEFAULT; 
 
 BOOST_FORCEINLINE BOOST_CONSTEXPR WORD_ MAKELANGID_(WORD_ p, WORD_ s) BOOST_NOEXCEPT
 {
-    return static_cast< WORD_ >(MAKELANGID(p, s));
+    return MAKELANGID(p,s);
 }
 
 #if BOOST_WINAPI_PARTITION_DESKTOP
@@ -102,7 +101,7 @@ BOOST_CONSTEXPR_OR_CONST WORD_ SUBLANG_DEFAULT_=               0x01;    // user 
 
 BOOST_FORCEINLINE BOOST_CONSTEXPR WORD_ MAKELANGID_(WORD_ p, WORD_ s) BOOST_NOEXCEPT
 {
-    return static_cast< WORD_ >((static_cast< DWORD_ >(s) << 10u) | p);
+    return (WORD_)((((WORD_)(s)) << 10) | (WORD_)(p));
 }
 
 #if BOOST_WINAPI_PARTITION_DESKTOP
@@ -150,7 +149,5 @@ BOOST_FORCEINLINE DWORD_ format_message(
 
 }
 }
-
-#include <boost/winapi/detail/footer.hpp>
 
 #endif // BOOST_WINAPI_ERROR_HANDLING_HPP_INCLUDED_

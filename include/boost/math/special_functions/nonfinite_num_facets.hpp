@@ -22,7 +22,10 @@
 #include <ios>
 #include <limits>
 #include <locale>
-#include <boost/math/tools/throw_exception.hpp>
+
+#include <boost/version.hpp>
+#include <boost/throw_exception.hpp>
+
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/math/special_functions/sign.hpp>
 
@@ -101,7 +104,7 @@ namespace boost {
         case FP_INFINITE:
           if(flags_ & trap_infinity)
           {
-            BOOST_MATH_THROW_EXCEPTION(std::ios_base::failure("Infinity"));
+            BOOST_THROW_EXCEPTION(std::ios_base::failure("Infinity"));
           }
           else if((boost::math::signbit)(val))
           { // negative infinity.
@@ -120,7 +123,7 @@ namespace boost {
         case FP_NAN:
           if(flags_ & trap_nan)
           {
-            BOOST_MATH_THROW_EXCEPTION(std::ios_base::failure("NaN"));
+            BOOST_THROW_EXCEPTION(std::ios_base::failure("NaN"));
           }
           else if((boost::math::signbit)(val))
           { // negative so "-nan".
@@ -414,7 +417,7 @@ namespace boost {
         switch(peek_char(it, end, ct)) {
         case 'q':
         case 's':
-          if(flags_ & legacy)
+          if(flags_ && legacy)
             ++it;
           break;  // "nanq", "nans"
 

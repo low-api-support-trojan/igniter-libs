@@ -38,12 +38,12 @@ namespace boost { namespace fusion {
 #endif
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     namespace ext { namespace boost { namespace fusion {
         // In the current version of Boost.Fusion, `boost::fusion::tuple` is
         // basically an alias to `boost::fusion::vector`, hence the alias.
         using tuple_tag = vector_tag;
     }}}
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_EXT_BOOST_FUSION_TUPLE_HPP

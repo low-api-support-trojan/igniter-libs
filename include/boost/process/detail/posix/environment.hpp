@@ -56,7 +56,6 @@ public:
     {
         _buffer = _load();
         _impl = _load_var(_buffer);
-        _env_impl = _impl.data();
     }
 
     string_type get(const pointer_type id) { return get(string_type(id)); }
@@ -95,7 +94,7 @@ public:
     native_environment_impl & operator=(native_environment_impl && ) = default;
     native_handle_type _env_impl = _impl.data();
 
-    native_handle_type native_handle() const {return _env_impl;}
+    native_handle_type native_handle() const {return environ;}
 };
 
 template<>
@@ -231,7 +230,7 @@ template<typename Char>
 inline auto basic_environment_impl<Char>::get(const string_type &id) -> string_type
 {
     auto itr = std::find_if(_data.begin(), _data.end(), 
-            [&](const string_type & st) -> bool
+            [&](const string_type & st)
             {
                 if (st.size() <= id.size())
                     return false;
@@ -251,7 +250,7 @@ template<typename Char>
 inline void basic_environment_impl<Char>::set(const string_type &id, const string_type &value)
 {
     auto itr = std::find_if(_data.begin(), _data.end(), 
-        [&](const string_type & st) -> bool
+        [&](const string_type & st)
         {
             if (st.size() <= id.size())
                 return false;
@@ -271,7 +270,7 @@ template<typename Char>
 inline void  basic_environment_impl<Char>::reset(const string_type &id)
 {
     auto itr = std::find_if(_data.begin(), _data.end(), 
-        [&](const string_type & st) -> bool
+        [&](const string_type & st)
         {
             if (st.size() <= id.size())
                 return false;
@@ -295,11 +294,7 @@ std::vector<Char*> basic_environment_impl<Char>::_load_var(std::vector<std::basi
     ret.reserve(data.size() +1);
 
     for (auto & val : data)
-    {
-        if (val.empty())
-            val.push_back(0);
         ret.push_back(&val.front());
-    }
 
     ret.push_back(nullptr);
     return ret;

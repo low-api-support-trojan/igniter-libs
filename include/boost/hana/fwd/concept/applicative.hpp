@@ -13,7 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-concepts
     //! @defgroup group-Applicative Applicative
     //! The `Applicative` concept represents `Functor`s with the ability
@@ -112,6 +112,6 @@ namespace boost { namespace hana {
     //! [1]: https://wiki.haskell.org/Typeclassopedia#Applicative
     template <typename A>
     struct Applicative;
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_CONCEPT_APPLICATIVE_HPP

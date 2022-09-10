@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     // Note: This function is documented per datatype/concept only.
     //! @cond
     template <typename T, typename = void>
@@ -26,7 +26,7 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(Set&& set, Args&& ...args) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr erase_key_t erase_key{};
-}} // end namespace boost::hana
+    constexpr erase_key_t erase_key{};
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_ERASE_KEY_HPP

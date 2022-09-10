@@ -14,9 +14,6 @@
 #include <boost/beast/core/buffer_traits.hpp>
 #include <boost/beast/core/detail/service_base.hpp>
 #include <boost/beast/core/detail/is_invocable.hpp>
-#include <boost/asio/any_io_executor.hpp>
-#include <boost/asio/dispatch.hpp>
-#include <boost/asio/post.hpp>
 #include <mutex>
 #include <stdexcept>
 #include <vector>
@@ -27,25 +24,55 @@ namespace test {
 
 //------------------------------------------------------------------------------
 
-template<class Executor>
+struct stream::service_impl
+{
+    std::mutex m_;
+    std::vector<state*> v_;
+
+    BOOST_BEAST_DECL
+    void
+    remove(state& impl);
+};
+
+class stream::service
+    : public beast::detail::service_base<service>
+{
+    boost::shared_ptr<service_impl> sp_;
+
+    BOOST_BEAST_DECL
+    void
+    shutdown() override;
+
+public:
+    BOOST_BEAST_DECL
+    explicit
+    service(net::execution_context& ctx);
+
+    BOOST_BEAST_DECL
+    static
+    auto
+    make_impl(
+        net::io_context& ctx,
+        test::fail_count* fc) ->
+            boost::shared_ptr<state>;
+};
+
+//------------------------------------------------------------------------------
+
 template<class Handler, class Buffers>
-class basic_stream<Executor>::read_op : public detail::stream_read_op_base
+class stream::read_op : public stream::read_op_base
 {
     using ex1_type =
-        executor_type;
+        net::io_context::executor_type;
     using ex2_type
         = net::associated_executor_t<Handler, ex1_type>;
 
     struct lambda
     {
         Handler h_;
-        boost::weak_ptr<detail::stream_state> wp_;
+        boost::weak_ptr<state> wp_;
         Buffers b_;
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
-        net::any_io_executor wg2_;
-#else // defined(BOOST_ASIO_NO_TS_EXECUTORS)
         net::executor_work_guard<ex2_type> wg2_;
-#endif // defined(BOOST_ASIO_NO_TS_EXECUTORS)
 
         lambda(lambda&&) = default;
         lambda(lambda const&) = default;
@@ -53,28 +80,14 @@ class basic_stream<Executor>::read_op : public detail::stream_read_op_base
         template<class Handler_>
         lambda(
             Handler_&& h,
-            boost::shared_ptr<detail::stream_state> const& s,
+            boost::shared_ptr<state> const& s,
             Buffers const& b)
             : h_(std::forward<Handler_>(h))
             , wp_(s)
             , b_(b)
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
-            , wg2_(net::prefer(
-                net::get_associated_executor(
-                  h_, s->exec),
-                net::execution::outstanding_work.tracked))
-#else // defined(BOOST_ASIO_NO_TS_EXECUTORS)
             , wg2_(net::get_associated_executor(
-                h_, s->exec))
-#endif // defined(BOOST_ASIO_NO_TS_EXECUTORS)
+                h_, s->ioc.get_executor()))
         {
-        }
-
-        using allocator_type = net::associated_allocator_t<Handler>;
-
-        allocator_type get_allocator() const noexcept
-        {
-          return net::get_associated_allocator(h_);
         }
 
         void
@@ -102,59 +115,40 @@ class basic_stream<Executor>::read_op : public detail::stream_read_op_base
                 }
             }
 
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
-            net::dispatch(wg2_,
+            auto alloc = net::get_associated_allocator(h_);
+            wg2_.get_executor().dispatch(
                 beast::bind_front_handler(std::move(h_),
-                    ec, bytes_transferred));
-            wg2_ = net::any_io_executor(); // probably unnecessary
-#else // defined(BOOST_ASIO_NO_TS_EXECUTORS)
-            net::dispatch(wg2_.get_executor(),
-                beast::bind_front_handler(std::move(h_),
-                    ec, bytes_transferred));
+                    ec, bytes_transferred), alloc);
             wg2_.reset();
-#endif // defined(BOOST_ASIO_NO_TS_EXECUTORS)
         }
     };
 
     lambda fn_;
-#if defined(BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
-    net::executor_work_guard<net::any_io_executor> wg1_;
-#else
-    net::any_io_executor wg1_;
-#endif
+    net::executor_work_guard<ex1_type> wg1_;
 
 public:
     template<class Handler_>
     read_op(
         Handler_&& h,
-        boost::shared_ptr<detail::stream_state> const& s,
+        boost::shared_ptr<state> const& s,
         Buffers const& b)
         : fn_(std::forward<Handler_>(h), s, b)
-#if defined(BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
-        , wg1_(s->exec)
-#else
-        , wg1_(net::prefer(s->exec,
-            net::execution::outstanding_work.tracked))
-#endif
+        , wg1_(s->ioc.get_executor())
     {
     }
 
     void
     operator()(error_code ec) override
     {
-#if defined(BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
-        net::post(wg1_.get_executor(),
-            beast::bind_front_handler(std::move(fn_), ec));
+
+        auto alloc = net::get_associated_allocator(fn_.h_);
+        wg1_.get_executor().post(
+            beast::bind_front_handler(std::move(fn_), ec), alloc);
         wg1_.reset();
-#else
-        net::post(wg1_, beast::bind_front_handler(std::move(fn_), ec));
-        wg1_ = net::any_io_executor(); // probably unnecessary
-#endif
     }
 };
 
-template<class Executor>
-struct basic_stream<Executor>::run_read_op
+struct stream::run_read_op
 {
     template<
         class ReadHandler,
@@ -162,7 +156,7 @@ struct basic_stream<Executor>::run_read_op
     void
     operator()(
         ReadHandler&& h,
-        boost::shared_ptr<detail::stream_state> const& in,
+        boost::shared_ptr<state> const& in,
         MutableBufferSequence const& buffers)
     {
         // If you get an error on the following line it means
@@ -176,7 +170,7 @@ struct basic_stream<Executor>::run_read_op
 
         initiate_read(
             in,
-            std::unique_ptr<detail::stream_read_op_base>{
+            std::unique_ptr<read_op_base>{
             new read_op<
                 typename std::decay<ReadHandler>::type,
                 MutableBufferSequence>(
@@ -187,8 +181,7 @@ struct basic_stream<Executor>::run_read_op
     }
 };
 
-template<class Executor>
-struct basic_stream<Executor>::run_write_op
+struct stream::run_write_op
 {
     template<
         class WriteHandler,
@@ -196,8 +189,8 @@ struct basic_stream<Executor>::run_write_op
     void
     operator()(
         WriteHandler&& h,
-        boost::shared_ptr<detail::stream_state> in_,
-        boost::weak_ptr<detail::stream_state> out_,
+        boost::shared_ptr<state> in_,
+        boost::weak_ptr<state> out_,
         ConstBufferSequence const& buffers)
     {
         // If you get an error on the following line it means
@@ -213,7 +206,7 @@ struct basic_stream<Executor>::run_write_op
         auto const upcall = [&](error_code ec, std::size_t n)
         {
             net::post(
-                in_->exec,
+                in_->ioc.get_executor(),
                 beast::bind_front_handler(std::move(h), ec, n));
         };
 
@@ -249,10 +242,9 @@ struct basic_stream<Executor>::run_write_op
 
 //------------------------------------------------------------------------------
 
-template<class Executor>
 template<class MutableBufferSequence>
 std::size_t
-basic_stream<Executor>::
+stream::
 read_some(MutableBufferSequence const& buffers)
 {
     static_assert(net::is_mutable_buffer_sequence<
@@ -265,10 +257,9 @@ read_some(MutableBufferSequence const& buffers)
     return n;
 }
 
-template<class Executor>
 template<class MutableBufferSequence>
 std::size_t
-basic_stream<Executor>::
+stream::
 read_some(MutableBufferSequence const& buffers,
     error_code& ec)
 {
@@ -296,7 +287,7 @@ read_some(MutableBufferSequence const& buffers,
         {
             return
                 in_->b.size() > 0 ||
-                in_->code != detail::stream_status::ok;
+                in_->code != status::ok;
         });
 
     // deliver bytes before eof
@@ -310,16 +301,14 @@ read_some(MutableBufferSequence const& buffers,
     }
 
     // deliver error
-    BOOST_ASSERT(in_->code != detail::stream_status::ok);
+    BOOST_ASSERT(in_->code != status::ok);
     ec = net::error::eof;
     return 0;
 }
 
-template<class Executor>
-template<class MutableBufferSequence,
-    BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) ReadHandler>
-BOOST_ASIO_INITFN_RESULT_TYPE(ReadHandler, void(error_code, std::size_t))
-basic_stream<Executor>::
+template<class MutableBufferSequence, class ReadHandler>
+BOOST_BEAST_ASYNC_RESULT2(ReadHandler)
+stream::
 async_read_some(
     MutableBufferSequence const& buffers,
     ReadHandler&& handler)
@@ -337,10 +326,9 @@ async_read_some(
             buffers);
 }
 
-template<class Executor>
 template<class ConstBufferSequence>
 std::size_t
-basic_stream<Executor>::
+stream::
 write_some(ConstBufferSequence const& buffers)
 {
     static_assert(net::is_const_buffer_sequence<
@@ -354,10 +342,9 @@ write_some(ConstBufferSequence const& buffers)
     return bytes_transferred;
 }
 
-template<class Executor>
 template<class ConstBufferSequence>
 std::size_t
-basic_stream<Executor>::
+stream::
 write_some(
     ConstBufferSequence const& buffers, error_code& ec)
 {
@@ -399,11 +386,9 @@ write_some(
     return n;
 }
 
-template<class Executor>
-template<class ConstBufferSequence,
-    BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) WriteHandler>
-BOOST_ASIO_INITFN_RESULT_TYPE(WriteHandler, void(error_code, std::size_t))
-basic_stream<Executor>::
+template<class ConstBufferSequence, class WriteHandler>
+BOOST_BEAST_ASYNC_RESULT2(WriteHandler)
+stream::
 async_write_some(
     ConstBufferSequence const& buffers,
     WriteHandler&& handler)
@@ -424,11 +409,11 @@ async_write_some(
 
 //------------------------------------------------------------------------------
 
-template<class Executor, class TeardownHandler>
+template<class TeardownHandler>
 void
 async_teardown(
     role_type,
-    basic_stream<Executor>& s,
+    stream& s,
     TeardownHandler&& handler)
 {
     error_code ec;
@@ -453,8 +438,8 @@ async_teardown(
 
 //------------------------------------------------------------------------------
 
-template<class Executor, class Arg1, class... ArgN>
-basic_stream<Executor>
+template<class Arg1, class... ArgN>
+stream
 connect(stream& to, Arg1&& arg1, ArgN&&... argn)
 {
     stream from{
@@ -462,34 +447,6 @@ connect(stream& to, Arg1&& arg1, ArgN&&... argn)
         std::forward<ArgN>(argn)...};
     from.connect(to);
     return from;
-}
-
-namespace detail
-{
-template<class To>
-struct extract_executor_op
-{
-    To operator()(net::any_io_executor& ex) const
-    {
-        assert(ex.template target<To>());
-        return *ex.template target<To>();
-    }
-};
-
-template<>
-struct extract_executor_op<net::any_io_executor>
-{
-    net::any_io_executor operator()(net::any_io_executor& ex) const
-    {
-        return ex;
-    }
-};
-}
-
-template<class Executor>
-auto basic_stream<Executor>::get_executor() noexcept -> executor_type
-{
-    return detail::extract_executor_op<Executor>()(in_->exec);
 }
 
 } // test

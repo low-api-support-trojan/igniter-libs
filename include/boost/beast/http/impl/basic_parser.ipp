@@ -50,7 +50,9 @@ basic_parser<isRequest>::
 content_length() const
 {
     BOOST_ASSERT(is_header_done());
-    return content_length_unchecked();
+    if(! (f_ & flagContentLength))
+        return boost::none;
+    return len0_;
 }
 
 template<bool isRequest>
@@ -82,17 +84,7 @@ basic_parser<isRequest>::
 put(net::const_buffer buffer,
     error_code& ec)
 {
-    // If this goes off you have tried to parse more data after the parser
-    // has completed. A common cause of this is re-using a parser, which is
-    // not supported. If you need to re-use a parser, consider storing it
-    // in an optional. Then reset() and emplace() prior to parsing each new
-    // message.
-    BOOST_ASSERT(!is_done());
-    if (is_done())
-    {
-        ec = error::stale_parser;
-        return 0;
-    }
+    BOOST_ASSERT(state_ != state::complete);
     auto p = static_cast<char const*>(buffer.data());
     auto n = buffer.size();
     auto const p0 = p;
@@ -164,8 +156,6 @@ loop:
             goto done;
         }
         finish_header(ec, is_request{});
-        if(ec)
-            goto done;
         break;
 
     case state::body0:
@@ -459,8 +449,7 @@ finish_header(error_code& ec, std::true_type)
     }
     else if(f_ & flagContentLength)
     {
-        if(body_limit_.has_value() &&
-           len_ > body_limit_)
+        if(len_ > body_limit_)
         {
             ec = error::body_limit;
             return;
@@ -524,8 +513,7 @@ finish_header(error_code& ec, std::false_type)
             f_ |= flagHasBody;
             state_ = state::body0;
 
-            if(body_limit_.has_value() &&
-               len_ > body_limit_)
+            if(len_ > body_limit_)
             {
                 ec = error::body_limit;
                 return;
@@ -587,15 +575,12 @@ basic_parser<isRequest>::
 parse_body_to_eof(char const*& p,
     std::size_t n, error_code& ec)
 {
-    if(body_limit_.has_value())
+    if(n > body_limit_)
     {
-        if (n > *body_limit_)
-        {
-            ec = error::body_limit;
-            return;
-        }
-        *body_limit_ -= n;
+        ec = error::body_limit;
+        return;
     }
+    body_limit_ = body_limit_ - n;
     ec = {};
     n = this->on_body_impl(string_view{p, n}, ec);
     p += n;
@@ -665,15 +650,12 @@ parse_chunk_header(char const*& p0,
         }
         if(size != 0)
         {
-            if (body_limit_.has_value())
+            if(size > body_limit_)
             {
-                if (size > *body_limit_)
-                {
-                    ec = error::body_limit;
-                    return;
-                }
-                *body_limit_ -= size;
+                ec = error::body_limit;
+                return;
             }
+            body_limit_ -= size;
             auto const start = p;
             parse_chunk_extensions(p, pend, ec);
             if(ec)
@@ -804,48 +786,30 @@ do_field(field f,
     // Content-Length
     if(f == field::content_length)
     {
-        auto bad_content_length = [&ec]
+        if(f_ & flagContentLength)
         {
+            // duplicate
             ec = error::bad_content_length;
-        };
-
-        // conflicting field
-        if(f_ & flagChunked)
-            return bad_content_length();
-
-        // Content-length may be a comma-separated list of integers
-        auto tokens_unprocessed = 1 +
-            std::count(value.begin(), value.end(), ',');
-        auto tokens = opt_token_list(value);
-        if (tokens.begin() == tokens.end() ||
-            !validate_list(tokens))
-                return bad_content_length();
-
-        auto existing = this->content_length_unchecked();
-        for (auto tok : tokens)
-        {
-            std::uint64_t v;
-            if (!parse_dec(tok, v))
-                return bad_content_length();
-            --tokens_unprocessed;
-            if (existing.has_value())
-            {
-                if (v != *existing)
-                    return bad_content_length();
-            }
-            else
-            {
-                existing = v;
-            }
+            return;
         }
 
-        if (tokens_unprocessed)
-            return bad_content_length();
+        if(f_ & flagChunked)
+        {
+            // conflicting field
+            ec = error::bad_content_length;
+            return;
+        }
 
-        BOOST_ASSERT(existing.has_value());
+        std::uint64_t v;
+        if(! parse_dec(value, v))
+        {
+            ec = error::bad_content_length;
+            return;
+        }
+
         ec = {};
-        len_ = *existing;
-        len0_ = *existing;
+        len_ = v;
+        len0_ = v;
         f_ |= flagContentLength;
         return;
     }

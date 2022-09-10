@@ -12,8 +12,6 @@
 #include <boost/histogram/axis/iterator.hpp>
 #include <boost/histogram/axis/metadata_base.hpp>
 #include <boost/histogram/axis/option.hpp>
-#include <boost/histogram/detail/detect.hpp>
-#include <boost/histogram/detail/relaxed_equal.hpp>
 #include <boost/histogram/fwd.hpp>
 #include <boost/throw_exception.hpp>
 #include <stdexcept>
@@ -44,11 +42,9 @@ namespace axis {
 */
 template <class Value, class MetaData, class Options, class Allocator>
 class category : public iterator_mixin<category<Value, MetaData, Options, Allocator>>,
-                 public metadata_base_t<MetaData> {
-  // these must be private, so that they are not automatically inherited
+                 public metadata_base<MetaData> {
   using value_type = Value;
-  using metadata_base = metadata_base_t<MetaData>;
-  using metadata_type = typename metadata_base::metadata_type;
+  using metadata_type = typename metadata_base<MetaData>::metadata_type;
   using options_type = detail::replace_default<Options, option::overflow_t>;
   using allocator_type = Allocator;
   using vector_type = std::vector<value_type, allocator_type>;
@@ -74,7 +70,7 @@ public:
    */
   template <class It, class = detail::requires_iterator<It>>
   category(It begin, It end, metadata_type meta = {}, allocator_type alloc = {})
-      : metadata_base(std::move(meta)), vec_(alloc) {
+      : metadata_base<MetaData>(std::move(meta)), vec_(alloc) {
     if (std::distance(begin, end) < 0)
       BOOST_THROW_EXCEPTION(
           std::invalid_argument("end must be reachable by incrementing begin"));
@@ -104,17 +100,6 @@ public:
            allocator_type alloc = {})
       : category(list.begin(), list.end(), std::move(meta), std::move(alloc)) {}
 
-  /// Constructor used by algorithm::reduce to shrink and rebin (not for users).
-  category(const category& src, index_type begin, index_type end, unsigned merge)
-      // LCOV_EXCL_START: gcc-8 is missing the delegated ctor for no reason
-      : category(src.vec_.begin() + begin, src.vec_.begin() + end, src.metadata(),
-                 src.get_allocator())
-  // LCOV_EXCL_STOP
-  {
-    if (merge > 1)
-      BOOST_THROW_EXCEPTION(std::invalid_argument("cannot merge bins for category axis"));
-  }
-
   /// Return index for value argument.
   index_type index(const value_type& x) const noexcept {
     const auto beg = vec_.begin();
@@ -123,11 +108,11 @@ public:
   }
 
   /// Returns index and shift (if axis has grown) for the passed argument.
-  std::pair<index_type, index_type> update(const value_type& x) {
+  auto update(const value_type& x) {
     const auto i = index(x);
-    if (i < size()) return {i, 0};
+    if (i < size()) return std::make_pair(i, 0);
     vec_.emplace_back(x);
-    return {i, -1};
+    return std::make_pair(i, -1);
   }
 
   /// Return value for index argument.
@@ -140,8 +125,8 @@ public:
     return vec_[idx];
   }
 
-  /// Return value for index argument; alias for value(...).
-  decltype(auto) bin(index_type idx) const { return value(idx); }
+  /// Return value for index argument.
+  decltype(auto) bin(index_type idx) const noexcept { return value(idx); }
 
   /// Returns the number of bins, without over- or underflow.
   index_type size() const noexcept { return static_cast<index_type>(vec_.size()); }
@@ -154,15 +139,12 @@ public:
     return options() & (option::overflow | option::growth);
   }
 
-  /// Indicate that the axis is not ordered.
-  static constexpr bool ordered() noexcept { return false; }
-
   template <class V, class M, class O, class A>
   bool operator==(const category<V, M, O, A>& o) const noexcept {
     const auto& a = vec_;
     const auto& b = o.vec_;
-    return std::equal(a.begin(), a.end(), b.begin(), b.end(), detail::relaxed_equal{}) &&
-           detail::relaxed_equal{}(this->metadata(), o.metadata());
+    return std::equal(a.begin(), a.end(), b.begin(), b.end()) &&
+           metadata_base<MetaData>::operator==(o);
   }
 
   template <class V, class M, class O, class A>
@@ -170,7 +152,7 @@ public:
     return !operator==(o);
   }
 
-  allocator_type get_allocator() const { return vec_.get_allocator(); }
+  auto get_allocator() const { return vec_.get_allocator(); }
 
   template <class Archive>
   void serialize(Archive& ar, unsigned /* version */) {

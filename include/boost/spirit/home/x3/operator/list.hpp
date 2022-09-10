@@ -20,8 +20,9 @@ namespace boost { namespace spirit { namespace x3
     {
         typedef binary_parser<Left, Right, list<Left, Right>> base_type;
         static bool const handles_container = true;
+        static bool const has_attribute = true;
 
-        constexpr list(Left const& left, Right const& right)
+        list(Left const& left, Right const& right)
           : base_type(left, right) {}
 
         template <typename Iterator, typename Context
@@ -47,7 +48,7 @@ namespace boost { namespace spirit { namespace x3
     };
 
     template <typename Left, typename Right>
-    constexpr list<
+    inline list<
         typename extension::as_parser<Left>::value_type
       , typename extension::as_parser<Right>::value_type>
     operator%(Left const& left, Right const& right)
@@ -62,10 +63,6 @@ namespace boost { namespace spirit { namespace x3 { namespace traits
     struct attribute_of<x3::list<Left, Right>, Context>
         : traits::build_container<
             typename attribute_of<Left, Context>::type> {};
-
-    template <typename Left, typename Right, typename Context>
-    struct has_attribute<x3::list<Left, Right>, Context>
-        : has_attribute<Left, Context> {};
 }}}}
 
 #endif

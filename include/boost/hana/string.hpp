@@ -46,7 +46,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <type_traits>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //////////////////////////////////////////////////////////////////////////
     // string<>
     //////////////////////////////////////////////////////////////////////////
@@ -117,7 +117,7 @@ namespace boost { namespace hana {
         constexpr auto operator"" _s() {
             static_assert(std::is_same<CharT, char>::value,
             "hana::string: Only narrow string literals are supported with "
-            "the _s string literal right now. See https://github.com/boostorg/hana/issues/80 "
+            "the _s string literal right now. See https://goo.gl/fBbKD7 "
             "if you need support for fancier types of compile-time strings.");
             return hana::string_c<s...>;
         }
@@ -344,6 +344,6 @@ namespace boost { namespace hana {
             return hana::type_c<String>;
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_STRING_HPP

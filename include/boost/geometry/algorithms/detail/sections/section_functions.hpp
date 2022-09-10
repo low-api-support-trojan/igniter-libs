@@ -2,8 +2,9 @@
 
 // Copyright (c) 2015 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2015-2021.
-// Modifications copyright (c) 2015-2021, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2015, 2017, 2018.
+// Modifications copyright (c) 2015-2018, Oracle and/or its affiliates.
+
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -13,8 +14,8 @@
 #ifndef BOOST_GEOMETRY_ALGORITHMS_DETAIL_SECTIONS_FUNCTIONS_HPP
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_SECTIONS_FUNCTIONS_HPP
 
+
 #include <boost/geometry/core/access.hpp>
-#include <boost/geometry/core/coordinate_type.hpp>
 #include <boost/geometry/algorithms/detail/recalculate.hpp>
 #include <boost/geometry/policies/robustness/robust_point_type.hpp>
 
@@ -121,40 +122,34 @@ template
 <
     std::size_t Dimension,
     typename Point,
-    typename Box,
+    typename RobustBox,
     typename RobustPolicy
 >
 static inline bool preceding(int dir,
                              Point const& point,
-                             Box const& point_box,
-                             Box const& other_box,
+                             RobustBox const& point_robust_box,
+                             RobustBox const& other_robust_box,
                              RobustPolicy const& robust_policy)
 {
     typename geometry::robust_point_type<Point, RobustPolicy>::type robust_point;
     geometry::recalculate(robust_point, point, robust_policy);
-
-    // After recalculate() to prevent warning: 'robust_point' may be used uninitialized
-    assert_coordinate_type_equal(robust_point, point_box);
-
-    return preceding_check<Dimension, Box>::apply(dir, robust_point,
-                                                    point_box,
-                                                    other_box);
+    return preceding_check<Dimension, Point>::apply(dir, robust_point, point_robust_box, other_robust_box);
 }
 
 template
 <
     std::size_t Dimension,
     typename Point,
-    typename Box,
+    typename RobustBox,
     typename RobustPolicy
 >
 static inline bool exceeding(int dir,
                              Point const& point,
-                             Box const& point_box,
-                             Box const& other_box,
+                             RobustBox const& point_robust_box,
+                             RobustBox const& other_robust_box,
                              RobustPolicy const& robust_policy)
 {
-    return preceding<Dimension>(-dir, point, point_box, other_box, robust_policy);
+    return preceding<Dimension>(-dir, point, point_robust_box, other_robust_box, robust_policy);
 }
 
 

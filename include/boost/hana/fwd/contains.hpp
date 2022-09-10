@@ -16,7 +16,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/functional/infix.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns whether the key occurs in the structure.
     //! @ingroup group-Searchable
     //!
@@ -51,7 +51,7 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Key&& key) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr auto contains = hana::infix(contains_t{});
+    constexpr auto contains = hana::infix(contains_t{});
 #endif
 
     //! Return whether the key occurs in the structure.
@@ -67,7 +67,7 @@ namespace boost { namespace hana {
     //! Example
     //! -------
     //! @include example/in.cpp
-    BOOST_HANA_INLINE_VARIABLE constexpr auto in = hana::infix(hana::flip(hana::contains));
-}} // end namespace boost::hana
+    constexpr auto in = hana::infix(hana::flip(hana::contains));
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_CONTAINS_HPP

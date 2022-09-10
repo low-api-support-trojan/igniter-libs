@@ -6,7 +6,6 @@
 #ifndef BOOST_MATH_SPECIAL_GEGENBAUER_HPP
 #define BOOST_MATH_SPECIAL_GEGENBAUER_HPP
 
-#include <limits>
 #include <stdexcept>
 #include <type_traits>
 

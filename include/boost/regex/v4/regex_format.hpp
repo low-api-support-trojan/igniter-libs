@@ -90,10 +90,6 @@ struct trivial_format_traits
    }
 };
 
-#ifdef BOOST_MSVC
-#  pragma warning(push)
-#pragma warning(disable:26812)
-#endif
 template <class OutputIterator, class Results, class traits, class ForwardIter>
 class basic_regex_formatter
 {
@@ -207,9 +203,6 @@ private:
    basic_regex_formatter(const basic_regex_formatter&);
    basic_regex_formatter& operator=(const basic_regex_formatter&);
 };
-#ifdef BOOST_MSVC
-#  pragma warning(pop)
-#endif
 
 template <class OutputIterator, class Results, class traits, class ForwardIter>
 OutputIterator basic_regex_formatter<OutputIterator, Results, traits, ForwardIter>::format(ForwardIter p1, ForwardIter p2, match_flag_type f)
@@ -251,7 +244,7 @@ void basic_regex_formatter<OutputIterator, Results, traits, ForwardIter>::format
             m_have_conditional = have_conditional;
             if(m_position == m_end)
                return;
-            BOOST_REGEX_ASSERT(*m_position == static_cast<char_type>(')'));
+            BOOST_ASSERT(*m_position == static_cast<char_type>(')'));
             ++m_position;  // skip the closing ')'
             break;
          }
@@ -307,7 +300,7 @@ void basic_regex_formatter<OutputIterator, Results, traits, ForwardIter>::format
    // On entry *m_position points to a '$' character
    // output the information that goes with it:
    //
-   BOOST_REGEX_ASSERT(*m_position == '$');
+   BOOST_ASSERT(*m_position == '$');
    //
    // see if this is a trailing '$':
    //
@@ -656,7 +649,7 @@ void basic_regex_formatter<OutputIterator, Results, traits, ForwardIter>::format
          len = ::boost::BOOST_REGEX_DETAIL_NS::distance(m_position, m_end);
          len = (std::min)(static_cast<std::ptrdiff_t>(4), len);
          v = this->toi(m_position, m_position + len, 8);
-         BOOST_REGEX_ASSERT(v >= 0);
+         BOOST_ASSERT(v >= 0);
          put(static_cast<char_type>(v));
          break;
       }

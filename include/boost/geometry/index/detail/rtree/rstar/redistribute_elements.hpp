@@ -4,8 +4,8 @@
 //
 // Copyright (c) 2011-2017 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2019-2020.
-// Modifications copyright (c) 2019-2020 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2019.
+// Modifications copyright (c) 2019 Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -16,8 +16,6 @@
 #define BOOST_GEOMETRY_INDEX_DETAIL_RTREE_RSTAR_REDISTRIBUTE_ELEMENTS_HPP
 
 #include <boost/core/ignore_unused.hpp>
-
-#include <boost/geometry/core/static_assert.hpp>
 
 #include <boost/geometry/index/detail/algorithms/intersection_content.hpp>
 #include <boost/geometry/index/detail/algorithms/margin.hpp>
@@ -190,7 +188,7 @@ struct choose_split_axis_and_index_for_corner
 //template <typename Box, size_t AxisIndex, typename ElementIndexableTag>
 //struct choose_split_axis_and_index_for_axis
 //{
-//    BOOST_GEOMETRY_STATIC_ASSERT_FALSE("Not implemented for this Tag type.", ElementIndexableTag);
+//    BOOST_MPL_ASSERT_MSG(false, NOT_IMPLEMENTED_FOR_THIS_TAG, (ElementIndexableTag));
 //};
 
 template <typename Box, size_t AxisIndex, typename ElementIndexableTag>
@@ -399,32 +397,29 @@ struct nth_element<Corner, Dimension, Dimension>
 
 } // namespace rstar
 
-template <typename MembersHolder>
-struct redistribute_elements<MembersHolder, rstar_tag>
+template <typename Value, typename Options, typename Translator, typename Box, typename Allocators>
+struct redistribute_elements<Value, Options, Translator, Box, Allocators, rstar_tag>
 {
-    typedef typename MembersHolder::box_type box_type;
-    typedef typename MembersHolder::parameters_type parameters_type;
-    typedef typename MembersHolder::translator_type translator_type;
-    typedef typename MembersHolder::allocators_type allocators_type;
+    typedef typename rtree::node<Value, typename Options::parameters_type, Box, Allocators, typename Options::node_tag>::type node;
+    typedef typename rtree::internal_node<Value, typename Options::parameters_type, Box, Allocators, typename Options::node_tag>::type internal_node;
+    typedef typename rtree::leaf<Value, typename Options::parameters_type, Box, Allocators, typename Options::node_tag>::type leaf;
 
-    typedef typename MembersHolder::node node;
-    typedef typename MembersHolder::internal_node internal_node;
-    typedef typename MembersHolder::leaf leaf;
+    typedef typename Options::parameters_type parameters_type;
 
-    static const size_t dimension = geometry::dimension<box_type>::value;
+    static const size_t dimension = geometry::dimension<Box>::value;
 
-    typedef typename index::detail::default_margin_result<box_type>::type margin_type;
-    typedef typename index::detail::default_content_result<box_type>::type content_type;
+    typedef typename index::detail::default_margin_result<Box>::type margin_type;
+    typedef typename index::detail::default_content_result<Box>::type content_type;
 
     template <typename Node>
     static inline void apply(
         Node & n,
         Node & second_node,
-        box_type & box1,
-        box_type & box2,
+        Box & box1,
+        Box & box2,
         parameters_type const& parameters,
-        translator_type const& translator,
-        allocators_type & allocators)
+        Translator const& translator,
+        Allocators & allocators)
     {
         typedef typename rtree::elements_type<Node>::type elements_type;
         typedef typename elements_type::value_type element_type;
@@ -451,7 +446,7 @@ struct redistribute_elements<MembersHolder, rstar_tag>
         //       and again, the same below calling partial_sort/nth_element
         //       It would be even possible to not re-sort/find nth_element if the axis/corner
         //       was found for the last sorting - last combination of axis/corner
-        rstar::choose_split_axis_and_index<box_type, dimension>
+        rstar::choose_split_axis_and_index<Box, dimension>
             ::apply(elements_copy,
                     split_axis, split_corner, split_index,
                     smallest_sum_of_margins, smallest_overlap, smallest_content,
@@ -484,10 +479,10 @@ struct redistribute_elements<MembersHolder, rstar_tag>
             elements2.assign(elements_copy.begin() + split_index, elements_copy.end());                 // MAY THROW, BASIC
 
             // calculate boxes
-            box1 = rtree::elements_box<box_type>(elements1.begin(), elements1.end(),
-                                                 translator, strategy);
-            box2 = rtree::elements_box<box_type>(elements2.begin(), elements2.end(),
-                                                 translator, strategy);
+            box1 = rtree::elements_box<Box>(elements1.begin(), elements1.end(),
+                                            translator, strategy);
+            box2 = rtree::elements_box<Box>(elements2.begin(), elements2.end(),
+                                            translator, strategy);
         }
         BOOST_CATCH(...)
         {
@@ -495,7 +490,7 @@ struct redistribute_elements<MembersHolder, rstar_tag>
             elements1.clear();
             elements2.clear();
 
-            rtree::destroy_elements<MembersHolder>::apply(elements_backup, allocators);
+            rtree::destroy_elements<Value, Options, Translator, Box, Allocators>::apply(elements_backup, allocators);
             //elements_backup.clear();
 
             BOOST_RETHROW                                                                                 // RETHROW, BASIC

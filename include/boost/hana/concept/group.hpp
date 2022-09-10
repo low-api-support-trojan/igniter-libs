@@ -20,7 +20,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/negate.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     template <typename G>
     struct Group
         : hana::integral_constant<bool,
@@ -29,6 +29,6 @@ namespace boost { namespace hana {
                                    typename tag_of<G>::type>>::value
         >
     { };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_CONCEPT_GROUP_HPP

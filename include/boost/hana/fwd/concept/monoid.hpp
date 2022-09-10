@@ -13,7 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-concepts
     //! @defgroup group-Monoid Monoid
     //! The `Monoid` concept represents data types with an associative
@@ -96,6 +96,6 @@ namespace boost { namespace hana {
     //! [2]: http://en.wikipedia.org/wiki/Monoid#Monoid_homomorphisms
     template <typename M>
     struct Monoid;
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_CONCEPT_MONOID_HPP

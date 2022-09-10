@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/fwd/length.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Equivalent to `length`; provided for consistency with the
     //! standard library.
     //! @ingroup group-Foldable
@@ -27,7 +27,7 @@ namespace boost { namespace hana {
     //! Example
     //! -------
     //! @include example/size.cpp
-    BOOST_HANA_INLINE_VARIABLE constexpr auto size = hana::length;
-}} // end namespace boost::hana
+    constexpr auto size = hana::length;
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_SIZE_HPP

@@ -17,7 +17,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/detail/integral_constant.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     namespace detail {
         template <typename F, typename Tag = typename tag_of<F>::type>
         struct metafunction_dispatch
@@ -36,6 +36,6 @@ namespace boost { namespace hana {
     struct Metafunction
         : detail::metafunction_dispatch<F>
     { };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_CONCEPT_METAFUNCTION_HPP

@@ -113,9 +113,7 @@ public:
 
     ~writer_backend()
     {
-        // JPEG compression object destruction does not signal errors,
-        // unlike jpeg_finish_compress called elsewhere,
-        // so there is no need for the setjmp bookmark here.
+        jpeg_finish_compress ( get() );
         jpeg_destroy_compress( get() );
     }
 

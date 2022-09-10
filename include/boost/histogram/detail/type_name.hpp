@@ -21,7 +21,7 @@ std::string type_name_impl(boost::type<T>) {
 }
 
 template <class T>
-std::string type_name_impl(boost::type<T const>) {
+std::string type_name_impl(boost::type<const T>) {
   return type_name_impl(boost::type<T>{}) + " const";
 }
 

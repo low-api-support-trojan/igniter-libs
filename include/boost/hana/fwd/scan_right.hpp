@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Fold a Sequence to the right and return a list containing the
     //! successive reduction states.
     //! @ingroup group-Sequence
@@ -98,8 +98,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, F const& f) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr scan_right_t scan_right{};
+    constexpr scan_right_t scan_right{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_SCAN_RIGHT_HPP

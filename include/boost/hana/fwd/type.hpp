@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/fwd/core/make.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Base class of `hana::type`; used for pattern-matching.
     //! @relates hana::type
     //!
@@ -125,7 +125,7 @@ namespace boost { namespace hana {
     //! Creates an object representing the C++ type `T`.
     //! @relates hana::type
     template <typename T>
-    BOOST_HANA_INLINE_VARIABLE constexpr type<T> type_c{};
+    constexpr type<T> type_c{};
 
     //! `decltype` keyword, lifted to Hana.
     //! @relates hana::type
@@ -194,7 +194,7 @@ namespace boost { namespace hana {
         constexpr auto operator()(T&&) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr decltype_t decltype_{};
+    constexpr decltype_t decltype_{};
 #endif
 
     //! Returns a `hana::type` representing the type of a given object.
@@ -237,7 +237,7 @@ namespace boost { namespace hana {
         constexpr auto operator()(T&&) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr typeid_t typeid_{};
+    constexpr typeid_t typeid_{};
 #endif
 
 #ifdef BOOST_HANA_DOXYGEN_INVOKED
@@ -259,7 +259,7 @@ namespace boost { namespace hana {
     //! Example
     //! -------
     //! @include example/type/make.cpp
-    BOOST_HANA_INLINE_VARIABLE constexpr auto make_type = hana::make<type_tag>;
+    constexpr auto make_type = hana::make<type_tag>;
 
     //! `sizeof` keyword, lifted to Hana.
     //! @relates hana::type
@@ -297,7 +297,7 @@ namespace boost { namespace hana {
         constexpr auto operator()(T&&) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr sizeof_t sizeof_{};
+    constexpr sizeof_t sizeof_{};
 #endif
 
     //! `alignof` keyword, lifted to Hana.
@@ -333,7 +333,7 @@ namespace boost { namespace hana {
         constexpr auto operator()(T&&) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr alignof_t alignof_{};
+    constexpr alignof_t alignof_{};
 #endif
 
     //! Checks whether a SFINAE-friendly expression is valid.
@@ -380,7 +380,7 @@ namespace boost { namespace hana {
         constexpr auto operator()(F&&, Args&&...) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr is_valid_t is_valid{};
+    constexpr is_valid_t is_valid{};
 #endif
 
     //! Lift a template to a Metafunction.
@@ -411,7 +411,7 @@ namespace boost { namespace hana {
     struct template_t;
 
     template <template <typename ...> class F>
-    BOOST_HANA_INLINE_VARIABLE constexpr template_t<F> template_{};
+    constexpr template_t<F> template_{};
 #endif
 
     //! Lift a MPL-style metafunction to a Metafunction.
@@ -442,7 +442,7 @@ namespace boost { namespace hana {
     struct metafunction_t;
 
     template <template <typename ...> class f>
-    BOOST_HANA_INLINE_VARIABLE constexpr metafunction_t<f> metafunction{};
+    constexpr metafunction_t<f> metafunction{};
 #endif
 
     //! Lift a MPL-style metafunction class to a Metafunction.
@@ -473,7 +473,7 @@ namespace boost { namespace hana {
     struct metafunction_class_t;
 
     template <typename F>
-    BOOST_HANA_INLINE_VARIABLE constexpr metafunction_class_t<F> metafunction_class{};
+    constexpr metafunction_class_t<F> metafunction_class{};
 #endif
 
     //! Turn a `Metafunction` into a function taking `type`s and returning a
@@ -525,7 +525,7 @@ namespace boost { namespace hana {
         { return {}; }
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr make_integral_t integral{};
+    constexpr make_integral_t integral{};
 #endif
 
     //! Alias to `integral(metafunction<F>)`, provided for convenience.
@@ -536,7 +536,7 @@ namespace boost { namespace hana {
     //! -------
     //! @include example/type/trait.cpp
     template <template <typename ...> class F>
-    BOOST_HANA_INLINE_VARIABLE constexpr auto trait = hana::integral(hana::metafunction<F>);
-}} // end namespace boost::hana
+    constexpr auto trait = hana::integral(hana::metafunction<F>);
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_TYPE_HPP

@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Dual operation to `fold_left` for sequences.
     //! @ingroup group-Sequence
     //!
@@ -78,8 +78,8 @@ namespace boost { namespace hana {
     struct unfold_left_t;
 
     template <typename S>
-    BOOST_HANA_INLINE_VARIABLE constexpr unfold_left_t<S> unfold_left{};
+    constexpr unfold_left_t<S> unfold_left{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_UNFOLD_LEFT_HPP

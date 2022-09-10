@@ -18,7 +18,7 @@
 #include <type_traits>
 
 #if BOOST_WORKAROUND(BOOST_MSVC, < 1910)
-#include <boost/type_traits/is_convertible.hpp>
+#include <boost/type_traits.hpp>
 #endif
 
 namespace boost {

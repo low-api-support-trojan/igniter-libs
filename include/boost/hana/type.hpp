@@ -27,7 +27,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //////////////////////////////////////////////////////////////////////////
     // basic_type
     //////////////////////////////////////////////////////////////////////////
@@ -279,6 +279,6 @@ namespace boost { namespace hana {
         static constexpr T apply(T const& t)
         { return t; }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_TYPE_HPP

@@ -95,7 +95,7 @@ template<typename Char>
 struct char_class_impl;
 
 
-#if defined(__QNXNTO__) || defined(__VXWORKS__)
+#if defined(__QNXNTO__)
 
 ///////////////////////////////////////////////////////////////////////////////
 //

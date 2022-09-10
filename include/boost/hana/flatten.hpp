@@ -25,7 +25,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs>
     constexpr auto flatten_t::operator()(Xs&& xs) const {
@@ -57,6 +57,6 @@ namespace boost { namespace hana {
             return detail::unpack_flatten(static_cast<Xs&&>(xs), hana::make<S>);
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FLATTEN_HPP

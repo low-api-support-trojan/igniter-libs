@@ -15,10 +15,8 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 #include <boost/hana/core/when.hpp>
 
-#include <type_traits>
 
-
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename T, typename>
     struct tag_of : tag_of<T, when<true>> { };
@@ -46,14 +44,6 @@ namespace boost { namespace hana {
     template <typename T> struct tag_of<T const volatile> : tag_of<T> { };
     template <typename T> struct tag_of<T&> : tag_of<T> { };
     template <typename T> struct tag_of<T&&> : tag_of<T> { };
-
-    namespace detail {
-        template <typename T>
-        struct has_idempotent_tag
-            : std::is_same<hana::tag_of_t<T>,
-                           std::remove_const_t<std::remove_reference_t<T>>>
-        { };
-    }
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_CORE_TAG_OF_HPP

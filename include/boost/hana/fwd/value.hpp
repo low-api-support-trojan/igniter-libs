@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Return the compile-time value associated to a constant.
     //! @ingroup group-Constant
     //!
@@ -93,8 +93,8 @@ namespace boost { namespace hana {
         { return hana::value<T>(); }
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr value_of_t value_of{};
+    constexpr value_of_t value_of{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_VALUE_HPP

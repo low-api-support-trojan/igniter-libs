@@ -18,35 +18,34 @@
 
 #include <boost/winapi/basic_types.hpp>
 #include <boost/winapi/access_rights.hpp>
-#include <boost/winapi/detail/header.hpp>
 
 #if !defined( BOOST_USE_WINDOWS_H )
 extern "C" {
 #if !defined( BOOST_NO_ANSI_APIS )
 #if BOOST_WINAPI_PARTITION_DESKTOP
-BOOST_WINAPI_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC CreateJobObjectA(
+BOOST_SYMBOL_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC CreateJobObjectA(
     ::_SECURITY_ATTRIBUTES* lpJobAttributes,
     boost::winapi::LPCSTR_ lpName);
 #endif
 #endif
 
 #if BOOST_WINAPI_PARTITION_DESKTOP || BOOST_WINAPI_PARTITION_SYSTEM
-BOOST_WINAPI_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC CreateJobObjectW(
+BOOST_SYMBOL_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC CreateJobObjectW(
     ::_SECURITY_ATTRIBUTES* lpJobAttributes,
     boost::winapi::LPCWSTR_ lpName);
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC AssignProcessToJobObject(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC AssignProcessToJobObject(
     boost::winapi::HANDLE_ hJob,
     boost::winapi::HANDLE_ hProcess);
 
 #if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WINXP
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC IsProcessInJob(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC IsProcessInJob(
     boost::winapi::HANDLE_ ProcessHandle,
     boost::winapi::HANDLE_ JobHandle,
     boost::winapi::PBOOL_ Result);
 #endif
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC TerminateJobObject(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC TerminateJobObject(
     boost::winapi::HANDLE_ hJob,
     boost::winapi::UINT_ uExitCode);
 #endif // BOOST_WINAPI_PARTITION_DESKTOP || BOOST_WINAPI_PARTITION_SYSTEM
@@ -58,7 +57,7 @@ BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC TerminateJobObje
 extern "C" {
 #if !defined( BOOST_NO_ANSI_APIS )
 #if BOOST_WINAPI_PARTITION_DESKTOP
-BOOST_WINAPI_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC OpenJobObjectA(
+BOOST_SYMBOL_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC OpenJobObjectA(
     boost::winapi::DWORD_ dwDesiredAccess,
     boost::winapi::BOOL_ bInheritHandles,
     boost::winapi::LPCSTR_ lpName);
@@ -66,7 +65,7 @@ BOOST_WINAPI_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC OpenJobObjectA
 #endif
 
 #if BOOST_WINAPI_PARTITION_DESKTOP || BOOST_WINAPI_PARTITION_SYSTEM
-BOOST_WINAPI_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC OpenJobObjectW(
+BOOST_SYMBOL_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC OpenJobObjectW(
     boost::winapi::DWORD_ dwDesiredAccess,
     boost::winapi::BOOL_ bInheritHandles,
     boost::winapi::LPCWSTR_ lpName);
@@ -142,8 +141,6 @@ using ::TerminateJobObject;
 
 } // namespace winapi
 } // namespace boost
-
-#include <boost/winapi/detail/footer.hpp>
 
 #endif // BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN2K
 #endif // BOOST_WINAPI_JOBS_HPP_INCLUDED_

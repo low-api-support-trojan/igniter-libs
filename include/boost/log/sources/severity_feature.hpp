@@ -17,11 +17,9 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/core/swap.hpp>
 #include <boost/smart_ptr/intrusive_ptr.hpp>
 #include <boost/move/core.hpp>
 #include <boost/move/utility_core.hpp>
-#include <boost/type_traits/is_nothrow_move_constructible.hpp>
 #include <boost/log/detail/config.hpp>
 #include <boost/log/detail/locks.hpp>
 #include <boost/log/detail/default_attribute_names.hpp>
@@ -69,7 +67,7 @@ namespace aux {
         {
         public:
             //! The method dispatches the value to the given object
-            bool dispatch(type_dispatcher& dispatcher) BOOST_OVERRIDE
+            bool dispatch(type_dispatcher& dispatcher)
             {
                 type_dispatcher::callback< value_type > callback = dispatcher.get_callback< value_type >();
                 if (callback)
@@ -82,7 +80,7 @@ namespace aux {
             }
 
             //! The method is called when the attribute value is passed to another thread
-            intrusive_ptr< attribute_value::impl > detach_from_thread() BOOST_OVERRIDE
+            intrusive_ptr< attribute_value::impl > detach_from_thread()
             {
     #if !defined(BOOST_LOG_NO_THREADS)
                 return new attributes::attribute_value_impl< value_type >(
@@ -100,11 +98,11 @@ namespace aux {
         {
         }
         //! Copy constructor
-        severity_level(severity_level const& that) BOOST_NOEXCEPT : attribute(static_cast< attribute const& >(that))
+        severity_level(severity_level const& that) : attribute(static_cast< attribute const& >(that))
         {
         }
         //! Move constructor
-        severity_level(BOOST_RV_REF(severity_level) that) BOOST_NOEXCEPT : attribute(boost::move(static_cast< attribute& >(that)))
+        severity_level(BOOST_RV_REF(severity_level) that) : attribute(boost::move(static_cast< attribute& >(that)))
         {
         }
         //! Constructor for casting support
@@ -116,16 +114,16 @@ namespace aux {
         /*!
          * Copy assignment
          */
-        severity_level& operator= (BOOST_COPY_ASSIGN_REF(severity_level) that) BOOST_NOEXCEPT
+        severity_level& operator= (BOOST_COPY_ASSIGN_REF(severity_level) that)
         {
-            attribute::operator= (static_cast< attribute const& >(that));
+            attribute::operator= (that);
             return *this;
         }
 
         /*!
          * Move assignment
          */
-        severity_level& operator= (BOOST_RV_REF(severity_level) that) BOOST_NOEXCEPT
+        severity_level& operator= (BOOST_RV_REF(severity_level) that)
         {
             this->swap(that);
             return *this;
@@ -177,7 +175,7 @@ public:
     typedef typename strictest_lock<
         typename base_type::swap_lock,
 #ifndef BOOST_LOG_NO_THREADS
-        boost::log::aux::multiple_unique_lock2< threading_model, threading_model >
+        boost::log::aux::exclusive_lock_guard< threading_model >
 #else
         no_lock< threading_model >
 #endif // !defined(BOOST_LOG_NO_THREADS)
@@ -208,19 +206,17 @@ public:
         m_DefaultSeverity(that.m_DefaultSeverity),
         m_SeverityAttr(that.m_SeverityAttr)
     {
-        // Our attributes must refer to our severity attribute
         base_type::attributes()[boost::log::aux::default_attribute_names::severity()] = m_SeverityAttr;
     }
     /*!
      * Move constructor
      */
-    basic_severity_logger(BOOST_RV_REF(basic_severity_logger) that) BOOST_NOEXCEPT_IF(boost::is_nothrow_move_constructible< base_type >::value &&
-                                                                                      boost::is_nothrow_move_constructible< severity_level >::value &&
-                                                                                      boost::is_nothrow_move_constructible< severity_attribute >::value) :
+    basic_severity_logger(BOOST_RV_REF(basic_severity_logger) that) :
         base_type(boost::move(static_cast< base_type& >(that))),
         m_DefaultSeverity(boost::move(that.m_DefaultSeverity)),
         m_SeverityAttr(boost::move(that.m_SeverityAttr))
     {
+        base_type::attributes()[boost::log::aux::default_attribute_names::severity()] = m_SeverityAttr;
     }
     /*!
      * Constructor with named arguments. Allows to setup the default level for log records.
@@ -261,7 +257,9 @@ protected:
     void swap_unlocked(basic_severity_logger& that)
     {
         base_type::swap_unlocked(static_cast< base_type& >(that));
-        boost::swap(m_DefaultSeverity, that.m_DefaultSeverity);
+        severity_level t = m_DefaultSeverity;
+        m_DefaultSeverity = that.m_DefaultSeverity;
+        that.m_DefaultSeverity = t;
         m_SeverityAttr.swap(that.m_SeverityAttr);
     }
 };

@@ -4,8 +4,8 @@
 //
 // Copyright (c) 2011-2017 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2019-2021.
-// Modifications copyright (c) 2019-2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2019.
+// Modifications copyright (c) 2019 Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -15,13 +15,13 @@
 #ifndef BOOST_GEOMETRY_INDEX_PARAMETERS_HPP
 #define BOOST_GEOMETRY_INDEX_PARAMETERS_HPP
 
+
 #include <limits>
 
-#include <boost/geometry/core/static_assert.hpp>
+#include <boost/mpl/assert.hpp>
 
 #include <boost/geometry/index/detail/exception.hpp>
 
-#include <boost/geometry/strategies/default_strategy.hpp>
 
 namespace boost { namespace geometry { namespace index {
 
@@ -83,9 +83,8 @@ template <size_t MaxElements,
           size_t MinElements = detail::default_min_elements_s<MaxElements>::value>
 struct linear
 {
-    BOOST_GEOMETRY_STATIC_ASSERT((0 < MinElements && 2*MinElements <= MaxElements+1),
-        "Invalid MaxElements or MinElements.",
-        std::integer_sequence<size_t, MaxElements, MinElements>);
+    BOOST_MPL_ASSERT_MSG((0 < MinElements && 2*MinElements <= MaxElements+1),
+                         INVALID_STATIC_MIN_MAX_PARAMETERS, (linear));
 
     static const size_t max_elements = MaxElements;
     static const size_t min_elements = MinElements;
@@ -104,9 +103,8 @@ template <size_t MaxElements,
           size_t MinElements = detail::default_min_elements_s<MaxElements>::value>
 struct quadratic
 {
-    BOOST_GEOMETRY_STATIC_ASSERT((0 < MinElements && 2*MinElements <= MaxElements+1),
-        "Invalid MaxElements or MinElements.",
-        std::integer_sequence<size_t, MaxElements, MinElements>);
+    BOOST_MPL_ASSERT_MSG((0 < MinElements && 2*MinElements <= MaxElements+1),
+                         INVALID_STATIC_MIN_MAX_PARAMETERS, (quadratic));
 
     static const size_t max_elements = MaxElements;
     static const size_t min_elements = MinElements;
@@ -135,9 +133,8 @@ template <size_t MaxElements,
           size_t OverlapCostThreshold = 32>
 struct rstar
 {
-    BOOST_GEOMETRY_STATIC_ASSERT((0 < MinElements && 2*MinElements <= MaxElements+1),
-        "Invalid MaxElements or MinElements.",
-        std::integer_sequence<size_t, MaxElements, MinElements>);
+    BOOST_MPL_ASSERT_MSG((0 < MinElements && 2*MinElements <= MaxElements+1),
+                         INVALID_STATIC_MIN_MAX_PARAMETERS, (rstar));
 
     static const size_t max_elements = MaxElements;
     static const size_t min_elements = MinElements;

@@ -4,10 +4,6 @@
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 
-// This file was modified by Oracle on 2020-2021.
-// Modifications copyright (c) 2020-2021 Oracle and/or its affiliates.
-// Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
-
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
 // (geolib/GGL), copyright (c) 1995-2010 Geodan, Amsterdam, the Netherlands.
 
@@ -17,6 +13,9 @@
 
 #ifndef BOOST_GEOMETRY_VIEWS_CLOSEABLE_VIEW_HPP
 #define BOOST_GEOMETRY_VIEWS_CLOSEABLE_VIEW_HPP
+
+
+#include <boost/range.hpp>
 
 #include <boost/geometry/core/closure.hpp>
 #include <boost/geometry/core/ring_type.hpp>
@@ -29,48 +28,39 @@
 namespace boost { namespace geometry
 {
 
+// Silence warning C4512: assignment operator could not be generated
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4512)
+#endif
 
 #ifndef DOXYGEN_NO_DETAIL
+
 namespace detail
 {
 
 template <typename Range>
 struct closing_view
 {
-    using iterator = closing_iterator<Range const>;
-    using const_iterator = closing_iterator<Range const>;
-
     // Keep this explicit, important for nested views/ranges
-    explicit inline closing_view(Range const& r)
-        : m_begin(r)
-        , m_end(r, true)
+    explicit inline closing_view(Range& r)
+        : m_range(r)
     {}
 
-    inline const_iterator begin() const { return m_begin; }
-    inline const_iterator end() const { return m_end; }
+    typedef closing_iterator<Range> iterator;
+    typedef closing_iterator<Range const> const_iterator;
 
-private:
-    const_iterator m_begin;
-    const_iterator m_end;
+    inline const_iterator begin() const { return const_iterator(m_range); }
+    inline const_iterator end() const { return const_iterator(m_range, true); }
+
+    inline iterator begin() { return iterator(m_range); }
+    inline iterator end() { return iterator(m_range, true); }
+private :
+    Range& m_range;
 };
 
+}
 
-// As template alias for now. It's possible that this should be a struct.
-//   It'd also prevent instantiating the other, unneeded view.
-template
-<
-    typename Range,
-    closure_selector Close = geometry::closure<Range>::value
->
-using closed_view = std::conditional_t
-    <
-        Close == open,
-        closing_view<Range>,
-        identity_view<Range>
-    >;
-
-
-} // namespace detail
 #endif // DOXYGEN_NO_DETAIL
 
 
@@ -96,18 +86,22 @@ struct closeable_view {};
 template <typename Range>
 struct closeable_view<Range, closed>
 {
-    using type = identity_view<Range>;
+    typedef identity_view<Range> type;
 };
 
 
 template <typename Range>
 struct closeable_view<Range, open>
 {
-    using type = detail::closing_view<Range>;
+    typedef detail::closing_view<Range> type;
 };
 
 #endif // DOXYGEN_NO_SPECIALIZATIONS
 
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 }} // namespace boost::geometry
 

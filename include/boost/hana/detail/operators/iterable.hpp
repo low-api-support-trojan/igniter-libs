@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/fwd/at.hpp>
 
 
-namespace boost { namespace hana { namespace detail {
+BOOST_HANA_NAMESPACE_BEGIN namespace detail {
     template <typename Derived>
     struct iterable_operators {
         template <typename N>
@@ -35,6 +35,6 @@ namespace boost { namespace hana { namespace detail {
                             static_cast<N&&>(n));
         }
     };
-} }} // end namespace boost::hana
+} BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DETAIL_OPERATORS_ITERABLE_HPP

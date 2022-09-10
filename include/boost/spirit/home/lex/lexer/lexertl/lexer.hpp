@@ -25,6 +25,8 @@
 #include <boost/spirit/home/support/detail/lexer/debug.hpp>
 #endif
 
+#include <boost/foreach.hpp>
+
 #include <iterator> // for std::iterator_traits
 
 namespace boost { namespace spirit { namespace lex { namespace lexertl
@@ -300,14 +302,13 @@ namespace boost { namespace spirit { namespace lex { namespace lexertl
             if (state == all_states_id) {
                 // add the action to all known states
                 typedef typename
-                    basic_rules_type::string_size_t_map::const_iterator
-                state_iterator;
+                    basic_rules_type::string_size_t_map::value_type
+                state_type;
 
                 std::size_t states = rules_.statemap().size();
-                for (state_iterator it = rules_.statemap().begin(),
-                                    end = rules_.statemap().end(); it != end; ++it) {
+                BOOST_FOREACH(state_type const& s, rules_.statemap()) {
                     for (std::size_t j = 0; j < states; ++j)
-                        actions_.add_action(unique_id + j, it->second, wrapper_type::call(act));
+                        actions_.add_action(unique_id + j, s.second, wrapper_type::call(act));
                 }
             }
             else {

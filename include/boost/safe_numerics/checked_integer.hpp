@@ -35,17 +35,10 @@ using bool_type = typename std::conditional<tf, std::true_type, std::false_type>
 // convert an integral value to some other integral type
 template<
     typename R,
-    R Min,
-    R Max,
     typename T,
     class F
 >
-struct heterogeneous_checked_operation<
-    R,
-    Min,
-    Max,
-    T,
-    F,
+struct heterogeneous_checked_operation<R, T, F,
     typename std::enable_if<
         std::is_integral<R>::value
         && std::is_integral<T>::value
@@ -64,11 +57,18 @@ struct heterogeneous_checked_operation<
             // INT32-C Ensure that operations on signed
             // integers do not overflow
             return
-            boost::safe_numerics::safe_compare::greater_than(t, Max) ?
+            boost::safe_numerics::safe_compare::greater_than(
+                t,
+                std::numeric_limits<R>::max()
+            ) ?
                 F::template invoke<safe_numerics_error::positive_overflow_error>(
                     "converted signed value too large"
                 )
-            : boost::safe_numerics::safe_compare::less_than(t, Min) ?
+            :
+            boost::safe_numerics::safe_compare::less_than(
+                t,
+                std::numeric_limits<R>::min()
+            ) ?
                 F::template invoke<safe_numerics_error::negative_overflow_error>(
                     "converted signed value too small"
                 )
@@ -85,14 +85,12 @@ struct heterogeneous_checked_operation<
             // INT30-C Ensure that unsigned integer operations
             // do not wrap
             return
-            boost::safe_numerics::safe_compare::greater_than(t, Max) ?
+            boost::safe_numerics::safe_compare::greater_than(
+                t,
+                std::numeric_limits<R>::max()
+            ) ?
                 F::template invoke<safe_numerics_error::positive_overflow_error>(
                     "converted unsigned value too large"
-                )
-            :
-            boost::safe_numerics::safe_compare::less_than(t, Min) ?
-                F::template invoke<safe_numerics_error::positive_overflow_error>(
-                    "converted unsigned value too small"
                 )
             :
                 checked_result<R>(static_cast<R>(t))
@@ -107,14 +105,12 @@ struct heterogeneous_checked_operation<
             // INT32-C Ensure that operations on unsigned
             // integers do not overflow
             return
-            boost::safe_numerics::safe_compare::greater_than(t, Max) ?
+            boost::safe_numerics::safe_compare::greater_than(
+                t,
+                std::numeric_limits<R>::max()
+            ) ?
                 F::template invoke<safe_numerics_error::positive_overflow_error>(
                     "converted unsigned value too large"
-                )
-            :
-            boost::safe_numerics::safe_compare::less_than(t, Min) ?
-                F::template invoke<safe_numerics_error::positive_overflow_error>(
-                    "converted unsigned value too small"
                 )
             :
                 checked_result<R>(static_cast<R>(t))
@@ -127,12 +123,15 @@ struct heterogeneous_checked_operation<
             std::true_type   // T is signed
         ){
             return
-            boost::safe_numerics::safe_compare::less_than(t, Min) ?
+            boost::safe_numerics::safe_compare::less_than(t, 0) ?
                 F::template invoke<safe_numerics_error::domain_error>(
-                    "converted value to low or negative"
+                    "converted negative value to unsigned"
                 )
             :
-            boost::safe_numerics::safe_compare::greater_than(t, Max) ?
+            boost::safe_numerics::safe_compare::greater_than(
+                t,
+                std::numeric_limits<R>::max()
+            ) ?
                 F::template invoke<safe_numerics_error::positive_overflow_error>(
                     "converted signed value too large"
                 )
@@ -151,22 +150,15 @@ struct heterogeneous_checked_operation<
                 std::is_signed<T>()
             );
     }
-}; // heterogeneous_checked_operation
+};
 
 // converting floating point value to integral type
 template<
     typename R,
-    R Min,
-    R Max,
     typename T,
     class F
 >
-struct heterogeneous_checked_operation<
-    R,
-    Min,
-    Max,
-    T,
-    F,
+struct heterogeneous_checked_operation<R, T, F,
     typename std::enable_if<
         std::is_integral<R>::value
         && std::is_floating_point<T>::value
@@ -176,24 +168,17 @@ struct heterogeneous_checked_operation<
     cast(const T & t){
         return static_cast<R>(t);
     }
-}; // heterogeneous_checked_operation
+};
 
 // converting integral value to floating point type
 
 // INT35-C. Use correct integer precisions
 template<
     typename R,
-    R Min,
-    R Max,
     typename T,
     class F
 >
-struct heterogeneous_checked_operation<
-    R,
-    Min,
-    Max,
-    T,
-    F,
+struct heterogeneous_checked_operation<R, T, F,
     typename std::enable_if<
         std::is_floating_point<R>::value
         && std::is_integral<T>::value
@@ -211,7 +196,7 @@ struct heterogeneous_checked_operation<
         }
         return t;
     }
-}; // heterogeneous_checked_operation
+};
 
 // binary operations on primitive integer types
 
@@ -690,7 +675,7 @@ struct checked_operation<R, F,
         return left_shift_integer_detail::left_shift(t, u, std::is_signed<R>());
     }
 
-    // right shift
+// right shift
 
     struct right_shift_integer_detail {
 
@@ -727,84 +712,84 @@ struct checked_operation<R, F,
         }
     }; // right_shift_integer_detail
 
-    constexpr static checked_result<R> right_shift(
-        const R & t,
-        const R & u
-    ){
-        // INT34-C - Do not shift an expression by a negative number of bits
+constexpr static checked_result<R> right_shift(
+    const R & t,
+    const R & u
+){
+    // INT34-C - Do not shift an expression by a negative number of bits
 
-        // standard paragraph 5.8 & 1
-        // if the right operand is negative
-        if(u < 0){
-            return F::template invoke<safe_numerics_error::negative_shift>(
-               "shifting negative amount"
-            );
-        }
-        if(u > std::numeric_limits<R>::digits){
-            // behavior is undefined
-            return F::template invoke<safe_numerics_error::shift_too_large>(
-               "shifting more bits than available"
-            );
-        }
-        return right_shift_integer_detail::right_shift(t, u ,std::is_signed<R>());
+    // standard paragraph 5.8 & 1
+    // if the right operand is negative
+    if(u < 0){
+        return F::template invoke<safe_numerics_error::negative_shift>(
+           "shifting negative amount"
+        );
     }
-
-    ///////////////////////////////////
-    // bitwise operations
-
-    // INT13-C Note: We don't enforce recommendation as acually written
-    // as it would break too many programs.  Specifically, we permit signed
-    // integer operands.
-
-    constexpr static checked_result<R> bitwise_or(const R & t, const R & u){
-        using namespace boost::safe_numerics::utility;
-        const unsigned int result_size
-            = std::max(significant_bits(t), significant_bits(u));
-
-        if(result_size > bits_type<R>::value){
-            return F::template invoke<safe_numerics_error::positive_overflow_error>(
-                "result type too small to hold bitwise or"
-            );
-        }
-        return t | u;
+    if(u > std::numeric_limits<R>::digits){
+        // behavior is undefined
+        return F::template invoke<safe_numerics_error::shift_too_large>(
+           "shifting more bits than available"
+        );
     }
+    return right_shift_integer_detail::right_shift(t, u ,std::is_signed<R>());
+}
 
-    constexpr static checked_result<R> bitwise_xor(const R & t, const R & u){
-        using namespace boost::safe_numerics::utility;
-        const unsigned int result_size
-            = std::max(significant_bits(t), significant_bits(u));
+///////////////////////////////////
+// bitwise operations
 
-        if(result_size > bits_type<R>::value){
-            return F::template invoke<safe_numerics_error::positive_overflow_error>(
-                "result type too small to hold bitwise or"
-            );
-        }
-        return t ^ u;
+// INT13-C Note: We don't enforce recommendation as acually written
+// as it would break too many programs.  Specifically, we permit signed
+// integer operands.
+
+constexpr static checked_result<R> bitwise_or(const R & t, const R & u){
+    using namespace boost::safe_numerics::utility;
+    const unsigned int result_size
+        = std::max(significant_bits(t), significant_bits(u));
+
+    if(result_size > bits_type<R>::value){
+        return F::template invoke<safe_numerics_error::positive_overflow_error>(
+            "result type too small to hold bitwise or"
+        );
     }
+    return t | u;
+}
 
-    constexpr static checked_result<R> bitwise_and(const R & t, const R & u){
-        using namespace boost::safe_numerics::utility;
-        const unsigned int result_size
-            = std::min(significant_bits(t), significant_bits(u));
+constexpr static checked_result<R> bitwise_xor(const R & t, const R & u){
+    using namespace boost::safe_numerics::utility;
+    const unsigned int result_size
+        = std::max(significant_bits(t), significant_bits(u));
 
-        if(result_size > bits_type<R>::value){
-            return F::template invoke<safe_numerics_error::positive_overflow_error>(
-                "result type too small to hold bitwise and"
-            );
-        }
-        return t & u;
+    if(result_size > bits_type<R>::value){
+        return F::template invoke<safe_numerics_error::positive_overflow_error>(
+            "result type too small to hold bitwise or"
+        );
     }
+    return t ^ u;
+}
 
-    constexpr static checked_result<R> bitwise_not(const R & t){
-        using namespace boost::safe_numerics::utility;
+constexpr static checked_result<R> bitwise_and(const R & t, const R & u){
+    using namespace boost::safe_numerics::utility;
+    const unsigned int result_size
+        = std::min(significant_bits(t), significant_bits(u));
 
-        if(significant_bits(t) > bits_type<R>::value){
-            return F::template invoke<safe_numerics_error::positive_overflow_error>(
-                "result type too small to hold bitwise inverse"
-            );
-        }
-        return ~t;
+    if(result_size > bits_type<R>::value){
+        return F::template invoke<safe_numerics_error::positive_overflow_error>(
+            "result type too small to hold bitwise and"
+        );
     }
+    return t & u;
+}
+
+constexpr static checked_result<R> bitwise_not(const R & t){
+    using namespace boost::safe_numerics::utility;
+
+    if(significant_bits(t) > bits_type<R>::value){
+        return F::template invoke<safe_numerics_error::positive_overflow_error>(
+            "result type too small to hold bitwise inverse"
+        );
+    }
+    return ~t;
+}
 
 }; // checked_operation
 } // safe_numerics

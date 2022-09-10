@@ -19,7 +19,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/find_if.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs, typename Key>
     constexpr auto find_t::operator()(Xs&& xs, Key const& key) const {
@@ -56,6 +56,6 @@ namespace boost { namespace hana {
                                  detail::equal_to<Key>{key});
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FIND_HPP

@@ -43,7 +43,7 @@ namespace boost { namespace process { namespace detail {
 
 struct cmd_
 {
-    constexpr cmd_() = default;
+    constexpr cmd_() {}
 
     template<typename Char>
     inline api::cmd_setter_<Char> operator()(const Char *s) const

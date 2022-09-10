@@ -24,7 +24,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename F, typename Xs, typename ...Ys>
     constexpr auto zip_with_t::operator()(F&& f, Xs&& xs, Ys&& ...ys) const {
@@ -65,6 +65,6 @@ namespace boost { namespace hana {
                               static_cast<X&&>(x), static_cast<Xs&&>(xs)...);
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_ZIP_WITH_HPP

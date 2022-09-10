@@ -5,10 +5,6 @@
 // Copyright (c) 2011-2013 Adam Wulkiewicz, Lodz, Poland.
 // Copyright (c) 2013 Mateusz Loskot, London, UK.
 //
-// This file was modified by Oracle on 2019-2020.
-// Modifications copyright (c) 2019-2020 Oracle and/or its affiliates.
-// Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
-//
 // Use, modification and distribution is subject to the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
@@ -17,18 +13,17 @@
 #define BOOST_GEOMETRY_INDEX_DETAIL_RTREE_UTILITIES_STATISTICS_HPP
 
 #include <algorithm>
-#include <tuple>
+#include <boost/tuple/tuple.hpp>
 
 namespace boost { namespace geometry { namespace index { namespace detail { namespace rtree { namespace utilities {
 
 namespace visitors {
 
-template <typename MembersHolder>
-struct statistics
-    : public MembersHolder::visitor_const
+template <typename Value, typename Options, typename Box, typename Allocators>
+struct statistics : public rtree::visitor<Value, typename Options::parameters_type, Box, Allocators, typename Options::node_tag, true>::type
 {
-    typedef typename MembersHolder::internal_node internal_node;
-    typedef typename MembersHolder::leaf leaf;
+    typedef typename rtree::internal_node<Value, typename Options::parameters_type, Box, Allocators, typename Options::node_tag>::type internal_node;
+    typedef typename rtree::leaf<Value, typename Options::parameters_type, Box, Allocators, typename Options::node_tag>::type leaf;
 
     inline statistics()
         : level(0)
@@ -87,19 +82,22 @@ struct statistics
 } // namespace visitors
 
 template <typename Rtree> inline
-std::tuple<std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t>
+boost::tuple<std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t>
 statistics(Rtree const& tree)
 {
     typedef utilities::view<Rtree> RTV;
     RTV rtv(tree);
 
     visitors::statistics<
-        typename RTV::members_holder
+        typename RTV::value_type,
+        typename RTV::options_type,
+        typename RTV::box_type,
+        typename RTV::allocators_type
     > stats_v;
 
     rtv.apply_visitor(stats_v);
     
-    return std::make_tuple(stats_v.levels, stats_v.nodes, stats_v.leaves, stats_v.values, stats_v.values_min, stats_v.values_max);
+    return boost::make_tuple(stats_v.levels, stats_v.nodes, stats_v.leaves, stats_v.values, stats_v.values_min, stats_v.values_max);
 }
 
 }}}}}} // namespace boost::geometry::index::detail::rtree::utilities

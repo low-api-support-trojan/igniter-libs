@@ -10,7 +10,6 @@
 #define BOOST_WINAPI_HANDLES_HPP_INCLUDED_
 
 #include <boost/winapi/basic_types.hpp>
-#include <boost/winapi/detail/header.hpp>
 
 #ifdef BOOST_HAS_PRAGMA_ONCE
 #pragma once
@@ -18,10 +17,10 @@
 
 #if !defined( BOOST_USE_WINDOWS_H )
 extern "C" {
-BOOST_WINAPI_IMPORT_EXCEPT_WM boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
 CloseHandle(boost::winapi::HANDLE_ handle);
 
-BOOST_WINAPI_IMPORT_EXCEPT_WM boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
 DuplicateHandle(
     boost::winapi::HANDLE_ hSourceProcessHandle,
     boost::winapi::HANDLE_ hSourceHandle,
@@ -32,7 +31,7 @@ DuplicateHandle(
     boost::winapi::DWORD_ dwOptions);
 
 #if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN10
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
 CompareObjectHandles(
     boost::winapi::HANDLE_ hFirstObjectHandle,
     boost::winapi::HANDLE_ hSecondObjectHandle);
@@ -69,7 +68,5 @@ const HANDLE_ invalid_handle_value BOOST_ATTRIBUTE_UNUSED = INVALID_HANDLE_VALUE
 
 }
 }
-
-#include <boost/winapi/detail/footer.hpp>
 
 #endif // BOOST_WINAPI_HANDLES_HPP_INCLUDED_

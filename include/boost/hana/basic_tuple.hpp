@@ -32,7 +32,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     namespace detail {
         //////////////////////////////////////////////////////////////////////
         // basic_tuple_impl<n, Xn>
@@ -259,6 +259,6 @@ namespace boost { namespace hana {
             return hana::size_t<sizeof...(Xn)>{};
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_BASIC_TUPLE_HPP

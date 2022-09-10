@@ -91,7 +91,6 @@ class simple_seq_fit_impl
    class block_ctrl
    {
       public:
-      static const size_type size_mask = size_type(-1);
       //!Offset pointer to the next block.
       block_ctrl_ptr m_next;
       //!This block's memory size (including block_ctrl

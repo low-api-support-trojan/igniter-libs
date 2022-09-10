@@ -13,20 +13,25 @@
 #pragma once
 #endif
 
-#include <boost/math/tools/assert.hpp>
-#include <boost/math/tools/config.hpp>
-#include <boost/math/tools/cxx03_warn.hpp>
+#include <boost/assert.hpp>
+#include <boost/config.hpp>
+#ifdef BOOST_NO_CXX11_LAMBDAS
+#include <boost/lambda/lambda.hpp>
+#endif
 #include <boost/math/tools/rational.hpp>
 #include <boost/math/tools/real_cast.hpp>
 #include <boost/math/policies/error_handling.hpp>
 #include <boost/math/special_functions/binomial.hpp>
+#include <boost/core/enable_if.hpp>
+#include <boost/type_traits/is_convertible.hpp>
 #include <boost/math/tools/detail/is_const_iterable.hpp>
 
 #include <vector>
 #include <ostream>
 #include <algorithm>
+#ifndef BOOST_NO_CXX11_HDR_INITIALIZER_LIST
 #include <initializer_list>
-#include <type_traits>
+#endif
 
 namespace boost{ namespace math{ namespace tools{
 
@@ -44,7 +49,7 @@ T chebyshev_coefficient(unsigned n, unsigned m)
    unsigned r = n - m;
    r /= 2;
 
-   BOOST_MATH_ASSERT(n - 2 * r == m);
+   BOOST_ASSERT(n - 2 * r == m);
 
    if(r & 1)
       result = -result;
@@ -123,7 +128,7 @@ namespace detail {
 * subtlety of distinction.
 */
 template <typename T, typename N>
-typename std::enable_if<!std::numeric_limits<T>::is_integer, void >::type
+BOOST_DEDUCED_TYPENAME disable_if_c<std::numeric_limits<T>::is_integer, void >::type
 division_impl(polynomial<T> &q, polynomial<T> &u, const polynomial<T>& v, N n, N k)
 {
     q[k] = u[n + k] / v[n];
@@ -166,7 +171,7 @@ T integer_power(T t, N n)
 * don't currently have that subtlety of distinction.
 */
 template <typename T, typename N>
-typename std::enable_if<std::numeric_limits<T>::is_integer, void >::type
+BOOST_DEDUCED_TYPENAME enable_if_c<std::numeric_limits<T>::is_integer, void >::type
 division_impl(polynomial<T> &q, polynomial<T> &u, const polynomial<T>& v, N n, N k)
 {
     q[k] = u[n + k] * integer_power(v[n], k);
@@ -189,9 +194,9 @@ template <typename T>
 std::pair< polynomial<T>, polynomial<T> >
 division(polynomial<T> u, const polynomial<T>& v)
 {
-    BOOST_MATH_ASSERT(v.size() <= u.size());
-    BOOST_MATH_ASSERT(v);
-    BOOST_MATH_ASSERT(u);
+    BOOST_ASSERT(v.size() <= u.size());
+    BOOST_ASSERT(v);
+    BOOST_ASSERT(u);
 
     typedef typename polynomial<T>::size_type N;
 
@@ -266,7 +271,7 @@ template <typename T>
 std::pair< polynomial<T>, polynomial<T> >
 quotient_remainder(const polynomial<T>& dividend, const polynomial<T>& divisor)
 {
-    BOOST_MATH_ASSERT(divisor);
+    BOOST_ASSERT(divisor);
     if (dividend.size() < divisor.size())
         return std::make_pair(polynomial<T>(), dividend);
     return detail::division(dividend, divisor);
@@ -298,21 +303,25 @@ public:
        normalize();
    }
 
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
    polynomial(std::vector<T>&& p) : m_data(std::move(p))
    {
       normalize();
    }
+#endif
 
-   template <class U, typename std::enable_if<std::is_convertible<U, T>::value, bool>::type = true>
-   explicit polynomial(const U& point)
+   template <class U>
+   explicit polynomial(const U& point, typename boost::enable_if<boost::is_convertible<U, T> >::type* = 0)
    {
        if (point != U(0))
           m_data.push_back(point);
    }
 
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
    // move:
-   polynomial(polynomial&& p) noexcept
+   polynomial(polynomial&& p) BOOST_NOEXCEPT
       : m_data(std::move(p.m_data)) { }
+#endif
 
    // copy:
    polynomial(const polynomial& p)
@@ -328,12 +337,13 @@ public:
       }
    }
 #ifdef BOOST_MATH_HAS_IS_CONST_ITERABLE
-    template <class Range, typename std::enable_if<boost::math::tools::detail::is_const_iterable<Range>::value, bool>::type = true>
-    explicit polynomial(const Range& r) 
+    template <class Range>
+    explicit polynomial(const Range& r, typename boost::enable_if<boost::math::tools::detail::is_const_iterable<Range> >::type* = 0) 
        : polynomial(r.begin(), r.end()) 
     {
     }
 #endif
+#if !defined(BOOST_NO_CXX11_HDR_INITIALIZER_LIST) && !BOOST_WORKAROUND(BOOST_GCC_VERSION, < 40500)
     polynomial(std::initializer_list<T> l) : polynomial(std::begin(l), std::end(l))
     {
     }
@@ -345,6 +355,7 @@ public:
         normalize();
         return *this;
     }
+#endif
 
 
    // access:
@@ -388,9 +399,10 @@ public:
        return m_data;
    }
 
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
    polynomial<T> prime() const
    {
-#ifdef _MSC_VER
+#ifdef BOOST_MSVC
       // Disable int->float conversion warning:
 #pragma warning(push)
 #pragma warning(disable:4244)
@@ -405,7 +417,7 @@ public:
           p_data[i] = m_data[i+1]*static_cast<T>(i+1);
       }
       return polynomial<T>(std::move(p_data));
-#ifdef _MSC_VER
+#ifdef BOOST_MSVC
 #pragma warning(pop)
 #endif
    }
@@ -423,12 +435,12 @@ public:
    }
 
    // operators:
-   polynomial& operator =(polynomial&& p) noexcept
+   polynomial& operator =(polynomial&& p) BOOST_NOEXCEPT
    {
        m_data = std::move(p.m_data);
        return *this;
    }
-
+#endif
    polynomial& operator =(const polynomial& p)
    {
        m_data = p.m_data;
@@ -436,7 +448,7 @@ public:
    }
 
    template <class U>
-   typename std::enable_if<std::is_constructible<T, U>::value, polynomial&>::type operator +=(const U& value)
+   typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial&>::type operator +=(const U& value)
    {
        addition(value);
        normalize();
@@ -444,7 +456,7 @@ public:
    }
 
    template <class U>
-   typename std::enable_if<std::is_constructible<T, U>::value, polynomial&>::type operator -=(const U& value)
+   typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial&>::type operator -=(const U& value)
    {
        subtraction(value);
        normalize();
@@ -452,7 +464,7 @@ public:
    }
 
    template <class U>
-   typename std::enable_if<std::is_constructible<T, U>::value, polynomial&>::type operator *=(const U& value)
+   typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial&>::type operator *=(const U& value)
    {
       multiplication(value);
       normalize();
@@ -460,7 +472,7 @@ public:
    }
 
    template <class U>
-   typename std::enable_if<std::is_constructible<T, U>::value, polynomial&>::type operator /=(const U& value)
+   typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial&>::type operator /=(const U& value)
    {
        division(value);
        normalize();
@@ -468,7 +480,7 @@ public:
    }
 
    template <class U>
-   typename std::enable_if<std::is_constructible<T, U>::value, polynomial&>::type operator %=(const U& /*value*/)
+   typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial&>::type operator %=(const U& /*value*/)
    {
        // We can always divide by a scalar, so there is no remainder:
        this->set_zero();
@@ -529,7 +541,7 @@ public:
    template <typename U>
    polynomial& operator >>=(U const &n)
    {
-       BOOST_MATH_ASSERT(n <= m_data.size());
+       BOOST_ASSERT(n <= m_data.size());
        m_data.erase(m_data.begin(), m_data.begin() + n);
        return *this;
    }
@@ -549,10 +561,19 @@ public:
    }
 
    // Conversion to bool.
-   inline explicit operator bool() const
+#ifdef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+   typedef bool (polynomial::*unmentionable_type)() const;
+
+   BOOST_FORCEINLINE operator unmentionable_type() const
+   {
+       return is_zero() ? false : &polynomial::is_zero;
+   }
+#else
+   BOOST_FORCEINLINE explicit operator bool() const
    {
        return !m_data.empty();
    }
+#endif
 
    // Fast way to set a polynomial to zero.
    void set_zero()
@@ -564,7 +585,12 @@ public:
     *        non-zero coefficients of higher degree. */
    void normalize()
    {
+#ifndef BOOST_NO_CXX11_LAMBDAS
       m_data.erase(std::find_if(m_data.rbegin(), m_data.rend(), [](const T& x)->bool { return x != T(0); }).base(), m_data.end());
+#else
+       using namespace boost::lambda;
+       m_data.erase(std::find_if(m_data.rbegin(), m_data.rend(), _1 != T(0)).base(), m_data.end());
+#endif
    }
 
 private:
@@ -614,15 +640,25 @@ private:
     template <class U>
     polynomial& multiplication(const U& value)
     {
+#ifndef BOOST_NO_CXX11_LAMBDAS
        std::transform(m_data.begin(), m_data.end(), m_data.begin(), [&](const T& x)->T { return x * value; });
-       return *this;
+#else
+        using namespace boost::lambda;
+        std::transform(m_data.begin(), m_data.end(), m_data.begin(), ret<T>(_1 * value));
+#endif
+        return *this;
     }
 
     template <class U>
     polynomial& division(const U& value)
     {
+#ifndef BOOST_NO_CXX11_LAMBDAS
        std::transform(m_data.begin(), m_data.end(), m_data.begin(), [&](const T& x)->T { return x / value; });
-       return *this;
+#else
+        using namespace boost::lambda;
+        std::transform(m_data.begin(), m_data.end(), m_data.begin(), ret<T>(_1 / value));
+#endif
+        return *this;
     }
 
     std::vector<T> m_data;
@@ -636,7 +672,7 @@ inline polynomial<T> operator + (const polynomial<T>& a, const polynomial<T>& b)
    result += b;
    return result;
 }
-
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 template <class T>
 inline polynomial<T> operator + (polynomial<T>&& a, const polynomial<T>& b)
 {
@@ -655,6 +691,7 @@ inline polynomial<T> operator + (polynomial<T>&& a, polynomial<T>&& b)
    a += b;
    return a;
 }
+#endif
 
 template <class T>
 inline polynomial<T> operator - (const polynomial<T>& a, const polynomial<T>& b)
@@ -663,7 +700,7 @@ inline polynomial<T> operator - (const polynomial<T>& a, const polynomial<T>& b)
    result -= b;
    return result;
 }
-
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 template <class T>
 inline polynomial<T> operator - (polynomial<T>&& a, const polynomial<T>& b)
 {
@@ -682,6 +719,7 @@ inline polynomial<T> operator - (polynomial<T>&& a, polynomial<T>&& b)
    a -= b;
    return a;
 }
+#endif
 
 template <class T>
 inline polynomial<T> operator * (const polynomial<T>& a, const polynomial<T>& b)
@@ -704,56 +742,56 @@ inline polynomial<T> operator % (const polynomial<T>& a, const polynomial<T>& b)
 }
 
 template <class T, class U>
-inline typename std::enable_if<std::is_constructible<T, U>::value, polynomial<T> >::type operator + (polynomial<T> a, const U& b)
+inline typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial<T> >::type operator + (polynomial<T> a, const U& b)
 {
    a += b;
    return a;
 }
 
 template <class T, class U>
-inline typename std::enable_if<std::is_constructible<T, U>::value, polynomial<T> >::type operator - (polynomial<T> a, const U& b)
+inline typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial<T> >::type operator - (polynomial<T> a, const U& b)
 {
    a -= b;
    return a;
 }
 
 template <class T, class U>
-inline typename std::enable_if<std::is_constructible<T, U>::value, polynomial<T> >::type operator * (polynomial<T> a, const U& b)
+inline typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial<T> >::type operator * (polynomial<T> a, const U& b)
 {
    a *= b;
    return a;
 }
 
 template <class T, class U>
-inline typename std::enable_if<std::is_constructible<T, U>::value, polynomial<T> >::type operator / (polynomial<T> a, const U& b)
+inline typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial<T> >::type operator / (polynomial<T> a, const U& b)
 {
    a /= b;
    return a;
 }
 
 template <class T, class U>
-inline typename std::enable_if<std::is_constructible<T, U>::value, polynomial<T> >::type operator % (const polynomial<T>&, const U&)
+inline typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial<T> >::type operator % (const polynomial<T>&, const U&)
 {
    // Since we can always divide by a scalar, result is always an empty polynomial:
    return polynomial<T>();
 }
 
 template <class U, class T>
-inline typename std::enable_if<std::is_constructible<T, U>::value, polynomial<T> >::type operator + (const U& a, polynomial<T> b)
+inline typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial<T> >::type operator + (const U& a, polynomial<T> b)
 {
    b += a;
    return b;
 }
 
 template <class U, class T>
-inline typename std::enable_if<std::is_constructible<T, U>::value, polynomial<T> >::type operator - (const U& a, polynomial<T> b)
+inline typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial<T> >::type operator - (const U& a, polynomial<T> b)
 {
    b -= a;
    return -b;
 }
 
 template <class U, class T>
-inline typename std::enable_if<std::is_constructible<T, U>::value, polynomial<T> >::type operator * (const U& a, polynomial<T> b)
+inline typename boost::enable_if_c<boost::is_constructible<T, U>::value, polynomial<T> >::type operator * (const U& a, polynomial<T> b)
 {
    b *= a;
    return b;

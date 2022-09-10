@@ -47,7 +47,7 @@ namespace boost {
 #endif
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     namespace ext { namespace boost { struct tuple_tag; }}
 
     template <typename ...Xs>
@@ -133,6 +133,6 @@ namespace boost { namespace hana {
             >{static_cast<Xs&&>(xs)...};
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_EXT_BOOST_TUPLE_HPP

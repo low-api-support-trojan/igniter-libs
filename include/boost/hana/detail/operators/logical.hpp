@@ -19,7 +19,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <type_traits>
 
 
-namespace boost { namespace hana { namespace detail {
+BOOST_HANA_NAMESPACE_BEGIN namespace detail {
     template <typename Tag>
     struct logical_operators {
         static constexpr bool value = false;
@@ -46,6 +46,6 @@ namespace boost { namespace hana { namespace detail {
         constexpr auto operator!(X&& x)
         { return hana::not_(static_cast<X&&>(x)); }
     } // end namespace operators
-} }} // end namespace boost::hana
+} BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DETAIL_OPERATORS_LOGICAL_HPP

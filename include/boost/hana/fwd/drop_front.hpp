@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Drop the first `n` elements of an iterable, and return the rest.
     //! @ingroup group-Iterable
     //!
@@ -59,8 +59,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr drop_front_t drop_front{};
+    constexpr drop_front_t drop_front{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_DROP_FRONT_HPP

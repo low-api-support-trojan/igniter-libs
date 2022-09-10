@@ -9,7 +9,6 @@
 # include <boost/python/detail/referent_storage.hpp>
 # include <boost/python/detail/destroy.hpp>
 # include <boost/python/detail/type_traits.hpp>
-# include <boost/align/align.hpp>
 # include <boost/static_assert.hpp>
 # include <cstddef>
 
@@ -133,13 +132,7 @@ template <class T>
 inline rvalue_from_python_data<T>::~rvalue_from_python_data()
 {
     if (this->stage1.convertible == this->storage.bytes)
-    {
-        size_t allocated = sizeof(this->storage);
-        void *ptr = this->storage.bytes;
-        void *aligned_storage =
-            ::boost::alignment::align(boost::python::detail::alignment_of<T>::value, 0, ptr, allocated);
-        python::detail::destroy_referent<ref_type>(aligned_storage);
-    }
+        python::detail::destroy_referent<ref_type>(this->storage.bytes);
 }
 
 }}} // namespace boost::python::converter

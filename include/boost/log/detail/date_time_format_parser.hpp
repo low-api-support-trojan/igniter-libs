@@ -343,21 +343,21 @@ struct date_time_format_parser_callback :
     typedef CharT char_type;
 
     //! Destructor
-    ~date_time_format_parser_callback() BOOST_OVERRIDE {}
+    virtual ~date_time_format_parser_callback() {}
 
     /*!
      * \brief The function is called when the parser discovers a string literal in the format string
      *
      * \param lit The string of characters not interpreted as a placeholder
      */
-    void on_literal(iterator_range< const char_type* > const& lit) BOOST_OVERRIDE = 0;
+    virtual void on_literal(iterator_range< const char_type* > const& lit) = 0;
 
     /*!
      * \brief The method is called when an unknown placeholder is found in the format string
      *
      * \param ph The placeholder with the leading percent sign
      */
-    void on_placeholder(iterator_range< const char_type* > const& ph) BOOST_OVERRIDE
+    virtual void on_placeholder(iterator_range< const char_type* > const& ph)
     {
         // By default interpret all unrecognized placeholders as literals
         on_literal(ph);

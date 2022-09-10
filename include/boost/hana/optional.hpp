@@ -41,7 +41,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //////////////////////////////////////////////////////////////////////////
     // optional<>
     //////////////////////////////////////////////////////////////////////////
@@ -412,6 +412,6 @@ namespace boost { namespace hana {
         static constexpr hana::false_ apply(hana::optional<> const&, Pred&&)
         { return {}; }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_OPTIONAL_HPP

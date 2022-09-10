@@ -13,7 +13,6 @@
 */
 
 #include <boost/histogram/accumulators/weighted_sum.hpp>
-#include <boost/histogram/detail/detect.hpp>
 #include <boost/histogram/histogram.hpp>
 #include <boost/histogram/storage_adaptor.hpp>
 #include <boost/histogram/unlimited_storage.hpp> // = default_storage

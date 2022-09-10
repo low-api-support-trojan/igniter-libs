@@ -30,7 +30,7 @@ private:
 public:
     typedef intrusive_ptr< fss_cleanup_function >   ptr_t;
 
-    fss_cleanup_function() = default;
+    fss_cleanup_function() noexcept = default;
 
     virtual ~fss_cleanup_function() = default;
 

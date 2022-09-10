@@ -80,6 +80,9 @@ void fiber_entry( transfer_t t) noexcept {
         t.fctx = rec->run( t.fctx);
     } catch ( forced_unwind const& ex) {
         t = { ex.fctx, nullptr };
+#ifndef BOOST_ASSERT_IS_VOID
+        const_cast< forced_unwind & >( ex).caught = true;
+#endif
     }
     BOOST_ASSERT( nullptr != t.fctx);
     // destroy context-stack of `this`context on next context
@@ -311,8 +314,6 @@ public:
         return fctx_ < other.fctx_;
     }
 
-    #if !defined(BOOST_EMBTC)
-    
     template< typename charT, class traitsT >
     friend std::basic_ostream< charT, traitsT > &
     operator<<( std::basic_ostream< charT, traitsT > & os, fiber const& other) {
@@ -322,34 +323,12 @@ public:
             return os << "{not-a-context}";
         }
     }
-
-    #else
-    
-    template< typename charT, class traitsT >
-    friend std::basic_ostream< charT, traitsT > &
-    operator<<( std::basic_ostream< charT, traitsT > & os, fiber const& other);
-
-    #endif
 
     void swap( fiber & other) noexcept {
         std::swap( fctx_, other.fctx_);
     }
 };
 
-#if defined(BOOST_EMBTC)
-
-    template< typename charT, class traitsT >
-    inline std::basic_ostream< charT, traitsT > &
-    operator<<( std::basic_ostream< charT, traitsT > & os, fiber const& other) {
-        if ( nullptr != other.fctx_) {
-            return os << other.fctx_;
-        } else {
-            return os << "{not-a-context}";
-        }
-    }
-
-#endif
-    
 inline
 void swap( fiber & l, fiber & r) noexcept {
     l.swap( r);

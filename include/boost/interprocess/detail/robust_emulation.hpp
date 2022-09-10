@@ -194,8 +194,7 @@ class robust_spin_mutex
    robust_spin_mutex();
    void lock();
    bool try_lock();
-   template<class TimePoint>
-   bool timed_lock(const TimePoint &abs_time);
+   bool timed_lock(const boost::posix_time::ptime &abs_time);
    void unlock();
    void consistent();
    bool previous_owner_dead();
@@ -217,7 +216,7 @@ class robust_spin_mutex
 
 template<class Mutex>
 inline robust_spin_mutex<Mutex>::robust_spin_mutex()
-   : mtx(), owner((boost::uint32_t)get_invalid_process_id()), state(correct_state)
+   : mtx(), owner(get_invalid_process_id()), state(correct_state)
 {}
 
 template<class Mutex>
@@ -237,7 +236,7 @@ inline bool robust_spin_mutex<Mutex>::try_lock()
    }
 
    if (mtx.try_lock()){
-      atomic_write32(&this->owner, static_cast<boost::uint32_t>(get_current_process_id()));
+      atomic_write32(&this->owner, get_current_process_id());
       return true;
    }
    else{
@@ -251,15 +250,14 @@ inline bool robust_spin_mutex<Mutex>::try_lock()
 }
 
 template<class Mutex>
-template<class TimePoint>
 inline bool robust_spin_mutex<Mutex>::timed_lock
-   (const TimePoint &abs_time)
+   (const boost::posix_time::ptime &abs_time)
 {  return try_based_timed_lock(*this, abs_time);   }
 
 template<class Mutex>
 inline void robust_spin_mutex<Mutex>::owner_to_filename(boost::uint32_t own, std::string &s)
 {
-   robust_emulation_helpers::create_and_get_robust_lock_file_path(s, (OS_process_id_t)own);
+   robust_emulation_helpers::create_and_get_robust_lock_file_path(s, own);
 }
 
 template<class Mutex>
@@ -278,7 +276,7 @@ inline bool robust_spin_mutex<Mutex>::robust_check()
 template<class Mutex>
 inline bool robust_spin_mutex<Mutex>::check_if_owner_dead_and_take_ownership_atomically()
 {
-   boost::uint32_t cur_owner = static_cast<boost::uint32_t>(get_current_process_id());
+   boost::uint32_t cur_owner = get_current_process_id();
    boost::uint32_t old_owner = atomic_read32(&this->owner), old_owner2;
    //The cas loop guarantees that only one thread from this or another process
    //will succeed taking ownership
@@ -300,7 +298,7 @@ template<class Mutex>
 inline bool robust_spin_mutex<Mutex>::is_owner_dead(boost::uint32_t own)
 {
    //If owner is an invalid id, then it's clear it's dead
-   if(own == static_cast<boost::uint32_t>(get_invalid_process_id())){
+   if(own == (boost::uint32_t)get_invalid_process_id()){
       return true;
    }
 
@@ -364,7 +362,7 @@ inline void robust_spin_mutex<Mutex>::unlock()
       atomic_write32(&this->state, broken_state);
    }
    //Write an invalid owner to minimize pid reuse possibility
-   atomic_write32(&this->owner, static_cast<boost::uint32_t>(get_invalid_process_id()));
+   atomic_write32(&this->owner, get_invalid_process_id());
    mtx.unlock();
 }
 

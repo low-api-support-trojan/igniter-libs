@@ -18,7 +18,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-functional
     //! Partially apply a function to some arguments.
     //!
@@ -98,8 +98,8 @@ namespace boost { namespace hana {
         }
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr make_partial_t partial{};
+    constexpr make_partial_t partial{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FUNCTIONAL_PARTIAL_HPP

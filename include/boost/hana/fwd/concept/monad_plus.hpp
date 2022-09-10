@@ -13,7 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-concepts
     //! @defgroup group-MonadPlus MonadPlus
     //! The `MonadPlus` concept represents Monads with a monoidal structure.
@@ -84,6 +84,6 @@ namespace boost { namespace hana {
     //! [1]: https://en.wikibooks.org/wiki/Haskell/MonadPlus
     template <typename M>
     struct MonadPlus;
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_CONCEPT_MONAD_PLUS_HPP

@@ -15,7 +15,7 @@
 #include <boost/mpl/less.hpp>
 #include <boost/mpl/arithmetic.hpp>
 
-#ifdef BOOST_BORLANDC
+#ifdef __BORLANDC__
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/integral_c.hpp>
 #include <boost/mpl/identity.hpp>
@@ -65,7 +65,7 @@ Neither @c static_power nor @c static_root are defined for @c static_rational. T
 may not be floating point values, while powers and roots of rational numbers can produce floating point 
 values. 
 */
-#ifdef BOOST_BORLANDC
+#ifdef __BORLANDC__
 
 template<integer_type X>
 struct make_integral_c {
@@ -190,7 +190,7 @@ value(const static_rational<N,D>&)
 
 namespace mpl {
 
-#ifdef BOOST_BORLANDC
+#ifdef __BORLANDC__
 
 template<>
 struct plus_impl<boost::units::detail::static_rational_tag, boost::units::detail::static_rational_tag>

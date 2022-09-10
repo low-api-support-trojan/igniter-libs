@@ -81,7 +81,7 @@ namespace boost {
          long long ll;
 #endif
       };
-#ifdef BOOST_BORLANDC
+#ifdef __BORLANDC__
       struct boost_type_traits_internal_struct_X : public virtual Derived, public virtual Base
       {
          boost_type_traits_internal_struct_X();

@@ -155,21 +155,21 @@ namespace boost { namespace yap {
 #ifndef BOOST_YAP_DOXYGEN
 
     template<typename Expr, typename... T>
-    constexpr decltype(auto) evaluate(Expr && expr, T &&... t);
+    decltype(auto) evaluate(Expr && expr, T &&... t);
 
     template<typename Expr, typename Transform, typename... Transforms>
     constexpr decltype(auto) transform(
         Expr && expr, Transform && transform, Transforms &&... transforms);
 
     template<typename Expr, typename Transform, typename... Transforms>
-    constexpr decltype(auto) transform_strict(
+    decltype(auto) transform_strict(
         Expr && expr, Transform && transform, Transforms &&... transforms);
 
     template<typename T>
-    constexpr decltype(auto) deref(T && x);
+    decltype(auto) deref(T && x);
 
     template<typename Expr>
-    constexpr decltype(auto) value(Expr && expr);
+    decltype(auto) value(Expr && expr);
 
 #endif // BOOST_YAP_DOXYGEN
 

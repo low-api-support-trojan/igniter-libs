@@ -24,6 +24,7 @@
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/detail/signed_unsigned_tools.hpp>
 #include <boost/random/detail/integer_log2.hpp>
+#include <boost/mpl/bool.hpp>
 
 namespace boost {
 namespace random {
@@ -48,7 +49,7 @@ generate_one_digit(Engine& eng, std::size_t bits)
 }
 
 template<class RealType, std::size_t w, class Engine>
-std::pair<RealType, int> generate_int_float_pair(Engine& eng, boost::true_type)
+std::pair<RealType, int> generate_int_float_pair(Engine& eng, boost::mpl::true_)
 {
     typedef typename Engine::result_type base_result;
     typedef typename boost::make_unsigned<base_result>::type base_unsigned;
@@ -81,7 +82,7 @@ std::pair<RealType, int> generate_int_float_pair(Engine& eng, boost::true_type)
         }
         r = RealType(u >> (w%m)) * mult;
     }
-    for(std::size_t i = m - w%m; i + m < digits; i += m) {
+    for(std::size_t i = m - w%m; i + m < digits; ++i) {
         base_unsigned u = generate_one_digit(eng, m);
         r += u;
         r *= RealType(0.5)/RealType(base_unsigned(1) << (m - 1));
@@ -98,7 +99,7 @@ std::pair<RealType, int> generate_int_float_pair(Engine& eng, boost::true_type)
 }
 
 template<class RealType, std::size_t w, class Engine>
-inline std::pair<RealType, int> generate_int_float_pair(Engine& eng, boost::false_type)
+inline std::pair<RealType, int> generate_int_float_pair(Engine& eng, boost::mpl::false_)
 {
     int bucket = uniform_int_distribution<>(0, (1 << w) - 1)(eng);
     RealType r = uniform_01<RealType>()(eng);

@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns the last element of a non-empty and finite iterable.
     //! @ingroup group-Iterable
     //!
@@ -41,8 +41,8 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(Xs&& xs) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr back_t back{};
+    constexpr back_t back{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_BACK_HPP

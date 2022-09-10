@@ -18,7 +18,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/fwd/keys.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Tag representing `hana::map`s.
     //! @relates hana::map
     struct map_tag { };
@@ -169,11 +169,11 @@ namespace boost { namespace hana {
     //! Example
     //! -------
     //! @include example/map/make.cpp
-    BOOST_HANA_INLINE_VARIABLE constexpr auto make_map = make<map_tag>;
+    constexpr auto make_map = make<map_tag>;
 
     //! Equivalent to `to<map_tag>`; provided for convenience.
     //! @relates hana::map
-    BOOST_HANA_INLINE_VARIABLE constexpr auto to_map = to<map_tag>;
+    constexpr auto to_map = to<map_tag>;
 
     //! Returns a `Sequence` of the keys of the map, in unspecified order.
     //! @relates hana::map
@@ -205,7 +205,7 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(Map&& map) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr values_t values{};
+    constexpr values_t values{};
 #endif
 
     //! Inserts a new key/value pair in a map.
@@ -377,6 +377,6 @@ constexpr auto symmetric_difference = [](auto&& xs, auto&& ys) {
 #endif
 
 
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_MAP_HPP

@@ -24,7 +24,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs, typename Z>
     constexpr auto intersperse_t::operator()(Xs&& xs, Z&& z) const {
@@ -71,6 +71,6 @@ namespace boost { namespace hana {
                                       std::make_index_sequence<new_size>{});
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_INTERSPERSE_HPP

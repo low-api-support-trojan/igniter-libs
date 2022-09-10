@@ -17,7 +17,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana { namespace detail {
+BOOST_HANA_NAMESPACE_BEGIN namespace detail {
     template <bool, typename Pred, typename ...Xs>
     struct find_tail_size;
 
@@ -51,6 +51,6 @@ namespace boost { namespace hana { namespace detail {
             >;
         }
     };
-} }} // end namespace boost::hana
+} BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DETAIL_FIRST_UNSATISFIED_INDEX_HPP

@@ -51,11 +51,6 @@ public:
             s.buffer_.commit(net::buffer_copy(
                 s.buffer_.prepare(result.size),
                 b, result.size));
-
-            BOOST_ASIO_HANDLER_LOCATION((
-                __FILE__, __LINE__,
-                "flat_stream::async_write_some"));
-
             s.stream_.async_write_some(
                 s.buffer_.data(), std::move(*this));
         }
@@ -63,11 +58,6 @@ public:
         {
             s.buffer_.clear();
             s.buffer_.shrink_to_fit();
-
-            BOOST_ASIO_HANDLER_LOCATION((
-                __FILE__, __LINE__,
-                "flat_stream::async_write_some"));
-
             s.stream_.async_write_some(
                 beast::buffers_prefix(
                     result.size, b), std::move(*this));
@@ -154,7 +144,7 @@ read_some(MutableBufferSequence const& buffers, error_code& ec)
 template<class NextLayer>
 template<
     class MutableBufferSequence,
-    BOOST_BEAST_ASYNC_TPARAM2 ReadHandler>
+    class ReadHandler>
 BOOST_BEAST_ASYNC_RESULT2(ReadHandler)
 flat_stream<NextLayer>::
 async_read_some(
@@ -235,7 +225,7 @@ write_some(ConstBufferSequence const& buffers, error_code& ec)
 template<class NextLayer>
 template<
     class ConstBufferSequence,
-    BOOST_BEAST_ASYNC_TPARAM2 WriteHandler>
+    class WriteHandler>
 BOOST_BEAST_ASYNC_RESULT2(WriteHandler)
 flat_stream<NextLayer>::
 async_write_some(

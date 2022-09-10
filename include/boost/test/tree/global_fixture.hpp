@@ -43,10 +43,10 @@ public:
     void unregister_from_framework();
 
     // Dtor
-    ~global_configuration() BOOST_OVERRIDE;
+    virtual ~global_configuration();
 
     // Happens after the framework global observer init has been done
-    int     priority() BOOST_OVERRIDE { return 1; }
+    virtual int     priority() { return 1; }
 
 private:
     bool registered;
@@ -70,7 +70,7 @@ public:
     void unregister_from_framework();
 
     // Dtor
-    ~global_fixture() BOOST_OVERRIDE;
+    virtual ~global_fixture();
 
 private:
     bool registered;
@@ -87,12 +87,12 @@ struct global_configuration_impl : public global_configuration {
     }
 
     // test observer interface
-    void    test_start( counter_t, test_unit_id ) BOOST_OVERRIDE {
+    virtual void    test_start( counter_t ) {
         m_configuration_observer = new F;
     }
 
     // test observer interface
-    void    test_finish() BOOST_OVERRIDE           {
+    virtual void    test_finish()           {
         if(m_configuration_observer) {
             delete m_configuration_observer;
             m_configuration_observer = 0;
@@ -110,13 +110,13 @@ struct global_fixture_impl : public global_fixture {
     }
 
     // test fixture interface
-    void setup() BOOST_OVERRIDE                    {
+    virtual void setup()                    {
         m_fixture = new F;
         setup_conditional(*m_fixture);
     }
 
     // test fixture interface
-    void teardown() BOOST_OVERRIDE                 {
+    virtual void teardown()                 {
         if(m_fixture) {
             teardown_conditional(*m_fixture);
         }

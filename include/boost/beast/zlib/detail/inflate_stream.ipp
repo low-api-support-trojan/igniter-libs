@@ -572,7 +572,7 @@ inflate_table(
     code *next;                     // next available space in table
     std::uint16_t const* base;      // base value table to use
     std::uint16_t const* extra;     // extra bits table to use
-    unsigned match;                 // use base and extra for symbol >= match
+    int end;                        // use base and extra for symbol > end
     std::uint16_t count[15+1];      // number of codes of each length
     std::uint16_t offs[15+1];       // offsets in table for each length
 
@@ -584,7 +584,7 @@ inflate_table(
     // Length codes 257..285 extra
     static std::uint16_t constexpr lext[31] = {
         16, 16, 16, 16, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18,
-        19, 19, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 16, 77, 202};
+        19, 19, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 16, 72, 78};
 
     // Distance codes 0..29 base
     static std::uint16_t constexpr dbase[32] = {
@@ -722,17 +722,19 @@ inflate_table(
     {
     case build::codes:
         base = extra = work;    /* dummy value--not used */
-        match = 20;
+        end = 19;
         break;
     case build::lens:
         base = lbase;
+        base -= 257;
         extra = lext;
-        match = 257;
+        extra -= 257;
+        end = 256;
         break;
     default:            /* build::dists */
         base = dbase;
         extra = dext;
-        match = 0;
+        end = -1;
     }
 
     /* initialize state for loop */
@@ -762,15 +764,15 @@ inflate_table(
     {
         /* create table entry */
         here.bits = (std::uint8_t)(len - drop);
-        if (work[sym] + 1U < match)
+        if ((int)(work[sym]) < end)
         {
             here.op = (std::uint8_t)0;
             here.val = work[sym];
         }
-        else if (work[sym] >= match)
+        else if ((int)(work[sym]) > end)
         {
-            here.op = (std::uint8_t)(extra[work[sym] - match]);
-            here.val = base[work[sym] - match];
+            here.op = (std::uint8_t)(extra[work[sym]]);
+            here.val = base[work[sym]];
         }
         else
         {

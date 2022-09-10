@@ -6,7 +6,6 @@
 #ifndef BOOST_MATH_TOOLS_CONDITION_NUMBERS_HPP
 #define BOOST_MATH_TOOLS_CONDITION_NUMBERS_HPP
 #include <cmath>
-#include <limits>
 #include <boost/math/differentiation/finite_difference.hpp>
 
 namespace boost::math::tools {
@@ -80,7 +79,7 @@ private:
 };
 
 template<class F, class Real>
-Real evaluation_condition_number(F const & f, Real const & x)
+auto evaluation_condition_number(F const & f, Real const & x)
 {
     using std::abs;
     using std::isnan;

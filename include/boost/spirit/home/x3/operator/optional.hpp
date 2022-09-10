@@ -21,10 +21,9 @@ namespace boost { namespace spirit { namespace x3
     struct optional : proxy<Subject, optional<Subject>>
     {
         typedef proxy<Subject, optional<Subject>> base_type;
-        static bool const is_pass_through_unary = false;
         static bool const handles_container = true;
 
-        constexpr optional(Subject const& subject)
+        optional(Subject const& subject)
           : base_type(subject) {}
 
         using base_type::parse_subject;
@@ -65,7 +64,7 @@ namespace boost { namespace spirit { namespace x3
     };
 
     template <typename Subject>
-    constexpr optional<typename extension::as_parser<Subject>::value_type>
+    inline optional<typename extension::as_parser<Subject>::value_type>
     operator-(Subject const& subject)
     {
         return { as_parser(subject) };

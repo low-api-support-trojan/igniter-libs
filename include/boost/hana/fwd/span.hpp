@@ -15,7 +15,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/detail/nested_by_fwd.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns a `Product` containing the longest prefix of a sequence
     //! satisfying a predicate, and the rest of the sequence.
     //! @ingroup group-Sequence
@@ -78,8 +78,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Pred&& pred) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr span_t span{};
+    constexpr span_t span{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_SPAN_HPP

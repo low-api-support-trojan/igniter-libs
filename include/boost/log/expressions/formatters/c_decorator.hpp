@@ -154,10 +154,10 @@ struct c_decorator_gen
  * For wide-character formatting there is the similar \c wc_decor decorator generator object.
  */
 #ifdef BOOST_LOG_USE_CHAR
-BOOST_INLINE_VARIABLE const aux::c_decorator_gen< char > c_decor = {};
+const aux::c_decorator_gen< char > c_decor = {};
 #endif
 #ifdef BOOST_LOG_USE_WCHAR_T
-BOOST_INLINE_VARIABLE const aux::c_decorator_gen< wchar_t > wc_decor = {};
+const aux::c_decorator_gen< wchar_t > wc_decor = {};
 #endif
 
 /*!
@@ -254,10 +254,10 @@ struct c_ascii_decorator_gen
  * For wide-character formatting there is the similar \c wc_ascii_decor decorator generator object.
  */
 #ifdef BOOST_LOG_USE_CHAR
-BOOST_INLINE_VARIABLE const aux::c_ascii_decorator_gen< char > c_ascii_decor = {};
+const aux::c_ascii_decorator_gen< char > c_ascii_decor = {};
 #endif
 #ifdef BOOST_LOG_USE_WCHAR_T
-BOOST_INLINE_VARIABLE const aux::c_ascii_decorator_gen< wchar_t > wc_ascii_decor = {};
+const aux::c_ascii_decorator_gen< wchar_t > wc_ascii_decor = {};
 #endif
 
 /*!

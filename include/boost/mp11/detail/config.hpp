@@ -47,9 +47,7 @@
 
 # endif
 
-#endif
-
-#if defined(__clang__)
+#elif defined(__clang__)
 
 // Clang
 
@@ -125,14 +123,17 @@
 
 // BOOST_MP11_DEPRECATED(msg)
 
-#if BOOST_MP11_WORKAROUND( BOOST_MP11_CLANG, < 304 )
+#if BOOST_MP11_WORKAROUND( BOOST_MP11_MSVC, < 1900 )
 #  define BOOST_MP11_DEPRECATED(msg)
-#elif defined(__GNUC__) || defined(__clang__)
+#elif BOOST_MP11_WORKAROUND( BOOST_MP11_GCC, < 50000 )
 #  define BOOST_MP11_DEPRECATED(msg) __attribute__((deprecated(msg)))
-#elif defined(_MSC_VER) && _MSC_VER >= 1900
-#  define BOOST_MP11_DEPRECATED(msg) [[deprecated(msg)]]
-#else
+#elif BOOST_MP11_WORKAROUND( BOOST_MP11_CLANG, < 304 )
 #  define BOOST_MP11_DEPRECATED(msg)
+#elif BOOST_MP11_CLANG
+// -pedantic warns about [[deprecated]] when in C++11 mode
+#  define BOOST_MP11_DEPRECATED(msg) __attribute__((deprecated(msg)))
+#else
+#  define BOOST_MP11_DEPRECATED(msg) [[deprecated(msg)]]
 #endif
 
 #endif // #ifndef BOOST_MP11_DETAIL_CONFIG_HPP_INCLUDED

@@ -16,7 +16,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <cstddef>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Extract the elements of a `Sequence` at the given indices.
     //! @ingroup group-Sequence
     //!
@@ -62,7 +62,7 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Indices&& indices) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr slice_t slice{};
+    constexpr slice_t slice{};
 #endif
 
     //! Shorthand to `slice` a contiguous range of elements.
@@ -98,8 +98,8 @@ namespace boost { namespace hana {
     struct slice_c_t;
 
     template <std::size_t from, std::size_t to>
-    BOOST_HANA_INLINE_VARIABLE constexpr slice_c_t<from, to> slice_c{};
+    constexpr slice_c_t<from, to> slice_c{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_SLICE_HPP

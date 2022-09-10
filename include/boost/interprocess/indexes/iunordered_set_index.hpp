@@ -161,7 +161,6 @@ class iunordered_set_index
    typedef typename index_type::bucket_type              bucket_type;
    typedef typename index_type::bucket_traits            bucket_traits;
    typedef typename index_type::size_type                size_type;
-   typedef typename index_type::difference_type          difference_type;
 
    #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
    private:
@@ -204,7 +203,7 @@ class iunordered_set_index
          (boost::interprocess::shrink_in_place | boost::interprocess::nothrow_allocation, received_size, received_size, buckets);
       BOOST_ASSERT(buckets == shunk_p); (void)shunk_p;
 
-      bucket_ptr buckets_init = buckets + difference_type(received_size);
+      bucket_ptr buckets_init = buckets + received_size;
       for(size_type i = 0; i < (old_size - received_size); ++i){
          to_raw_pointer(buckets_init++)->~bucket_type();
       }
@@ -220,7 +219,7 @@ class iunordered_set_index
       bucket_ptr ret = alloc.allocation_command
             (boost::interprocess::expand_fwd | boost::interprocess::allocate_new, new_num, received_size, reuse);
       if(ret == old_buckets){
-         bucket_ptr buckets_init = old_buckets + difference_type(old_num);
+         bucket_ptr buckets_init = old_buckets + old_num;
          for(size_type i = 0; i < (new_num - old_num); ++i){
             ::new(to_raw_pointer(buckets_init++), boost_container_new_t())bucket_type();
          }
@@ -277,15 +276,15 @@ class iunordered_set_index
       new_n = index_type::suggested_upper_bucket_count(new_n);
       bucket_ptr new_p;
       //This can throw
-      BOOST_TRY{
+      try{
          if(old_p != bucket_ptr(&this->init_bucket))
             new_p = expand_or_create_buckets(old_p, old_n, this->alloc, new_n);
          else
             new_p = create_buckets(this->alloc, new_n);
       }
-      BOOST_CATCH(...){
+      catch(...){
          return;
-      } BOOST_CATCH_END
+      }
       //Rehashing does not throw, since neither the hash nor the
       //comparison function can throw
       this->rehash(bucket_traits(new_p, new_n));
@@ -313,12 +312,12 @@ class iunordered_set_index
          if(sug_count >= cur_count)
             return;
 
-         BOOST_TRY{
+         try{
             shrink_buckets(old_p, cur_count, this->alloc, sug_count);
          }
-         BOOST_CATCH(...){
+         catch(...){
             return;
-         } BOOST_CATCH_END
+         }
 
          //Rehashing does not throw, since neither the hash nor the
          //comparison function can throw
@@ -341,10 +340,10 @@ class iunordered_set_index
       iterator it = index_type::insert_commit(val, commit_data);
       size_type cur_size      = this->size();
       if(cur_size > this->bucket_count()){
-         BOOST_TRY{
+         try{
             this->reserve(cur_size);
          }
-         BOOST_CATCH(...){
+         catch(...){
             //Strong guarantee: if something goes wrong
             //we should remove the insertion.
             //
@@ -353,8 +352,8 @@ class iunordered_set_index
             //throw only because of the memory allocation:
             //the iterator has not been invalidated.
             index_type::erase(it);
-            BOOST_RETHROW
-         } BOOST_CATCH_END
+            throw;
+         }
       }
       return it;
    }

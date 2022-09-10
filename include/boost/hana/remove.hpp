@@ -21,7 +21,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/not.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs, typename Value>
     constexpr auto remove_t::operator()(Xs&& xs, Value&& value) const {
@@ -49,6 +49,6 @@ namespace boost { namespace hana {
                                   hana::equal.to(static_cast<Value&&>(value))));
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_REMOVE_HPP

@@ -12,7 +12,8 @@
 
 #include <boost/range/detail/any_iterator_buffer.hpp>
 #include <boost/iterator/iterator_categories.hpp>
-#include <boost/type_traits/is_convertible.hpp>
+#include <boost/type_traits/add_const.hpp>
+#include <boost/type_traits/add_reference.hpp>
 #include <boost/type_traits/is_reference.hpp>
 #include <boost/type_traits/remove_const.hpp>
 #include <boost/type_traits/remove_reference.hpp>
@@ -34,16 +35,15 @@ namespace boost
         };
 
         template<class T>
-        struct reference_as_value_type_generator
+        struct mutable_reference_type_generator
         {
-            typedef typename remove_reference<
-                typename remove_const<T>::type
-            >::type value_type;
-
             typedef typename mpl::if_<
-                typename is_convertible<const value_type&, value_type>::type,
-                value_type,
-                T
+                typename mpl::and_<
+                    typename is_const<T>::type,
+                    typename mpl::not_<typename is_reference<T>::type>::type
+                >::type,
+                T,
+                typename add_reference<T>::type
             >::type type;
         };
 
@@ -53,12 +53,16 @@ namespace boost
         >
         struct any_incrementable_iterator_interface
         {
-            typedef Reference reference;
+            typedef typename mutable_reference_type_generator<
+                Reference
+            >::type reference;
+
             typedef typename const_reference_type_generator<
                 Reference
             >::type const_reference;
-            typedef typename reference_as_value_type_generator<
-                Reference
+
+            typedef typename remove_const<
+                typename remove_reference<Reference>::type
             >::type reference_as_value_type;
 
             typedef Buffer buffer_type;

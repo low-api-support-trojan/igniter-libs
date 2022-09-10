@@ -116,7 +116,7 @@ public:
     template<class F>
     chebyshev_transform(const F& f, Real a, Real b,
        Real tol = 500 * std::numeric_limits<Real>::epsilon(),
-       size_t max_refinements = 16) : m_a(a), m_b(b)
+       size_t max_refinements = 15) : m_a(a), m_b(b)
     {
         if (a >= b)
         {
@@ -174,9 +174,16 @@ public:
         }
     }
 
-    inline Real operator()(Real x) const
+    Real operator()(Real x) const
     {
-        return chebyshev_clenshaw_recurrence(m_coeffs.data(), m_coeffs.size(), m_a, m_b, x);
+        using boost::math::constants::half;
+        if (x > m_b || x < m_a)
+        {
+            throw std::domain_error("x not in [a, b]\n");
+        }
+
+        Real z = (2*x - m_a - m_b)/(m_b - m_a);
+        return chebyshev_clenshaw_recurrence(m_coeffs.data(), m_coeffs.size(), z);
     }
 
     // Integral over entire domain [a, b]

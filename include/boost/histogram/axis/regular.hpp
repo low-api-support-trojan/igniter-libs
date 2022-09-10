@@ -7,6 +7,7 @@
 #ifndef BOOST_HISTOGRAM_AXIS_REGULAR_HPP
 #define BOOST_HISTOGRAM_AXIS_REGULAR_HPP
 
+#include <boost/assert.hpp>
 #include <boost/core/nvp.hpp>
 #include <boost/histogram/axis/interval_view.hpp>
 #include <boost/histogram/axis/iterator.hpp>
@@ -18,7 +19,6 @@
 #include <boost/histogram/fwd.hpp>
 #include <boost/mp11/utility.hpp>
 #include <boost/throw_exception.hpp>
-#include <cassert>
 #include <cmath>
 #include <limits>
 #include <stdexcept>
@@ -178,12 +178,10 @@ step_type<T> step(T t) {
 template <class Value, class Transform, class MetaData, class Options>
 class regular : public iterator_mixin<regular<Value, Transform, MetaData, Options>>,
                 protected detail::replace_default<Transform, transform::id>,
-                public metadata_base_t<MetaData> {
-  // these must be private, so that they are not automatically inherited
+                public metadata_base<MetaData> {
   using value_type = Value;
   using transform_type = detail::replace_default<Transform, transform::id>;
-  using metadata_base = metadata_base_t<MetaData>;
-  using metadata_type = typename metadata_base::metadata_type;
+  using metadata_type = typename metadata_base<MetaData>::metadata_type;
   using options_type =
       detail::replace_default<Options, decltype(option::underflow | option::overflow)>;
 
@@ -217,7 +215,7 @@ public:
   regular(transform_type trans, unsigned n, value_type start, value_type stop,
           metadata_type meta = {})
       : transform_type(std::move(trans))
-      , metadata_base(std::move(meta))
+      , metadata_base<MetaData>(std::move(meta))
       , size_(static_cast<index_type>(n))
       , min_(this->forward(detail::get_scale(start)))
       , delta_(this->forward(detail::get_scale(stop)) - min_) {
@@ -280,7 +278,7 @@ public:
   regular(const regular& src, index_type begin, index_type end, unsigned merge)
       : regular(src.transform(), (end - begin) / merge, src.value(begin), src.value(end),
                 src.metadata()) {
-    assert((end - begin) % merge == 0);
+    BOOST_ASSERT((end - begin) % merge == 0);
     if (options_type::test(option::circular) && !(begin == 0 && end == src.size()))
       BOOST_THROW_EXCEPTION(std::invalid_argument("cannot shrink circular axis"));
   }
@@ -309,13 +307,13 @@ public:
   }
 
   /// Returns index and shift (if axis has grown) for the passed argument.
-  std::pair<index_type, index_type> update(value_type x) noexcept {
-    assert(options_type::test(option::growth));
+  auto update(value_type x) noexcept {
+    BOOST_ASSERT(options_type::test(option::growth));
     const auto z = (this->forward(x / unit_type{}) - min_) / delta_;
     if (z < 1) { // don't use i here!
       if (z >= 0) {
         const auto i = static_cast<axis::index_type>(z * size());
-        return {i, 0};
+        return std::make_pair(i, 0);
       }
       if (z != -std::numeric_limits<internal_value_type>::infinity()) {
         const auto stop = min_ + delta_;
@@ -323,10 +321,10 @@ public:
         min_ += i * (delta_ / size());
         delta_ = stop - min_;
         size_ -= i;
-        return {0, -i};
+        return std::make_pair(0, -i);
       }
       // z is -infinity
-      return {-1, 0};
+      return std::make_pair(-1, 0);
     }
     // z either beyond range, infinite, or NaN
     if (z < std::numeric_limits<internal_value_type>::infinity()) {
@@ -335,10 +333,10 @@ public:
       delta_ /= size();
       delta_ *= size() + n;
       size_ += n;
-      return {i, -n};
+      return std::make_pair(i, -n);
     }
     // z either infinite or NaN
-    return {size(), 0};
+    return std::make_pair(size(), 0);
   }
 
   /// Return value for fractional index argument.
@@ -367,9 +365,8 @@ public:
 
   template <class V, class T, class M, class O>
   bool operator==(const regular<V, T, M, O>& o) const noexcept {
-    return detail::relaxed_equal{}(transform(), o.transform()) && size() == o.size() &&
-           min_ == o.min_ && delta_ == o.delta_ &&
-           detail::relaxed_equal{}(this->metadata(), o.metadata());
+    return detail::relaxed_equal(transform(), o.transform()) && size() == o.size() &&
+           min_ == o.min_ && delta_ == o.delta_ && metadata_base<MetaData>::operator==(o);
   }
   template <class V, class T, class M, class O>
   bool operator!=(const regular<V, T, M, O>& o) const noexcept {

@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Finds the value associated to the first key satisfying a predicate.
     //! @ingroup group-Searchable
     //!
@@ -50,8 +50,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Pred&& pred) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr find_if_t find_if{};
+    constexpr find_if_t find_if{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_FIND_IF_HPP

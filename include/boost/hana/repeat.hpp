@@ -20,7 +20,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     template <typename I, bool condition>
     struct repeat_impl<I, when<condition>> : default_ {
         template <typename F, std::size_t ...i>
@@ -53,6 +53,6 @@ namespace boost { namespace hana {
         return Repeat::apply(n, static_cast<F&&>(f));
     }
     //! @endcond
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_REPEAT_HPP

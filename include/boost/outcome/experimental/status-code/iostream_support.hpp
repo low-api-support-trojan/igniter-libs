@@ -1,5 +1,5 @@
 /* Proposed SG14 status_code
-(C) 2018-2021 Niall Douglas <http://www.nedproductions.biz/> (5 commits)
+(C) 2018-2019 Niall Douglas <http://www.nedproductions.biz/> (5 commits)
 File Created: Feb 2018
 
 
@@ -33,15 +33,16 @@ DEALINGS IN THE SOFTWARE.
 
 #include "error.hpp"
 
-#include <ostream>
+#include <iostream>
 
 BOOST_OUTCOME_SYSTEM_ERROR2_NAMESPACE_BEGIN
 
 /*! Print the status code to a `std::ostream &`.
 Requires that `DomainType::value_type` implements an `operator<<` overload for `std::ostream`.
 */
-BOOST_OUTCOME_SYSTEM_ERROR2_TEMPLATE(class DomainType)  //
-BOOST_OUTCOME_SYSTEM_ERROR2_TREQUIRES(BOOST_OUTCOME_SYSTEM_ERROR2_TPRED(std::is_same<std::ostream, typename std::decay<decltype(std::declval<std::ostream>() << std::declval<typename status_code<DomainType>::value_type>())>::type>::value)) inline std::ostream &operator<<(std::ostream &s, const status_code<DomainType> &v)
+template <class DomainType,  //
+          typename std::enable_if<std::is_same<std::ostream, typename std::decay<decltype(std::declval<std::ostream>() << std::declval<typename status_code<DomainType>::value_type>())>::type>::value, bool>::type = true>
+inline std::ostream &operator<<(std::ostream &s, const status_code<DomainType> &v)
 {
   if(v.empty())
   {
@@ -50,33 +51,26 @@ BOOST_OUTCOME_SYSTEM_ERROR2_TREQUIRES(BOOST_OUTCOME_SYSTEM_ERROR2_TPRED(std::is_
   return s << v.domain().name().c_str() << ": " << v.value();
 }
 
-/*! Print a status code domain's `string_ref` to a `std::ostream &`.
- */
-inline std::ostream &operator<<(std::ostream &s, const status_code_domain::string_ref &v)
-{
-  return s << v.c_str();
-}
-
 /*! Print the erased status code to a `std::ostream &`.
- */
+*/
 template <class ErasedType> inline std::ostream &operator<<(std::ostream &s, const status_code<erased<ErasedType>> &v)
 {
   if(v.empty())
   {
     return s << "(empty)";
   }
-  return s << v.domain().name() << ": " << v.message();
+  return s << v.domain().name().c_str() << ": " << v.message().c_str();
 }
 
 /*! Print the generic code to a `std::ostream &`.
- */
+*/
 inline std::ostream &operator<<(std::ostream &s, const generic_code &v)
 {
   if(v.empty())
   {
     return s << "(empty)";
   }
-  return s << v.domain().name() << ": " << v.message();
+  return s << v.domain().name().c_str() << ": " << v.message().c_str();
 }
 
 BOOST_OUTCOME_SYSTEM_ERROR2_NAMESPACE_END

@@ -136,7 +136,7 @@ private:
 
 class template_test_case_gen_base : public test_unit_generator {
 public:
-    test_unit* next() const BOOST_OVERRIDE
+    virtual test_unit* next() const
     {
         if( m_test_cases.empty() )
             return 0;

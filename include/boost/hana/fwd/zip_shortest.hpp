@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Zip one sequence or more.
     //! @ingroup group-Sequence
     //!
@@ -54,8 +54,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Ys&& ...ys) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr zip_shortest_t zip_shortest{};
+    constexpr zip_shortest_t zip_shortest{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_ZIP_SHORTEST_HPP

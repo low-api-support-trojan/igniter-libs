@@ -20,12 +20,13 @@
 #include <boost/integer/integer_mask.hpp>
 #include <boost/integer/static_log2.hpp>
 #include <boost/random/traits.hpp>
+#include <boost/mpl/bool.hpp>
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/int.hpp>
 #include <boost/random/detail/const_mod.hpp>
 #include <boost/random/detail/integer_log2.hpp>
 #include <boost/random/detail/signed_unsigned_tools.hpp>
 #include <boost/random/detail/generator_bits.hpp>
-#include <boost/type_traits/conditional.hpp>
-#include <boost/type_traits/integral_constant.hpp>
 
 #include <boost/random/detail/disable_warnings.hpp>
 
@@ -40,7 +41,7 @@ namespace detail {
 template<class T>
 struct seed_type
 {
-    typedef typename boost::conditional<boost::is_integral<T>::value,
+    typedef typename boost::mpl::if_<boost::is_integral<T>,
         T,
         boost::uint32_t
     >::type type;
@@ -202,13 +203,13 @@ void generate_from_int(Engine& eng, Iter begin, Iter end)
 }
 
 template<class Engine, class Iter>
-void generate_impl(Engine& eng, Iter first, Iter last, boost::true_type)
+void generate_impl(Engine& eng, Iter first, Iter last, boost::mpl::true_)
 {
     return detail::generate_from_int(eng, first, last);
 }
 
 template<class Engine, class Iter>
-void generate_impl(Engine& eng, Iter first, Iter last, boost::false_type)
+void generate_impl(Engine& eng, Iter first, Iter last, boost::mpl::false_)
 {
     return detail::generate_from_real(eng, first, last);
 }
@@ -224,8 +225,8 @@ void generate(Engine& eng, Iter first, Iter last)
 template<class IntType, IntType m, class SeedSeq>
 IntType seed_one_int(SeedSeq& seq)
 {
-    static const int log = ::boost::conditional<(m == 0),
-        ::boost::integral_constant<int, (::std::numeric_limits<IntType>::digits)>,
+    static const int log = ::boost::mpl::if_c<(m == 0),
+        ::boost::mpl::int_<(::std::numeric_limits<IntType>::digits)>,
         ::boost::static_log2<m> >::type::value;
     static const int k =
         (log + ((~(static_cast<IntType>(2) << (log - 1)) & m)? 32 : 31)) / 32;
@@ -243,8 +244,8 @@ IntType seed_one_int(SeedSeq& seq)
 template<class IntType, IntType m, class Iter>
 IntType get_one_int(Iter& first, Iter last)
 {
-    static const int log = ::boost::conditional<(m == 0),
-        ::boost::integral_constant<int, (::std::numeric_limits<IntType>::digits)>,
+    static const int log = ::boost::mpl::if_c<(m == 0),
+        ::boost::mpl::int_<(::std::numeric_limits<IntType>::digits)>,
         ::boost::static_log2<m> >::type::value;
     static const int k =
         (log + ((~(static_cast<IntType>(2) << (log - 1)) & m)? 32 : 31)) / 32;
@@ -276,7 +277,7 @@ void seed_array_int_impl(SeedSeq& seq, UIntType (&x)[n])
 }
 
 template<int w, std::size_t n, class SeedSeq, class IntType>
-inline void seed_array_int_impl(SeedSeq& seq, IntType (&x)[n], boost::true_type)
+inline void seed_array_int_impl(SeedSeq& seq, IntType (&x)[n], boost::mpl::true_)
 {
     BOOST_STATIC_ASSERT_MSG(boost::is_integral<IntType>::value, "Sorry but this routine has not been ported to non built-in integers as it relies on a reinterpret_cast.");
     typedef typename boost::make_unsigned<IntType>::type unsigned_array[n];
@@ -284,7 +285,7 @@ inline void seed_array_int_impl(SeedSeq& seq, IntType (&x)[n], boost::true_type)
 }
 
 template<int w, std::size_t n, class SeedSeq, class IntType>
-inline void seed_array_int_impl(SeedSeq& seq, IntType (&x)[n], boost::false_type)
+inline void seed_array_int_impl(SeedSeq& seq, IntType (&x)[n], boost::mpl::false_)
 {
     seed_array_int_impl<w>(seq, x);
 }
@@ -311,7 +312,7 @@ void fill_array_int_impl(Iter& first, Iter last, UIntType (&x)[n])
 }
 
 template<int w, std::size_t n, class Iter, class IntType>
-inline void fill_array_int_impl(Iter& first, Iter last, IntType (&x)[n], boost::true_type)
+inline void fill_array_int_impl(Iter& first, Iter last, IntType (&x)[n], boost::mpl::true_)
 {
     BOOST_STATIC_ASSERT_MSG(boost::is_integral<IntType>::value, "Sorry but this routine has not been ported to non built-in integers as it relies on a reinterpret_cast.");
     typedef typename boost::make_unsigned<IntType>::type unsigned_array[n];
@@ -319,7 +320,7 @@ inline void fill_array_int_impl(Iter& first, Iter last, IntType (&x)[n], boost::
 }
 
 template<int w, std::size_t n, class Iter, class IntType>
-inline void fill_array_int_impl(Iter& first, Iter last, IntType (&x)[n], boost::false_type)
+inline void fill_array_int_impl(Iter& first, Iter last, IntType (&x)[n], boost::mpl::false_)
 {
     fill_array_int_impl<w>(first, last, x);
 }

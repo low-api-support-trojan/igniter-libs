@@ -50,7 +50,7 @@ namespace boost { namespace fusion {
 #endif
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     namespace ext { namespace boost { namespace fusion {
         struct vector_tag;
     }}}
@@ -105,6 +105,6 @@ namespace boost { namespace hana {
             return ::boost::fusion::make_vector(static_cast<Xs&&>(xs)...);
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_EXT_BOOST_FUSION_VECTOR_HPP

@@ -15,11 +15,9 @@
 # pragma once
 #endif              
 
-#include <boost/config.hpp> // BOOST_STRINGIZE.
-
 #if defined(BOOST_BZIP2_BINARY)
 # if defined(BOOST_MSVC) || \
-     defined(BOOST_BORLANDC) || \
+     defined(__BORLANDC__) || \
      (defined(__MWERKS__) && defined(_WIN32) && (__MWERKS__ >= 0x3000)) || \
      (defined(__ICL) && defined(_MSC_EXTENSIONS)) \
      /**/

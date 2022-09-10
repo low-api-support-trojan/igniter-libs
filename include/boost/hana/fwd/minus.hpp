@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Subtract two elements of a group.
     //! @ingroup group-Group
     //!
@@ -60,8 +60,8 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(X&& x, Y&& y) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr minus_t minus{};
+    constexpr minus_t minus{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_MINUS_HPP

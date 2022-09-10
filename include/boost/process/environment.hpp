@@ -44,7 +44,7 @@ struct const_entry
             bool operator()(char c)    const {return c == api::env_seperator<char>   ();}
         } s;
         boost::split(data, _data, s);
-        return data;
+        return std::move(data);
     }
     string_type to_string()              const
     {
@@ -677,11 +677,11 @@ inline std::vector<boost::filesystem::path> path()
 #if defined(BOOST_WINDOWS_API)
     const ::boost::process::wnative_environment ne{};
     typedef typename ::boost::process::wnative_environment::const_entry_type value_type;
-    static constexpr auto id = L"PATH";
+    const auto id = L"PATH";
 #else
     const ::boost::process::native_environment ne{};
     typedef typename ::boost::process::native_environment::const_entry_type value_type;
-    static constexpr auto id = "PATH";
+    const auto id = "PATH";
 #endif
 
     auto itr = std::find_if(ne.cbegin(), ne.cend(),

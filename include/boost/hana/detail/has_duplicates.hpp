@@ -18,7 +18,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana { namespace detail {
+BOOST_HANA_NAMESPACE_BEGIN namespace detail {
     template <typename T, typename ...U>
     constexpr std::size_t pack_count() {
         std::size_t c = 0;
@@ -60,6 +60,6 @@ namespace boost { namespace hana { namespace detail {
             !detail::fast_and<(detail::pack_count<T, T...>() == 1)...>::value
         ;
     };
-} }} // end namespace boost::hana
+} BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DETAIL_HAS_DUPLICATES_HPP

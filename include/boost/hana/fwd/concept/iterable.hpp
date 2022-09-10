@@ -13,7 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-concepts
     //! @defgroup group-Iterable Iterable
     //! The `Iterable` concept represents data structures supporting external
@@ -144,6 +144,6 @@ namespace boost { namespace hana {
     //! [1]: https://github.com/boostorg/hana/issues/40
     template <typename It>
     struct Iterable;
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_CONCEPT_ITERABLE_HPP

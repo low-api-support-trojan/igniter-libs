@@ -19,11 +19,9 @@
 
 #if BOOST_WINAPI_PARTITION_DESKTOP_SYSTEM
 
-#include <boost/winapi/detail/header.hpp>
-
 #if !defined( BOOST_USE_WINDOWS_H ) && BOOST_WINAPI_PARTITION_DESKTOP && !defined( BOOST_NO_ANSI_APIS )
 extern "C" {
-BOOST_WINAPI_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC CreateNamedPipeA(
+BOOST_SYMBOL_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC CreateNamedPipeA(
     boost::winapi::LPCSTR_ lpName,
     boost::winapi::DWORD_ dwOpenMode,
     boost::winapi::DWORD_ dwPipeMode,
@@ -38,29 +36,29 @@ BOOST_WINAPI_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC CreateNamedPip
 #if !defined( BOOST_USE_WINDOWS_H )
 extern "C" {
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC ImpersonateNamedPipeClient(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC ImpersonateNamedPipeClient(
     boost::winapi::HANDLE_ hNamedPipe);
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC CreatePipe(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC CreatePipe(
     boost::winapi::PHANDLE_ hReadPipe,
     boost::winapi::PHANDLE_ hWritePipe,
     _SECURITY_ATTRIBUTES* lpPipeAttributes,
     boost::winapi::DWORD_ nSize);
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC ConnectNamedPipe(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC ConnectNamedPipe(
     boost::winapi::HANDLE_ hNamedPipe,
     _OVERLAPPED* lpOverlapped);
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC DisconnectNamedPipe(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC DisconnectNamedPipe(
     boost::winapi::HANDLE_ hNamedPipe);
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC SetNamedPipeHandleState(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC SetNamedPipeHandleState(
     boost::winapi::HANDLE_ hNamedPipe,
     boost::winapi::LPDWORD_ lpMode,
     boost::winapi::LPDWORD_ lpMaxCollectionCount,
     boost::winapi::LPDWORD_ lpCollectDataTimeout);
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC PeekNamedPipe(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC PeekNamedPipe(
     boost::winapi::HANDLE_ hNamedPipe,
     boost::winapi::LPVOID_ lpBuffer,
     boost::winapi::DWORD_ nBufferSize,
@@ -68,7 +66,7 @@ BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC PeekNamedPipe(
     boost::winapi::LPDWORD_ lpTotalBytesAvail,
     boost::winapi::LPDWORD_ lpBytesLeftThisMessage);
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC TransactNamedPipe(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC TransactNamedPipe(
     boost::winapi::HANDLE_ hNamedPipe,
     boost::winapi::LPVOID_ lpInBuffer,
     boost::winapi::DWORD_ nInBufferSize,
@@ -78,12 +76,12 @@ BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC TransactNamedPip
     _OVERLAPPED* lpOverlapped);
 
 #if !defined( BOOST_NO_ANSI_APIS )
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC WaitNamedPipeA(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC WaitNamedPipeA(
     boost::winapi::LPCSTR_ lpNamedPipeName,
     boost::winapi::DWORD_ nTimeOut);
 #endif // !defined( BOOST_NO_ANSI_APIS )
 
-BOOST_WINAPI_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC CreateNamedPipeW(
+BOOST_SYMBOL_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC CreateNamedPipeW(
     boost::winapi::LPCWSTR_ lpName,
     boost::winapi::DWORD_ dwOpenMode,
     boost::winapi::DWORD_ dwPipeMode,
@@ -93,19 +91,19 @@ BOOST_WINAPI_IMPORT boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC CreateNamedPip
     boost::winapi::DWORD_ nDefaultTimeOut,
     _SECURITY_ATTRIBUTES* lpSecurityAttributes);
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC WaitNamedPipeW(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC WaitNamedPipeW(
     boost::winapi::LPCWSTR_ lpNamedPipeName,
     boost::winapi::DWORD_ nTimeOut);
 
 #if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
 #if !defined( BOOST_NO_ANSI_APIS )
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC GetNamedPipeClientComputerNameA(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC GetNamedPipeClientComputerNameA(
     boost::winapi::HANDLE_ Pipe,
     boost::winapi::LPSTR_ ClientComputerName,
     boost::winapi::ULONG_ ClientComputerNameLength);
 #endif // !defined( BOOST_NO_ANSI_APIS )
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC GetNamedPipeClientComputerNameW(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC GetNamedPipeClientComputerNameW(
     boost::winapi::HANDLE_ Pipe,
     boost::winapi::LPWSTR_ ClientComputerName,
     boost::winapi::ULONG_ ClientComputerNameLength);
@@ -314,8 +312,6 @@ BOOST_FORCEINLINE BOOL_ get_named_pipe_client_computer_name(HANDLE_ Pipe, LPWSTR
 
 }
 }
-
-#include <boost/winapi/detail/footer.hpp>
 
 #endif // BOOST_WINAPI_PARTITION_DESKTOP_SYSTEM
 

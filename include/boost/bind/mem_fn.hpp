@@ -264,31 +264,21 @@ namespace _mfi
 
 #define BOOST_MEM_FN_NAME(X) X
 #define BOOST_MEM_FN_CC
-#define BOOST_MEM_FN_NOEXCEPT
 
 #include <boost/bind/mem_fn_cc.hpp>
 
-#if defined( __cpp_noexcept_function_type ) || defined( _NOEXCEPT_TYPES_SUPPORTED )
-#  undef BOOST_MEM_FN_NOEXCEPT
-#  define BOOST_MEM_FN_NOEXCEPT noexcept
-#  include <boost/bind/mem_fn_cc.hpp>
-#endif
-
 #undef BOOST_MEM_FN_NAME
 #undef BOOST_MEM_FN_CC
-#undef BOOST_MEM_FN_NOEXCEPT
 
 #if defined(BOOST_MEM_FN_ENABLE_CDECL) && !defined(_M_X64)
 
 #define BOOST_MEM_FN_NAME(X) X##_cdecl
 #define BOOST_MEM_FN_CC __cdecl
-#define BOOST_MEM_FN_NOEXCEPT
 
 #include <boost/bind/mem_fn_cc.hpp>
 
 #undef BOOST_MEM_FN_NAME
 #undef BOOST_MEM_FN_CC
-#undef BOOST_MEM_FN_NOEXCEPT
 
 #endif
 
@@ -296,13 +286,11 @@ namespace _mfi
 
 #define BOOST_MEM_FN_NAME(X) X##_stdcall
 #define BOOST_MEM_FN_CC __stdcall
-#define BOOST_MEM_FN_NOEXCEPT
 
 #include <boost/bind/mem_fn_cc.hpp>
 
 #undef BOOST_MEM_FN_NAME
 #undef BOOST_MEM_FN_CC
-#undef BOOST_MEM_FN_NOEXCEPT
 
 #endif
 
@@ -310,13 +298,11 @@ namespace _mfi
 
 #define BOOST_MEM_FN_NAME(X) X##_fastcall
 #define BOOST_MEM_FN_CC __fastcall
-#define BOOST_MEM_FN_NOEXCEPT
 
 #include <boost/bind/mem_fn_cc.hpp>
 
 #undef BOOST_MEM_FN_NAME
 #undef BOOST_MEM_FN_CC
-#undef BOOST_MEM_FN_NOEXCEPT
 
 #endif
 

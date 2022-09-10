@@ -21,7 +21,7 @@
 #include <boost/variant.hpp>
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repeat.hpp>
-#include <boost/range/range_fwd.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <iterator> // for std::iterator_traits
 
 namespace boost { namespace spirit { namespace traits
@@ -207,7 +207,8 @@ namespace boost { namespace spirit { namespace traits
     template <typename Iterator>
     struct container_iterator<iterator_range<Iterator> >
     {
-        typedef Iterator type;
+        typedef typename range_const_iterator<
+              iterator_range<Iterator> >::type type;
     };
 
     template <>

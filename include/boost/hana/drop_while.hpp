@@ -24,7 +24,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/lazy.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs, typename Pred>
     constexpr auto drop_while_t::operator()(Xs&& xs, Pred&& pred) const {
@@ -88,6 +88,6 @@ namespace boost { namespace hana {
                                     FirstUnsatisfied{});
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DROP_WHILE_HPP

@@ -13,7 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Transform a function taking multiple arguments into a function that
     //! can be called with a compile-time `Foldable`.
     //! @ingroup group-Foldable
@@ -48,8 +48,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(F&& f) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr fuse_t fuse{};
+    constexpr fuse_t fuse{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_FUSE_HPP

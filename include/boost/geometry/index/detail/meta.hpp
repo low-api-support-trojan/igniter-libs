@@ -2,36 +2,40 @@
 //
 // Copyright (c) 2011-2019 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2020.
-// Modifications copyright (c) 2020 Oracle and/or its affiliates.
-// Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
-//
 // Use, modification and distribution is subject to the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <boost/range.hpp>
+#include <boost/mpl/aux_/has_type.hpp>
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/and.hpp>
+#include <boost/type_traits/is_convertible.hpp>
+#include <boost/type_traits/is_same.hpp>
+
 #ifndef BOOST_GEOMETRY_INDEX_DETAIL_META_HPP
 #define BOOST_GEOMETRY_INDEX_DETAIL_META_HPP
 
-#include <type_traits>
-
-//#include <boost/range/value_type.hpp>
-
 namespace boost { namespace geometry { namespace index { namespace detail {
 
-//template <typename T, typename V, bool IsRange = range::detail::is_range<T>::value>
+template <typename T>
+struct is_range
+    : ::boost::mpl::aux::has_type< ::boost::range_iterator<T> >
+{};
+
+//template <typename T, typename V, bool IsRange>
 //struct is_range_of_convertible_values_impl
-//    : std::is_convertible<typename ::boost::range_value<T>::type, V>
+//    : ::boost::is_convertible<typename ::boost::range_value<T>::type, V>
 //{};
 //
 //template <typename T, typename V>
 //struct is_range_of_convertible_values_impl<T, V, false>
-//    : std::integral_constant<bool, false>
+//    : ::boost::mpl::bool_<false>
 //{};
 //
 //template <typename T, typename V>
 //struct is_range_of_convertible_values
-//    : is_range_of_convertible_values_impl<T, V>
+//    : is_range_of_convertible_values_impl<T, V, is_range<T>::value>
 //{};
 
 // Implemented this way in order to prevent instantiation of all type traits at
@@ -51,12 +55,12 @@ struct convertible_type_impl
 template <typename T, typename Value, typename Indexable>
 struct convertible_type_impl<T, Value, Indexable, void, 0>
 {
-    typedef std::conditional_t
+    typedef typename boost::mpl::if_c
         <
-            std::is_convertible<T, Indexable>::value,
+            boost::is_convertible<T, Indexable>::value,
             Indexable,
             void
-        > result_type;
+        >::type result_type;
 
     typedef typename convertible_type_impl
         <
@@ -67,28 +71,28 @@ struct convertible_type_impl<T, Value, Indexable, void, 0>
 template <typename T, typename Value, typename Indexable>
 struct convertible_type_impl<T, Value, Indexable, void, 1>
 {
-    typedef std::conditional_t
+    typedef typename boost::mpl::if_c
         <
-            std::is_convertible<T, Value>::value,
+            boost::is_convertible<T, Value>::value,
             Value,
             void
-        > type;
+        >::type type;
 };
 
 template <typename T, typename Value, typename Indexable>
 struct convertible_type
 {
-    typedef std::conditional_t
+    typedef typename boost::mpl::if_c
         <
-            std::is_same<T, Value>::value,
+            boost::is_same<T, Value>::value,
             Value,
-            std::conditional_t
+            typename boost::mpl::if_c
                 <
-                    std::is_same<T, Indexable>::value,
+                    boost::is_same<T, Indexable>::value,
                     Indexable,
                     void
-                >
-        > result_type;
+                >::type
+        >::type result_type;
 
     typedef typename convertible_type_impl
         <

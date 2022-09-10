@@ -20,7 +20,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <type_traits>
 
 
-namespace boost { namespace hana { namespace detail {
+BOOST_HANA_NAMESPACE_BEGIN namespace detail {
     template <typename Tag>
     struct orderable_operators {
         static constexpr bool value = false;
@@ -55,6 +55,6 @@ namespace boost { namespace hana { namespace detail {
         constexpr auto operator>=(X&& x, Y&& y)
         { return hana::greater_equal(static_cast<X&&>(x), static_cast<Y&&>(y)); }
     } // end namespace operators
-} }} // end namespace boost::hana
+} BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DETAIL_OPERATORS_ORDERABLE_HPP

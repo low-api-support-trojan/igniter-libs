@@ -7,8 +7,6 @@
 #ifndef BOOST_HISTOGRAM_AXIS_INTERVAL_VIEW_HPP
 #define BOOST_HISTOGRAM_AXIS_INTERVAL_VIEW_HPP
 
-#include <boost/histogram/fwd.hpp>
-
 namespace boost {
 namespace histogram {
 namespace axis {
@@ -18,12 +16,12 @@ namespace axis {
 
   Represents the current bin interval.
 */
-template <class Axis>
+template <typename Axis>
 class interval_view {
 public:
-  interval_view(const Axis& axis, index_type idx) : axis_(axis), idx_(idx) {}
+  interval_view(const Axis& axis, int idx) : axis_(axis), idx_(idx) {}
   // avoid viewing a temporary that goes out of scope
-  interval_view(Axis&& axis, index_type idx) = delete;
+  interval_view(Axis&& axis, int idx) = delete;
 
   /// Return lower edge of bin.
   decltype(auto) lower() const noexcept { return axis_.value(idx_); }
@@ -34,19 +32,19 @@ public:
   /// Return width of bin.
   decltype(auto) width() const noexcept { return upper() - lower(); }
 
-  template <class BinType>
+  template <typename BinType>
   bool operator==(const BinType& rhs) const noexcept {
     return lower() == rhs.lower() && upper() == rhs.upper();
   }
 
-  template <class BinType>
+  template <typename BinType>
   bool operator!=(const BinType& rhs) const noexcept {
     return !operator==(rhs);
   }
 
 private:
   const Axis& axis_;
-  const index_type idx_;
+  const int idx_;
 };
 
 } // namespace axis

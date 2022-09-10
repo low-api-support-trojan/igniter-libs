@@ -16,7 +16,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/assert.hpp>
-#include <boost/config/workaround.hpp>
+#include <boost/detail/workaround.hpp>
 
 namespace boost
 {

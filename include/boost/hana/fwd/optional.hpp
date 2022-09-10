@@ -15,7 +15,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/fwd/core/make.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-datatypes
     //! Optional value whose optional-ness is known at compile-time.
     //!
@@ -310,7 +310,7 @@ namespace boost { namespace hana {
     //! Example
     //! -------
     //! @include example/optional/make.cpp
-    BOOST_HANA_INLINE_VARIABLE constexpr auto make_optional = make<optional_tag>;
+    constexpr auto make_optional = make<optional_tag>;
 
     //! Create an optional value containing `x`.
     //! @relates hana::optional
@@ -329,7 +329,7 @@ namespace boost { namespace hana {
         constexpr auto operator()(T&&) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr make_just_t just{};
+    constexpr make_just_t just{};
 #endif
 
     //! An empty optional value.
@@ -366,7 +366,7 @@ namespace boost { namespace hana {
         constexpr U&& value_or(U&& u) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr optional<> nothing{};
+    constexpr optional<> nothing{};
 #endif
 
     //! Apply a function to the contents of an optional, with a fallback
@@ -421,7 +421,7 @@ namespace boost { namespace hana {
         { return static_cast<Def&&>(def); }
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr maybe_t maybe{};
+    constexpr maybe_t maybe{};
 #endif
 
     //! Calls a function if the call expression is well-formed.
@@ -462,7 +462,7 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(F&& f) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr sfinae_t sfinae{};
+    constexpr sfinae_t sfinae{};
 #endif
 
     //! Return whether an `optional` contains a value.
@@ -485,7 +485,7 @@ namespace boost { namespace hana {
         constexpr auto operator()(optional<T...> const&) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr is_just_t is_just{};
+    constexpr is_just_t is_just{};
 #endif
 
     //! Return whether an `optional` is empty.
@@ -508,8 +508,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(optional<T...> const&) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr is_nothing_t is_nothing{};
+    constexpr is_nothing_t is_nothing{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_OPTIONAL_HPP

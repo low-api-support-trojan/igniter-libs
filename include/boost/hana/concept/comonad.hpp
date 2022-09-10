@@ -21,7 +21,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/extract.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     template <typename W>
     struct Comonad
         : hana::integral_constant<bool,
@@ -30,6 +30,6 @@ namespace boost { namespace hana {
                  !is_default<extend_impl<typename tag_of<W>::type>>::value)
         >
     { };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_CONCEPT_COMONAD_HPP

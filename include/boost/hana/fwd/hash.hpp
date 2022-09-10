@@ -15,7 +15,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns a `hana::type` representing the compile-time hash of an object.
     //! @ingroup group-Hashable
     //!
@@ -61,8 +61,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(X const& x) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr hash_t hash{};
+    constexpr hash_t hash{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_HASH_HPP

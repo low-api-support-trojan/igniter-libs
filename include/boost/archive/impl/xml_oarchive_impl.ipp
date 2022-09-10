@@ -109,7 +109,10 @@ xml_oarchive_impl<Archive>::xml_oarchive_impl(
         0 != (flags & no_codecvt)
     ),
     basic_xml_oarchive<Archive>(flags)
-{}
+{
+    if(0 == (flags & no_header))
+        this->init();
+}
 
 template<class Archive>
 BOOST_ARCHIVE_DECL void

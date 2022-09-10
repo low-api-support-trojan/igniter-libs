@@ -13,7 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 
 
-namespace boost { namespace hana { namespace detail {
+BOOST_HANA_NAMESPACE_BEGIN namespace detail {
     //! @ingroup group-details
     //! Tag representing a canonical `Constant`.
     //!
@@ -26,7 +26,7 @@ namespace boost { namespace hana { namespace detail {
     struct CanonicalConstant {
         using value_type = T;
     };
-} }} // end namespace boost::hana
+} BOOST_HANA_NAMESPACE_END
 
 
 #include <boost/hana/concept/constant.hpp>
@@ -37,7 +37,7 @@ namespace boost { namespace hana { namespace detail {
 #include <type_traits>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //////////////////////////////////////////////////////////////////////////
     // Constant
     //////////////////////////////////////////////////////////////////////////
@@ -75,6 +75,6 @@ namespace boost { namespace hana {
     struct IntegralConstant<detail::CanonicalConstant<T>> {
         static constexpr bool value = std::is_integral<T>::value;
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DETAIL_CANONICAL_CONSTANT_HPP

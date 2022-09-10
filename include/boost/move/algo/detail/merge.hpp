@@ -11,7 +11,6 @@
 #ifndef BOOST_MOVE_MERGE_HPP
 #define BOOST_MOVE_MERGE_HPP
 
-#include <boost/core/ignore_unused.hpp>
 #include <boost/move/algo/move.hpp>
 #include <boost/move/adl_move_swap.hpp>
 #include <boost/move/algo/detail/basic_op.hpp>
@@ -21,11 +20,6 @@
 #include <boost/move/detail/iterator_to_raw_pointer.hpp>
 #include <boost/assert.hpp>
 #include <cstddef>
-
-#if defined(BOOST_CLANG) || (defined(BOOST_GCC) && (BOOST_GCC >= 40600))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#endif
 
 namespace boost {
 namespace movelib {
@@ -55,9 +49,8 @@ class adaptive_xbuf
    template<class RandIt>
    void move_assign(RandIt first, size_type n)
    {
-      typedef typename iterator_traits<RandIt>::difference_type rand_diff_t;
       if(n <= m_size){
-         boost::move(first, first+rand_diff_t(n), m_ptr);
+         boost::move(first, first+n, m_ptr);
          size_type size = m_size;
          while(size-- != n){
             m_ptr[size].~T();
@@ -65,8 +58,8 @@ class adaptive_xbuf
          m_size = n;
       }
       else{
-         RandRawIt result = boost::move(first, first+rand_diff_t(m_size), m_ptr);
-         boost::uninitialized_move(first+rand_diff_t(m_size), first+rand_diff_t(n), result);
+         RandRawIt result = boost::move(first, first+m_size, m_ptr);
+         boost::uninitialized_move(first+m_size, first+n, result);
          m_size = n;
       }
    }
@@ -314,21 +307,19 @@ Unsigned gcd(Unsigned x, Unsigned y)
    else{
       Unsigned z = 1;
       while((!(x&1)) & (!(y&1))){
-         z = Unsigned(z << 1);
-         x = Unsigned(x >> 1);
-         y = Unsigned(y >> 1);
+         z <<=1, x>>=1, y>>=1;
       }
       while(x && y){
          if(!(x&1))
-            x = Unsigned(x >> 1);
+            x >>=1;
          else if(!(y&1))
-            y = Unsigned (y >> 1);
+            y >>=1;
          else if(x >=y)
-            x = Unsigned((x-y) >> 1u);
+            x = (x-y) >> 1;
          else
-            y = Unsigned((y-x) >> 1);
+            y = (y-x) >> 1;
       }
-      return Unsigned(z*(x+y));
+      return z*(x+y);
    }
 }
 
@@ -359,7 +350,7 @@ RandIt rotate_gcd(RandIt first, RandIt middle, RandIt last)
             *it_j = boost::move(*it_k);
             it_j = it_k;
             size_type const left = size_type(last - it_j);
-            it_k = left > middle_pos ? it_j + middle_pos : first + middle_pos - left;
+            it_k = left > middle_pos ? it_j + middle_pos : first + (middle_pos - left);
          } while(it_k != it_i);
          *it_j = boost::move(temp);
       }
@@ -377,13 +368,13 @@ RandIt lower_bound
    RandIt middle;
 
    while (len) {
-      size_type step = size_type(len >> 1);
+      size_type step = len >> 1;
       middle = first;
       middle += step;
 
       if (comp(*middle, key)) {
          first = ++middle;
-         len = size_type(len - (step + 1));
+         len -= step + 1;
       }
       else{
          len = step;
@@ -402,13 +393,13 @@ RandIt upper_bound
    RandIt middle;
 
    while (len) {
-      size_type step = size_type(len >> 1);
+      size_type step = len >> 1;
       middle = first;
       middle += step;
 
       if (!comp(key, *middle)) {
          first = ++middle;
-         len = size_type(len - (step + 1));
+         len -= step + 1;
       }
       else{
          len = step;
@@ -638,17 +629,16 @@ void merge_bufferless_ONlogN_recursive
       RandIt new_middle = rotate_gcd(first_cut, middle, second_cut);
 
       //Avoid one recursive call doing a manual tail call elimination on the biggest range
-      const size_type len_internal = size_type(len11+len22);
+      const size_type len_internal = len11+len22;
       if( len_internal < (len1 + len2 - len_internal) ) {
-         merge_bufferless_ONlogN_recursive(first, first_cut,  new_middle, len11, len22, comp);
+         merge_bufferless_ONlogN_recursive(first, first_cut,  new_middle, len11, len22,        comp);
          first = new_middle;
          middle = second_cut;
-         len1 = size_type(len1-len11);
-         len2 = size_type(len2-len22);
+         len1 -= len11;
+         len2 -= len22;
       }
       else {
-         merge_bufferless_ONlogN_recursive
-            (new_middle, second_cut, last, size_type(len1 - len11), size_type(len2 - len22), comp);
+         merge_bufferless_ONlogN_recursive(new_middle, second_cut, last, len1 - len11, len2 - len22, comp);
          middle = first_cut;
          last = new_middle;
          len1 = len11;
@@ -690,7 +680,7 @@ void op_merge_with_right_placed
       if (r_first == r_last) {
          InputOutIterator end = op(forward_t(), first, last, dest_first);
          BOOST_ASSERT(end == r_last);
-         boost::ignore_unused(end);
+         (void)end;
          return;
       }
       else if (comp(*r_first, *first)) {
@@ -727,7 +717,7 @@ void op_merge_with_left_placed
       if(first == last) {
          BidirOutIterator res = op(backward_t(), r_first, r_last, dest_last);
          BOOST_ASSERT(last == res);
-         boost::ignore_unused(res);
+         (void)res;
          return;
       }
       --r_last;
@@ -791,7 +781,7 @@ void uninitialized_merge_with_right_placed
          d.release();
          InputOutIterator end = ::boost::move(first, last, original_r_first);
          BOOST_ASSERT(end == r_last);
-         boost::ignore_unused(end);
+         (void)end;
          return;
       }
       else if (comp(*r_first, *first)) {
@@ -809,6 +799,51 @@ void uninitialized_merge_with_right_placed
    d.release();
    merge_with_right_placed(first, last, original_r_first, r_first, r_last, comp);
 }
+
+/*
+// [r_first, r_last) are already in the right part of the destination range.
+// [dest_first, r_first) is uninitialized memory
+template <class Compare, class BidirOutIterator, class BidirIterator>
+void uninitialized_merge_with_left_placed
+   ( BidirOutIterator dest_first, BidirOutIterator r_first, BidirOutIterator r_last
+   , BidirIterator first, BidirIterator last
+   , Compare comp)
+{
+   BOOST_ASSERT((last - first) == (r_last - r_first));
+   typedef typename iterator_traits<BidirOutIterator>::value_type value_type;
+   BidirOutIterator const original_r_last = r_last;
+
+   destruct_n<value_type> d(&*dest_last);
+
+   while ( first != last && dest_first != original_r_first ) {
+      if (r_first == r_last) {
+         for(; dest_first != original_r_first; ++dest_first, ++first){
+            ::new(&*dest_first) value_type(::boost::move(*first));
+            d.incr();
+         }
+         d.release();
+         BidirOutIterator end = ::boost::move(first, last, original_r_first);
+         BOOST_ASSERT(end == r_last);
+         (void)end;
+         return;
+      }
+      else if (comp(*r_first, *first)) {
+         ::new(&*dest_first) value_type(::boost::move(*r_first));
+         d.incr();
+         ++r_first;
+      }
+      else {
+         ::new(&*dest_first) value_type(::boost::move(*first));
+         d.incr();
+         ++first;
+      }
+      ++dest_first;
+   }
+   d.release();
+   merge_with_right_placed(first, last, original_r_first, r_first, r_last, comp);
+}
+*/
+
 
 /// This is a helper function for the merge routines.
 template<typename BidirectionalIterator1, typename BidirectionalIterator2>
@@ -863,48 +898,49 @@ template<typename BidirectionalIterator,
    typedef typename iterator_traits<BidirectionalIterator>::size_type size_type;
    //trivial cases
    if (!len2 || !len1) {
-      // no-op
+      return;
    }
-   else if (len1 <= buffer_size || len2 <= buffer_size) {
+   else if (len1 <= buffer_size || len2 <= buffer_size)
+   {
       range_xbuf<Pointer, size_type, move_op> rxbuf(buffer, buffer + buffer_size);
       buffered_merge(first, middle, last, comp, rxbuf);
    }
    else if (size_type(len1 + len2) == 2u) {
       if (comp(*middle, *first))
          adl_move_swap(*first, *middle);
+      return;
    }
    else if (size_type(len1 + len2) < MergeBufferlessONLogNRotationThreshold) {
       merge_bufferless_ON2(first, middle, last, comp);
+      return;
    }
-   else {
-      BidirectionalIterator first_cut = first;
-      BidirectionalIterator second_cut = middle;
-      size_type len11 = 0;
-      size_type len22 = 0;
-      if (len1 > len2)  //(len1 < len2)
-      {
-         len11 = len1 / 2;
-         first_cut += len11;
-         second_cut = boost::movelib::lower_bound(middle, last, *first_cut, comp);
-         len22 = size_type(second_cut - middle);
-      }
-      else
-      {
-         len22 = len2 / 2;
-         second_cut += len22;
-         first_cut = boost::movelib::upper_bound(first, middle, *second_cut, comp);
-         len11 = size_type(first_cut - first);
-      }
+   BidirectionalIterator first_cut = first;
+   BidirectionalIterator second_cut = middle;
+   size_type len11 = 0;
+   size_type len22 = 0;
+   if (len1 > len2)  //(len1 < len2)
+   {
+      len11 = len1 / 2;
+      first_cut += len11;
+      second_cut = boost::movelib::lower_bound(middle, last, *first_cut, comp);
+      len22 = second_cut - middle;
+   }
+   else
+   {
+      len22 = len2 / 2;
+      second_cut += len22;
+      first_cut = boost::movelib::upper_bound(first, middle, *second_cut, comp);
+      len11 = first_cut - first;
+   }
 
-      BidirectionalIterator new_middle
-         = rotate_adaptive(first_cut, middle, second_cut,
-            size_type(len1 - len11), len22, buffer,
-            buffer_size);
-      merge_adaptive_ONlogN_recursive(first, first_cut, new_middle, len11,
-         len22, buffer, buffer_size, comp);
-      merge_adaptive_ONlogN_recursive(new_middle, second_cut, last,
-         size_type(len1 - len11), size_type(len2 - len22), buffer, buffer_size, comp);
-   }
+   BidirectionalIterator new_middle
+      = rotate_adaptive(first_cut, middle, second_cut,
+         size_type(len1 - len11), len22, buffer,
+         buffer_size);
+   merge_adaptive_ONlogN_recursive(first, first_cut, new_middle, len11,
+      len22, buffer, buffer_size, comp);
+   merge_adaptive_ONlogN_recursive(new_middle, second_cut, last,
+      len1 - len11, len2 - len22, buffer, buffer_size, comp);
 }
 
 
@@ -937,11 +973,8 @@ void merge_adaptive_ONlogN(BidirectionalIterator first,
    }
 }
 
+
 }  //namespace movelib {
 }  //namespace boost {
-
-#if defined(BOOST_CLANG) || (defined(BOOST_GCC) && (BOOST_GCC >= 40600))
-#pragma GCC diagnostic pop
-#endif
 
 #endif   //#define BOOST_MOVE_MERGE_HPP

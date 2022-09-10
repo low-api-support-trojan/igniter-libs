@@ -1,6 +1,6 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2014-2021, Oracle and/or its affiliates.
+// Copyright (c) 2014-2019, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -11,10 +11,7 @@
 #ifndef BOOST_GEOMETRY_ALGORITHMS_DETAIL_IS_SIMPLE_AREAL_HPP
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_IS_SIMPLE_AREAL_HPP
 
-#include <boost/range/begin.hpp>
-#include <boost/range/empty.hpp>
-#include <boost/range/end.hpp>
-#include <boost/range/value_type.hpp>
+#include <boost/range.hpp>
 
 #include <boost/geometry/core/closure.hpp>
 #include <boost/geometry/core/exterior_ring.hpp>
@@ -22,6 +19,7 @@
 #include <boost/geometry/core/ring_type.hpp>
 #include <boost/geometry/core/tags.hpp>
 
+#include <boost/geometry/algorithms/detail/check_iterator_range.hpp>
 #include <boost/geometry/algorithms/detail/is_simple/failure_policy.hpp>
 #include <boost/geometry/algorithms/detail/is_valid/has_duplicates.hpp>
 
@@ -37,33 +35,54 @@ namespace detail { namespace is_simple
 {
 
 
-template <typename Ring, typename Strategy>
-inline bool is_simple_ring(Ring const& ring, Strategy const& strategy)
+template <typename Ring, typename CSTag>
+struct is_simple_ring
 {
-    simplicity_failure_policy policy;
-    return ! boost::empty(ring)
-        && ! detail::is_valid::has_duplicates<Ring>::apply(ring, policy, strategy);
-}
+    static inline bool apply(Ring const& ring)
+    {
+        simplicity_failure_policy policy;
+        return ! boost::empty(ring)
+            && ! detail::is_valid::has_duplicates
+                    <
+                        Ring, geometry::closure<Ring>::value, CSTag
+                    >::apply(ring, policy);
+    }
+};
 
-template <typename InteriorRings, typename Strategy>
-inline bool are_simple_interior_rings(InteriorRings const& interior_rings,
-                                      Strategy const& strategy)
-{
-    auto const end = boost::end(interior_rings);
-    return std::find_if(boost::begin(interior_rings), end,
-                        [&](auto const& r)
-                        {
-                            return ! is_simple_ring(r, strategy);
-                        }) == end; // non-simple ring not found
-    // allow empty ring
-}
 
-template <typename Polygon, typename Strategy>
-inline bool is_simple_polygon(Polygon const& polygon, Strategy const& strategy)
+template <typename Polygon, typename CSTag>
+class is_simple_polygon
 {
-    return is_simple_ring(geometry::exterior_ring(polygon), strategy)
-        && are_simple_interior_rings(geometry::interior_rings(polygon), strategy);
-}
+private:
+    template <typename InteriorRings>
+    static inline
+    bool are_simple_interior_rings(InteriorRings const& interior_rings)
+    {
+        return
+            detail::check_iterator_range
+                <
+                    is_simple_ring
+                        <
+                            typename boost::range_value<InteriorRings>::type,
+                            CSTag
+                        >
+                >::apply(boost::begin(interior_rings),
+                         boost::end(interior_rings));
+    }
+
+public:
+    static inline bool apply(Polygon const& polygon)
+    {
+        return
+            is_simple_ring
+                <
+                    typename ring_type<Polygon>::type,
+                    CSTag
+                >::apply(exterior_ring(polygon))
+            &&
+            are_simple_interior_rings(geometry::interior_rings(polygon));
+    }
+};
 
 
 }} // namespace detail::is_simple
@@ -85,9 +104,13 @@ template <typename Ring>
 struct is_simple<Ring, ring_tag>
 {
     template <typename Strategy>
-    static inline bool apply(Ring const& ring, Strategy const& strategy)
+    static inline bool apply(Ring const& ring, Strategy const&)
     {
-        return detail::is_simple::is_simple_ring(ring, strategy);
+        return detail::is_simple::is_simple_ring
+            <
+                Ring,
+                typename Strategy::cs_tag
+            >::apply(ring);
     }
 };
 
@@ -99,9 +122,13 @@ template <typename Polygon>
 struct is_simple<Polygon, polygon_tag>
 {
     template <typename Strategy>
-    static inline bool apply(Polygon const& polygon, Strategy const& strategy)
+    static inline bool apply(Polygon const& polygon, Strategy const&)
     {
-        return detail::is_simple::is_simple_polygon(polygon, strategy);
+        return detail::is_simple::is_simple_polygon
+            <
+                Polygon,
+                typename Strategy::cs_tag
+            >::apply(polygon);
     }
 };
 
@@ -114,14 +141,18 @@ template <typename MultiPolygon>
 struct is_simple<MultiPolygon, multi_polygon_tag>
 {
     template <typename Strategy>
-    static inline bool apply(MultiPolygon const& multipolygon, Strategy const& strategy)
+    static inline bool apply(MultiPolygon const& multipolygon, Strategy const&)
     {
-        auto const end = boost::end(multipolygon);
-        return std::find_if(boost::begin(multipolygon), end,
-                [&](auto const& po) {
-                    return ! detail::is_simple::is_simple_polygon(po, strategy);
-                }) == end; // non-simple polygon not found
-                // allow empty multi-polygon
+        return
+            detail::check_iterator_range
+                <
+                    detail::is_simple::is_simple_polygon
+                        <
+                            typename boost::range_value<MultiPolygon>::type,
+                            typename Strategy::cs_tag
+                        >,
+                    true // allow empty multi-polygon
+                >::apply(boost::begin(multipolygon), boost::end(multipolygon));
     }
 };
 

@@ -5,8 +5,8 @@
 // Copyright (c) 2009-2015 Mateusz Loskot, London, UK.
 // Copyright (c) 2014-2015 Adam Wulkiewicz, Lodz, Poland.
 
-// This file was modified by Oracle on 2014-2021.
-// Modifications copyright (c) 2014-2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2014, 2015, 2016, 2017, 2018, 2019.
+// Modifications copyright (c) 2014-2019 Oracle and/or its affiliates.
 
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
@@ -23,29 +23,27 @@
 
 
 #include <cstddef>
-#include <type_traits>
 #include <vector>
 
-#include <boost/range/size.hpp>
+#include <boost/range.hpp>
+#include <boost/type_traits/is_base_of.hpp>
 
 #include <boost/geometry/core/access.hpp>
 #include <boost/geometry/core/tags.hpp>
 
+#include <boost/geometry/algorithms/detail/equals/point_point.hpp>
+
+// For trivial checks
 #include <boost/geometry/algorithms/area.hpp>
 #include <boost/geometry/algorithms/length.hpp>
-#include <boost/geometry/algorithms/detail/equals/point_point.hpp>
+#include <boost/geometry/util/math.hpp>
+#include <boost/geometry/util/select_coordinate_type.hpp>
+#include <boost/geometry/util/select_most_precise.hpp>
+
 #include <boost/geometry/algorithms/detail/equals/collect_vectors.hpp>
 #include <boost/geometry/algorithms/detail/equals/interface.hpp>
 #include <boost/geometry/algorithms/detail/relate/relate_impl.hpp>
 #include <boost/geometry/algorithms/relate.hpp>
-
-#include <boost/geometry/strategies/relate/cartesian.hpp>
-#include <boost/geometry/strategies/relate/geographic.hpp>
-#include <boost/geometry/strategies/relate/spherical.hpp>
-
-#include <boost/geometry/util/math.hpp>
-#include <boost/geometry/util/select_coordinate_type.hpp>
-#include <boost/geometry/util/select_most_precise.hpp>
 
 #include <boost/geometry/views/detail/indexed_point_view.hpp>
 
@@ -66,11 +64,9 @@ template
 struct point_point
 {
     template <typename Point1, typename Point2, typename Strategy>
-    static inline bool apply(Point1 const& point1, Point2 const& point2,
-                             Strategy const& strategy)
+    static inline bool apply(Point1 const& point1, Point2 const& point2, Strategy const& )
     {
-        typedef decltype(strategy.relate(point1, point2)) strategy_type;
-        return strategy_type::apply(point1, point2);
+        return Strategy::apply(point1, point2);
     }
 };
 
@@ -111,22 +107,25 @@ struct segment_segment
     static inline bool apply(Segment1 const& segment1, Segment2 const& segment2,
                              Strategy const& strategy)
     {
+        typename Strategy::point_in_point_strategy_type const&
+            pt_pt_strategy = strategy.get_point_in_point_strategy();
+
         return equals::equals_point_point(
                     indexed_point_view<Segment1 const, 0>(segment1),
                     indexed_point_view<Segment2 const, 0>(segment2),
-                    strategy)
+                    pt_pt_strategy)
                 ? equals::equals_point_point(
                     indexed_point_view<Segment1 const, 1>(segment1),
                     indexed_point_view<Segment2 const, 1>(segment2),
-                    strategy)
+                    pt_pt_strategy)
                 : ( equals::equals_point_point(
                         indexed_point_view<Segment1 const, 0>(segment1),
                         indexed_point_view<Segment2 const, 1>(segment2),
-                        strategy)
+                        pt_pt_strategy)
                  && equals::equals_point_point(
                         indexed_point_view<Segment1 const, 1>(segment1),
                         indexed_point_view<Segment2 const, 0>(segment2),
-                        strategy)
+                        pt_pt_strategy)
                   );
     }
 };
@@ -139,13 +138,15 @@ struct area_check
                              Geometry2 const& geometry2,
                              Strategy const& strategy)
     {
-        return geometry::math::equals(geometry::area(geometry1, strategy),
-                                      geometry::area(geometry2, strategy));
+        return geometry::math::equals(
+            geometry::area(geometry1,
+                           strategy.template get_area_strategy<Geometry1>()),
+            geometry::area(geometry2,
+                           strategy.template get_area_strategy<Geometry2>()));
     }
 };
 
 
-/*
 struct length_check
 {
     template <typename Geometry1, typename Geometry2, typename Strategy>
@@ -153,38 +154,34 @@ struct length_check
                              Geometry2 const& geometry2,
                              Strategy const& strategy)
     {
-        return geometry::math::equals(geometry::length(geometry1, strategy),
-                                      geometry::length(geometry2, strategy));
+        return geometry::math::equals(
+            geometry::length(geometry1,
+                             strategy.template get_distance_strategy<Geometry1>()),
+            geometry::length(geometry2,
+                             strategy.template get_distance_strategy<Geometry2>()));
     }
 };
-*/
 
 
-// Small helper structure do decide to use collect_vectors, or not
-template <typename Strategy, typename CsTag>
-struct use_collect_vectors
+template <typename Geometry1, typename Geometry2, typename IntersectionStrategy>
+struct collected_vector
 {
-    static constexpr bool value = false;
+    typedef typename geometry::select_most_precise
+        <
+            typename select_coordinate_type
+                <
+                    Geometry1, Geometry2
+                >::type,
+            double
+        >::type calculation_type;
+
+    typedef geometry::collected_vector
+        <
+            calculation_type,
+            Geometry1,
+            typename IntersectionStrategy::side_strategy_type
+        > type;
 };
-
-template <typename Strategy>
-struct use_collect_vectors<Strategy, cartesian_tag>
-{
-    static constexpr bool value = true;
-
-    template <typename T, typename Point>
-    using type = collected_vector_cartesian<T>;
-};
-
-template <typename CV>
-struct use_collect_vectors<strategy::side::spherical_side_formula<CV>, spherical_tag>
-{
-    static constexpr bool value = true;
-
-    template <typename T, typename Point>
-    using type = collected_vector_spherical<T, Point>;
-};
-
 
 template <typename TrivialCheck>
 struct equals_by_collection
@@ -199,24 +196,10 @@ struct equals_by_collection
             return false;
         }
 
-        using calculation_type = typename geometry::select_most_precise
+        typedef typename collected_vector
             <
-                typename select_coordinate_type
-                    <
-                        Geometry1, Geometry2
-                    >::type,
-                double
-            >::type;
-
-        using collected_vector_type = typename use_collect_vectors
-            <
-                decltype(std::declval<Strategy>().side()),
-                typename Strategy::cs_tag
-            >::template type
-                <
-                    calculation_type,
-                    typename geometry::point_type<Geometry1>::type
-                >;
+                Geometry1, Geometry2, Strategy
+            >::type collected_vector_type;
 
         std::vector<collected_vector_type> c1, c2;
 
@@ -231,7 +214,7 @@ struct equals_by_collection
         std::sort(c1.begin(), c1.end());
         std::sort(c2.begin(), c2.end());
 
-        // Check if these vectors are equal.
+        // Just check if these vectors are equal.
         return std::equal(c1.begin(), c1.end(), c2.begin());
     }
 };
@@ -246,40 +229,47 @@ struct equals_by_relate
         >
 {};
 
-// Use either collect_vectors or relate
+// If collect_vectors which is a SideStrategy-dispatched optimization
+// is implemented in a way consistent with the Intersection/Side Strategy
+// then collect_vectors is used, otherwise relate is used.
 // NOTE: the result could be conceptually different for invalid
 // geometries in different coordinate systems because collect_vectors
 // and relate treat invalid geometries differently.
 template<typename TrivialCheck>
 struct equals_by_collection_or_relate
 {
-    template <typename Strategy>
-    using use_vectors = use_collect_vectors
-        <
-            decltype(std::declval<Strategy>().side()),
-            typename Strategy::cs_tag
-        >;
-
-    template
-    <
-        typename Geometry1, typename Geometry2, typename Strategy,
-        std::enable_if_t<use_vectors<Strategy>::value, int> = 0
-    >
+    template <typename Geometry1, typename Geometry2, typename Strategy>
     static inline bool apply(Geometry1 const& geometry1,
                              Geometry2 const& geometry2,
                              Strategy const& strategy)
     {
+        typedef typename boost::is_base_of
+            <
+                nyi::not_implemented_tag,
+                typename collected_vector
+                    <
+                        Geometry1, Geometry2, Strategy
+                    >::type
+            >::type enable_relate_type;
+
+        return apply(geometry1, geometry2, strategy, enable_relate_type());
+    }
+
+private:
+    template <typename Geometry1, typename Geometry2, typename Strategy>
+    static inline bool apply(Geometry1 const& geometry1,
+                             Geometry2 const& geometry2,
+                             Strategy const& strategy,
+                             boost::false_type /*enable_relate*/)
+    {
         return equals_by_collection<TrivialCheck>::apply(geometry1, geometry2, strategy);
     }
 
-    template
-    <
-        typename Geometry1, typename Geometry2, typename Strategy,
-        std::enable_if_t<! use_vectors<Strategy>::value, int> = 0
-    >
+    template <typename Geometry1, typename Geometry2, typename Strategy>
     static inline bool apply(Geometry1 const& geometry1,
                              Geometry2 const& geometry2,
-                             Strategy const& strategy)
+                             Strategy const& strategy,
+                             boost::true_type /*enable_relate*/)
     {
         return equals_by_relate<Geometry1, Geometry2>::apply(geometry1, geometry2, strategy);
     }

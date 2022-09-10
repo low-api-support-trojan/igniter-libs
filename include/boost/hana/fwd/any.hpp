@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns whether any key of the structure is true-valued.
     //! @ingroup group-Searchable
     //!
@@ -39,8 +39,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr any_t any{};
+    constexpr any_t any{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_ANY_HPP

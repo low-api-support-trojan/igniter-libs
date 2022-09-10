@@ -8,7 +8,6 @@ Distributed under the Boost Software License, Version 1.0.
 #ifndef BOOST_SMART_PTR_ALLOCATE_SHARED_ARRAY_HPP
 #define BOOST_SMART_PTR_ALLOCATE_SHARED_ARRAY_HPP
 
-#include <boost/core/allocator_access.hpp>
 #include <boost/core/alloc_construct.hpp>
 #include <boost/core/first_scalar.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
@@ -57,6 +56,18 @@ struct sp_align_up {
         value = (N + M - 1) & ~(M - 1)
     };
 };
+
+#if !defined(BOOST_NO_CXX11_ALLOCATOR)
+template<class A, class T>
+struct sp_bind_allocator {
+    typedef typename std::allocator_traits<A>::template rebind_alloc<T> type;
+};
+#else
+template<class A, class T>
+struct sp_bind_allocator {
+    typedef typename A::template rebind<T>::other type;
+};
+#endif
 
 template<class T>
 BOOST_CONSTEXPR inline std::size_t
@@ -160,7 +171,7 @@ public:
     }
 
 private:
-    typename boost::allocator_rebind<A, type>::type other_;
+    typename sp_bind_allocator<A, type>::type other_;
     std::size_t size_;
 };
 
@@ -195,29 +206,28 @@ public:
         return state_;
     }
 
-    void dispose() BOOST_SP_NOEXCEPT BOOST_OVERRIDE {
+    virtual void dispose() BOOST_SP_NOEXCEPT {
         boost::alloc_destroy_n(state_.allocator(),
             boost::first_scalar(sp_array_start<type>(this)),
             state_.size() * sp_array_count<type>::value);
     }
 
-    void destroy() BOOST_SP_NOEXCEPT BOOST_OVERRIDE {
+    virtual void destroy() BOOST_SP_NOEXCEPT {
         sp_array_creator<allocator, sp_array_base> other(state_.allocator(),
             state_.size());
         this->~sp_array_base();
         other.destroy(this);
     }
 
-    void* get_deleter(const sp_typeinfo_&) BOOST_SP_NOEXCEPT BOOST_OVERRIDE {
+    virtual void* get_deleter(const sp_typeinfo_&) BOOST_SP_NOEXCEPT {
         return 0;
     }
 
-    void* get_local_deleter(const sp_typeinfo_&)
-        BOOST_SP_NOEXCEPT BOOST_OVERRIDE {
+    virtual void* get_local_deleter(const sp_typeinfo_&) BOOST_SP_NOEXCEPT {
         return 0;
     }
 
-    void* get_untyped_deleter() BOOST_SP_NOEXCEPT BOOST_OVERRIDE {
+    virtual void* get_untyped_deleter() BOOST_SP_NOEXCEPT {
         return 0;
     }
 
@@ -262,7 +272,7 @@ inline typename enable_if_<is_unbounded_array<T>::value, shared_ptr<T> >::type
 allocate_shared(const A& allocator, std::size_t count)
 {
     typedef typename detail::sp_array_element<T>::type element;
-    typedef typename allocator_rebind<A, element>::type other;
+    typedef typename detail::sp_bind_allocator<A, element>::type other;
     typedef detail::sp_array_state<other> state;
     typedef detail::sp_array_base<state> base;
     detail::sp_array_result<other, base> result(allocator, count);
@@ -282,7 +292,7 @@ allocate_shared(const A& allocator)
         count = extent<T>::value
     };
     typedef typename detail::sp_array_element<T>::type element;
-    typedef typename allocator_rebind<A, element>::type other;
+    typedef typename detail::sp_bind_allocator<A, element>::type other;
     typedef detail::sp_size_array_state<other, extent<T>::value> state;
     typedef detail::sp_array_base<state> base;
     detail::sp_array_result<other, base> result(allocator, count);
@@ -300,7 +310,7 @@ allocate_shared(const A& allocator, std::size_t count,
     const typename remove_extent<T>::type& value)
 {
     typedef typename detail::sp_array_element<T>::type element;
-    typedef typename allocator_rebind<A, element>::type other;
+    typedef typename detail::sp_bind_allocator<A, element>::type other;
     typedef detail::sp_array_state<other> state;
     typedef detail::sp_array_base<state> base;
     detail::sp_array_result<other, base> result(allocator, count);
@@ -321,7 +331,7 @@ allocate_shared(const A& allocator,
         count = extent<T>::value
     };
     typedef typename detail::sp_array_element<T>::type element;
-    typedef typename allocator_rebind<A, element>::type other;
+    typedef typename detail::sp_bind_allocator<A, element>::type other;
     typedef detail::sp_size_array_state<other, extent<T>::value> state;
     typedef detail::sp_array_base<state> base;
     detail::sp_array_result<other, base> result(allocator, count);

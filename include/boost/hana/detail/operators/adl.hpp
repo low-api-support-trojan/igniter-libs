@@ -13,7 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 
 
-namespace boost { namespace hana { namespace detail { namespace operators {
+BOOST_HANA_NAMESPACE_BEGIN namespace detail { namespace operators {
     //! @ingroup group-details
     //! Enables [ADL](http://en.cppreference.com/w/cpp/language/adl) in the
     //! `hana::detail::operators` namespace.
@@ -29,6 +29,6 @@ namespace boost { namespace hana { namespace detail { namespace operators {
     //! is not a concern, `adl<>` can simply be used.
     template <typename ...>
     struct adl { };
-}} }} // end namespace boost::hana
+}} BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_DETAIL_OPERATORS_ADL_HPP

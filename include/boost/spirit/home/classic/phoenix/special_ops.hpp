@@ -5,8 +5,8 @@
   Distributed under the Boost Software License, Version 1.0. (See accompanying
   file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ==============================================================================*/
-#ifndef BOOST_SPIRIT_CLASSIC_PHOENIX_SPECIAL_OPS_HPP
-#define BOOST_SPIRIT_CLASSIC_PHOENIX_SPECIAL_OPS_HPP
+#ifndef PHOENIX_SPECIAL_OPS_HPP
+#define PHOENIX_SPECIAL_OPS_HPP
 
 #include <boost/config.hpp>
 #ifdef BOOST_NO_STRINGSTREAM
@@ -169,7 +169,7 @@ typedef PHOENIX_STD::ios_base&  (*iomanip_t)(PHOENIX_STD::ios_base&);
 typedef PHOENIX_STD::istream&   (*imanip_t)(PHOENIX_STD::istream&);
 typedef PHOENIX_STD::ostream&   (*omanip_t)(PHOENIX_STD::ostream&);
 
-#if defined(BOOST_BORLANDC)
+#if defined(__BORLANDC__)
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -195,7 +195,7 @@ omanip_t    endl_   = &PHOENIX_STD::endl;
 omanip_t    ends_   = &PHOENIX_STD::ends;
 omanip_t    flush_  = &PHOENIX_STD::flush;
 
-#else // BOOST_BORLANDC
+#else // __BORLANDC__
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -233,7 +233,7 @@ operator<<(actor<BaseT> const& _0, iomanip_t _1)
     return impl::make_binary1<shift_l_op, BaseT, iomanip_t>::construct(_0, _1);
 }
 
-#endif // BOOST_BORLANDC
+#endif // __BORLANDC__
 
 ///////////////////////////////////////////////////////////////////////////////
 //

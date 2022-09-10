@@ -45,6 +45,7 @@
 #include <boost/beast/core/static_string.hpp>
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/core/string.hpp>
+#include <boost/beast/core/string_param.hpp>
 #include <boost/beast/core/tcp_stream.hpp>
 
 #endif

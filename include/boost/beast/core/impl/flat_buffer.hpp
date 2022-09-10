@@ -124,6 +124,8 @@ basic_flat_buffer(
         end_ = nullptr;
         max_ = other.max_;
         copy_from(other);
+        other.clear();
+        other.shrink_to_fit();
         return;
     }
 
@@ -260,32 +262,17 @@ reserve(std::size_t n)
 template<class Allocator>
 void
 basic_flat_buffer<Allocator>::
-shrink_to_fit() noexcept
+shrink_to_fit()
 {
     auto const len = size();
-
     if(len == capacity())
         return;
-
     char* p;
     if(len > 0)
     {
         BOOST_ASSERT(begin_);
         BOOST_ASSERT(in_);
-#ifndef BOOST_NO_EXCEPTIONS
-        try
-        {
-#endif
-            p = alloc(len);
-#ifndef BOOST_NO_EXCEPTIONS
-        }
-        catch(std::exception const&)
-        {
-            // request could not be fulfilled,
-            // squelch the exception
-            return;
-        }
-#endif
+        p = alloc(len);
         std::memcpy(p, in_, len);
     }
     else
@@ -449,6 +436,8 @@ move_assign(basic_flat_buffer& other, std::false_type)
     if(this->get() != other.get())
     {
         copy_from(other);
+        other.clear();
+        other.shrink_to_fit();
     }
     else
     {

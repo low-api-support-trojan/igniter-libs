@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Invokes a nullary function `n` times.
     //! @ingroup group-IntegralConstant
     //!
@@ -51,8 +51,8 @@ namespace boost { namespace hana {
         constexpr void operator()(N const& n, F&& f) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr repeat_t repeat{};
+    constexpr repeat_t repeat{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_REPEAT_HPP

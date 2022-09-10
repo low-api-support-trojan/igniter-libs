@@ -10,7 +10,6 @@
 #pragma once
 #endif
 
-#include <limits>
 #include <vector>
 #include <boost/math/special_functions/legendre.hpp>
 #include <boost/math/constants/constants.hpp>
@@ -29,11 +28,11 @@ struct gauss_constant_category
       (std::numeric_limits<T>::is_specialized == 0) ? 999 :
       (std::numeric_limits<T>::radix == 2) ?
       (
-         (std::numeric_limits<T>::digits <= std::numeric_limits<float>::digits) && std::is_convertible<float, T>::value ? 0 :
-         (std::numeric_limits<T>::digits <= std::numeric_limits<double>::digits) && std::is_convertible<double, T>::value ? 1 :
-         (std::numeric_limits<T>::digits <= std::numeric_limits<long double>::digits) && std::is_convertible<long double, T>::value ? 2 :
+         (std::numeric_limits<T>::digits <= std::numeric_limits<float>::digits) && boost::is_convertible<float, T>::value ? 0 :
+         (std::numeric_limits<T>::digits <= std::numeric_limits<double>::digits) && boost::is_convertible<double, T>::value ? 1 :
+         (std::numeric_limits<T>::digits <= std::numeric_limits<long double>::digits) && boost::is_convertible<long double, T>::value ? 2 :
 #ifdef BOOST_HAS_FLOAT128
-         (std::numeric_limits<T>::digits <= 113) && std::is_constructible<__float128, T>::value ? 3 :
+         (std::numeric_limits<T>::digits <= 113) && boost::is_constructible<__float128, T>::value ? 3 :
 #endif
          (std::numeric_limits<T>::digits10 <= 110) ? 4 : 999
       ) : (std::numeric_limits<T>::digits10 <= 110) ? 4 : 999;
@@ -81,7 +80,7 @@ class gauss_detail<T, 7, 0>
 public:
    static std::array<T, 4> const & abscissa()
    {
-      static constexpr std::array<T, 4> data = {
+      static const std::array<T, 4> data = {
          0.000000000e+00f,
          4.058451514e-01f,
          7.415311856e-01f,
@@ -91,7 +90,7 @@ public:
    }
    static std::array<T, 4> const & weights()
    {
-      static constexpr std::array<T, 4> data = {
+      static const std::array<T, 4> data = {
          4.179591837e-01f,
          3.818300505e-01f,
          2.797053915e-01f,
@@ -107,7 +106,7 @@ class gauss_detail<T, 7, 1>
 public:
    static std::array<T, 4> const & abscissa()
    {
-      static constexpr std::array<T, 4> data = {
+      static const std::array<T, 4> data = {
          0.00000000000000000e+00,
          4.05845151377397167e-01,
          7.41531185599394440e-01,
@@ -117,7 +116,7 @@ public:
    }
    static std::array<T, 4> const & weights()
    {
-      static constexpr std::array<T, 4> data = {
+      static const std::array<T, 4> data = {
          4.17959183673469388e-01,
          3.81830050505118945e-01,
          2.79705391489276668e-01,
@@ -133,7 +132,7 @@ class gauss_detail<T, 7, 2>
 public:
    static std::array<T, 4> const & abscissa()
    {
-      static constexpr std::array<T, 4> data = {
+      static const std::array<T, 4> data = {
          0.00000000000000000000000000000000000e+00L,
          4.05845151377397166906606412076961463e-01L,
          7.41531185599394439863864773280788407e-01L,
@@ -143,7 +142,7 @@ public:
    }
    static std::array<T, 4> const & weights()
    {
-      static constexpr std::array<T, 4> data = {
+      static const std::array<T, 4> data = {
          4.17959183673469387755102040816326531e-01L,
          3.81830050505118944950369775488975134e-01L,
          2.79705391489276667901467771423779582e-01L,
@@ -211,7 +210,7 @@ class gauss_detail<T, 10, 0>
 public:
    static std::array<T, 5> const & abscissa()
    {
-      static constexpr std::array<T, 5> data = {
+      static const std::array<T, 5> data = {
          1.488743390e-01f,
          4.333953941e-01f,
          6.794095683e-01f,
@@ -222,7 +221,7 @@ public:
    }
    static std::array<T, 5> const & weights()
    {
-      static constexpr std::array<T, 5> data = {
+      static const std::array<T, 5> data = {
          2.955242247e-01f,
          2.692667193e-01f,
          2.190863625e-01f,
@@ -239,7 +238,7 @@ class gauss_detail<T, 10, 1>
 public:
    static std::array<T, 5> const & abscissa()
    {
-      static constexpr std::array<T, 5> data = {
+      static const std::array<T, 5> data = {
          1.48874338981631211e-01,
          4.33395394129247191e-01,
          6.79409568299024406e-01,
@@ -250,7 +249,7 @@ public:
    }
    static std::array<T, 5> const & weights()
    {
-      static constexpr std::array<T, 5> data = {
+      static const std::array<T, 5> data = {
          2.95524224714752870e-01,
          2.69266719309996355e-01,
          2.19086362515982044e-01,
@@ -267,7 +266,7 @@ class gauss_detail<T, 10, 2>
 public:
    static std::array<T, 5> const & abscissa()
    {
-      static constexpr std::array<T, 5> data = {
+      static const std::array<T, 5> data = {
          1.48874338981631210884826001129719985e-01L,
          4.33395394129247190799265943165784162e-01L,
          6.79409568299024406234327365114873576e-01L,
@@ -278,7 +277,7 @@ public:
    }
    static std::array<T, 5> const & weights()
    {
-      static constexpr std::array<T, 5> data = {
+      static const std::array<T, 5> data = {
          2.95524224714752870173892994651338329e-01L,
          2.69266719309996355091226921569469353e-01L,
          2.19086362515982043995534934228163192e-01L,
@@ -351,7 +350,7 @@ class gauss_detail<T, 15, 0>
 public:
    static std::array<T, 8> const & abscissa()
    {
-      static constexpr std::array<T, 8> data = {
+      static const std::array<T, 8> data = {
          0.000000000e+00f,
          2.011940940e-01f,
          3.941513471e-01f,
@@ -365,7 +364,7 @@ public:
    }
    static std::array<T, 8> const & weights()
    {
-      static constexpr std::array<T, 8> data = {
+      static const std::array<T, 8> data = {
          2.025782419e-01f,
          1.984314853e-01f,
          1.861610000e-01f,
@@ -385,7 +384,7 @@ class gauss_detail<T, 15, 1>
 public:
    static std::array<T, 8> const & abscissa()
    {
-      static constexpr std::array<T, 8> data = {
+      static const std::array<T, 8> data = {
          0.00000000000000000e+00,
          2.01194093997434522e-01,
          3.94151347077563370e-01,
@@ -399,7 +398,7 @@ public:
    }
    static std::array<T, 8> const & weights()
    {
-      static constexpr std::array<T, 8> data = {
+      static const std::array<T, 8> data = {
          2.02578241925561273e-01,
          1.98431485327111576e-01,
          1.86161000015562211e-01,
@@ -419,7 +418,7 @@ class gauss_detail<T, 15, 2>
 public:
    static std::array<T, 8> const & abscissa()
    {
-      static constexpr std::array<T, 8> data = {
+      static const std::array<T, 8> data = {
          0.00000000000000000000000000000000000e+00L,
          2.01194093997434522300628303394596208e-01L,
          3.94151347077563369897207370981045468e-01L,
@@ -433,7 +432,7 @@ public:
    }
    static std::array<T, 8> const & weights()
    {
-      static constexpr std::array<T, 8> data = {
+      static const std::array<T, 8> data = {
          2.02578241925561272880620199967519315e-01L,
          1.98431485327111576456118326443839325e-01L,
          1.86161000015562211026800561866422825e-01L,
@@ -521,7 +520,7 @@ class gauss_detail<T, 20, 0>
 public:
    static std::array<T, 10> const & abscissa()
    {
-      static constexpr std::array<T, 10> data = {
+      static const std::array<T, 10> data = {
          7.652652113e-02f,
          2.277858511e-01f,
          3.737060887e-01f,
@@ -537,7 +536,7 @@ public:
    }
    static std::array<T, 10> const & weights()
    {
-      static constexpr std::array<T, 10> data = {
+      static const std::array<T, 10> data = {
          1.527533871e-01f,
          1.491729865e-01f,
          1.420961093e-01f,
@@ -559,7 +558,7 @@ class gauss_detail<T, 20, 1>
 public:
    static std::array<T, 10> const & abscissa()
    {
-      static constexpr std::array<T, 10> data = {
+      static const std::array<T, 10> data = {
          7.65265211334973338e-02,
          2.27785851141645078e-01,
          3.73706088715419561e-01,
@@ -575,7 +574,7 @@ public:
    }
    static std::array<T, 10> const & weights()
    {
-      static constexpr std::array<T, 10> data = {
+      static const std::array<T, 10> data = {
          1.52753387130725851e-01,
          1.49172986472603747e-01,
          1.42096109318382051e-01,
@@ -597,7 +596,7 @@ class gauss_detail<T, 20, 2>
 public:
    static std::array<T, 10> const & abscissa()
    {
-      static constexpr std::array<T, 10> data = {
+      static const std::array<T, 10> data = {
          7.65265211334973337546404093988382110e-02L,
          2.27785851141645078080496195368574625e-01L,
          3.73706088715419560672548177024927237e-01L,
@@ -613,7 +612,7 @@ public:
    }
    static std::array<T, 10> const & weights()
    {
-      static constexpr std::array<T, 10> data = {
+      static const std::array<T, 10> data = {
          1.52753387130725850698084331955097593e-01L,
          1.49172986472603746787828737001969437e-01L,
          1.42096109318382051329298325067164933e-01L,
@@ -711,7 +710,7 @@ class gauss_detail<T, 25, 0>
 public:
    static std::array<T, 13> const & abscissa()
    {
-      static constexpr std::array<T, 13> data = {
+      static const std::array<T, 13> data = {
          0.000000000e+00f,
          1.228646926e-01f,
          2.438668837e-01f,
@@ -730,7 +729,7 @@ public:
    }
    static std::array<T, 13> const & weights()
    {
-      static constexpr std::array<T, 13> data = {
+      static const std::array<T, 13> data = {
          1.231760537e-01f,
          1.222424430e-01f,
          1.194557635e-01f,
@@ -755,7 +754,7 @@ class gauss_detail<T, 25, 1>
 public:
    static std::array<T, 13> const & abscissa()
    {
-      static constexpr std::array<T, 13> data = {
+      static const std::array<T, 13> data = {
          0.00000000000000000e+00,
          1.22864692610710396e-01,
          2.43866883720988432e-01,
@@ -774,7 +773,7 @@ public:
    }
    static std::array<T, 13> const & weights()
    {
-      static constexpr std::array<T, 13> data = {
+      static const std::array<T, 13> data = {
          1.23176053726715451e-01,
          1.22242442990310042e-01,
          1.19455763535784772e-01,
@@ -799,7 +798,7 @@ class gauss_detail<T, 25, 2>
 public:
    static std::array<T, 13> const & abscissa()
    {
-      static constexpr std::array<T, 13> data = {
+      static const std::array<T, 13> data = {
          0.00000000000000000000000000000000000e+00L,
          1.22864692610710396387359818808036806e-01L,
          2.43866883720988432045190362797451586e-01L,
@@ -818,7 +817,7 @@ public:
    }
    static std::array<T, 13> const & weights()
    {
-      static constexpr std::array<T, 13> data = {
+      static const std::array<T, 13> data = {
          1.23176053726715451203902873079050142e-01L,
          1.22242442990310041688959518945851506e-01L,
          1.19455763535784772228178126512901047e-01L,
@@ -931,7 +930,7 @@ class gauss_detail<T, 30, 0>
 public:
    static std::array<T, 15> const & abscissa()
    {
-      static constexpr std::array<T, 15> data = {
+      static const std::array<T, 15> data = {
          5.147184256e-02f,
          1.538699136e-01f,
          2.546369262e-01f,
@@ -952,7 +951,7 @@ public:
    }
    static std::array<T, 15> const & weights()
    {
-      static constexpr std::array<T, 15> data = {
+      static const std::array<T, 15> data = {
          1.028526529e-01f,
          1.017623897e-01f,
          9.959342059e-02f,
@@ -979,7 +978,7 @@ class gauss_detail<T, 30, 1>
 public:
    static std::array<T, 15> const & abscissa()
    {
-      static constexpr std::array<T, 15> data = {
+      static const std::array<T, 15> data = {
          5.14718425553176958e-02,
          1.53869913608583547e-01,
          2.54636926167889846e-01,
@@ -1000,7 +999,7 @@ public:
    }
    static std::array<T, 15> const & weights()
    {
-      static constexpr std::array<T, 15> data = {
+      static const std::array<T, 15> data = {
          1.02852652893558840e-01,
          1.01762389748405505e-01,
          9.95934205867952671e-02,
@@ -1027,7 +1026,7 @@ class gauss_detail<T, 30, 2>
 public:
    static std::array<T, 15> const & abscissa()
    {
-      static constexpr std::array<T, 15> data = {
+      static const std::array<T, 15> data = {
          5.14718425553176958330252131667225737e-02L,
          1.53869913608583546963794672743255920e-01L,
          2.54636926167889846439805129817805108e-01L,
@@ -1048,7 +1047,7 @@ public:
    }
    static std::array<T, 15> const & weights()
    {
-      static constexpr std::array<T, 15> data = {
+      static const std::array<T, 15> data = {
          1.02852652893558840341285636705415044e-01L,
          1.01762389748405504596428952168554045e-01L,
          9.95934205867952670627802821035694765e-02L,
@@ -1179,8 +1178,6 @@ public:
      // In many math texts, K represents the field of real or complex numbers.
      // Too bad we can't put blackboard bold into C++ source!
       typedef decltype(f(Real(0))) K;
-      static_assert(!std::is_integral<K>::value,
-                   "The return type cannot be integral, it must be either a real or complex floating point type.");
       using std::abs;
       unsigned non_zero_start = 1;
       K result = Real(0);
@@ -1261,13 +1258,9 @@ public:
 
          if ((boost::math::isfinite)(a) && (boost::math::isfinite)(b))
          {
-            if (a == b)
+            if (b <= a)
             {
-               return K(0);
-            }
-            if (b < a)
-            {
-               return -integrate(f, b, a, pL1);
+               return policies::raise_domain_error(function, "Arguments to integrate are in wrong order; integration over [a,b] must have b > a.", a, Policy());
             }
             Real avg = (a + b)*constants::half<Real>();
             Real scale = (b - a)*constants::half<Real>();

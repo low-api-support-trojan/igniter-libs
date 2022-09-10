@@ -24,7 +24,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <vector>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     namespace ext { namespace std { struct vector_tag; }}
 
     template <typename T, typename Allocator>
@@ -105,6 +105,6 @@ namespace boost { namespace hana {
         }
     };
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_EXT_STD_VECTOR_HPP

@@ -7,11 +7,10 @@
 #ifndef BOOST_MATH_COMMON_FACTOR_RT_HPP
 #define BOOST_MATH_COMMON_FACTOR_RT_HPP
 
-#ifndef BOOST_MATH_STANDALONE
 #include <boost/integer/common_factor_rt.hpp>
-#include <boost/math/tools/header_deprecated.hpp>
+#include <boost/config/header_deprecated.hpp>
 
-BOOST_MATH_HEADER_DEPRECATED("<boost/integer/common_factor_rt.hpp>");
+BOOST_HEADER_DEPRECATED("<boost/integer/common_factor_rt.hpp>");
 
 namespace boost {
    namespace math {
@@ -23,8 +22,5 @@ namespace boost {
       using boost::integer::lcm_evaluator;
    }
 }
-#else
-#error Common factor is not available in standalone mode because it requires boost.integer.
-#endif // BOOST_MATH_STANDALONE
 
 #endif  // BOOST_MATH_COMMON_FACTOR_RT_HPP

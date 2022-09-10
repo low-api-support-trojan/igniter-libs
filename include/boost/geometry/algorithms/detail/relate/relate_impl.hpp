@@ -2,8 +2,8 @@
 
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2013-2020.
-// Modifications copyright (c) 2013-2020 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2013, 2014, 2015, 2019.
+// Modifications copyright (c) 2013-2019 Oracle and/or its affiliates.
 
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -14,7 +14,9 @@
 #ifndef BOOST_GEOMETRY_ALGORITHMS_DETAIL_RELATE_RELATE_IMPL_HPP
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_RELATE_RELATE_IMPL_HPP
 
-#include <type_traits>
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/or.hpp>
+#include <boost/type_traits/is_base_of.hpp>
 
 #include <boost/geometry/algorithms/detail/relate/interface.hpp>
 #include <boost/geometry/algorithms/not_implemented.hpp>
@@ -34,9 +36,9 @@ template
     typename Geometry2
 >
 struct relate_impl_base
-    : std::conditional_t
+    : boost::mpl::if_c
         <
-            std::is_base_of
+            boost::is_base_of
                 <
                     nyi::not_implemented_tag,
                     dispatch::relate<Geometry1, Geometry2>
@@ -47,7 +49,7 @@ struct relate_impl_base
                     typename geometry::tag<Geometry2>::type
                 >,
             implemented_tag
-        >
+        >::type
 {};
 
 template

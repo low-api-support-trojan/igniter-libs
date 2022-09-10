@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Return the number of elements in a foldable structure.
     //! @ingroup group-Foldable
     //!
@@ -43,8 +43,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs const& xs) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr length_t length{};
+    constexpr length_t length{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_LENGTH_HPP

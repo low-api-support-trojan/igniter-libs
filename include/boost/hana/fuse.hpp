@@ -17,7 +17,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/unpack.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     namespace detail {
         template <typename F>
         struct fused {
@@ -42,6 +42,6 @@ namespace boost { namespace hana {
         return detail::fused<typename detail::decay<F>::type>{static_cast<F&&>(f)};
     }
     //! @endcond
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FUSE_HPP

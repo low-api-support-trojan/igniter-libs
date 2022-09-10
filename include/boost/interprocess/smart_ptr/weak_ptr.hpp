@@ -63,10 +63,8 @@ class weak_ptr
    private:
    // Borland 5.5.1 specific workarounds
    typedef weak_ptr<T, A, D> this_type;
-   typedef typename boost::container::
-      allocator_traits<A>::pointer                       alloc_ptr;
    typedef typename boost::intrusive::
-      pointer_traits<alloc_ptr>::template
+      pointer_traits<typename A::pointer>::template
          rebind_pointer<T>::type                         pointer;
    typedef typename ipcdetail::add_reference
                      <T>::type            reference;

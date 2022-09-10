@@ -11,6 +11,7 @@
 #include <boost/spirit/home/x3/core/skip_over.hpp>
 #include <boost/spirit/home/x3/string/detail/string_parse.hpp>
 #include <boost/spirit/home/x3/support/no_case.hpp>
+#include <boost/spirit/home/x3/string/detail/no_case_string_parse.hpp>
 #include <boost/spirit/home/x3/support/utility/utf8.hpp>
 #include <boost/spirit/home/support/char_encoding/ascii.hpp>
 #include <boost/spirit/home/support/char_encoding/standard.hpp>
@@ -33,7 +34,7 @@ namespace boost { namespace spirit { namespace x3
             !is_same<unused_type, attribute_type>::value;
         static bool const handles_container = has_attribute;
 
-        constexpr literal_string(typename add_reference< typename add_const<String>::type >::type str)
+        literal_string(typename add_reference< typename add_const<String>::type >::type str)
           : str(str)
         {}
 
@@ -50,7 +51,7 @@ namespace boost { namespace spirit { namespace x3
 
     namespace standard
     {
-        constexpr literal_string<char const*, char_encoding::standard>
+        inline literal_string<char const*, char_encoding::standard>
         string(char const* s)
         {
             return { s };
@@ -62,7 +63,7 @@ namespace boost { namespace spirit { namespace x3
             return { s };
         }
 
-        inline constexpr literal_string<char const*, char_encoding::standard, unused_type>
+        inline literal_string<char const*, char_encoding::standard, unused_type>
         lit(char const* s)
         {
             return { s };
@@ -79,7 +80,7 @@ namespace boost { namespace spirit { namespace x3
 #ifndef BOOST_SPIRIT_NO_STANDARD_WIDE
     namespace standard_wide
     {
-        constexpr literal_string<wchar_t const*, char_encoding::standard_wide>
+        inline literal_string<wchar_t const*, char_encoding::standard_wide>
         string(wchar_t const* s)
         {
             return { s };
@@ -91,7 +92,7 @@ namespace boost { namespace spirit { namespace x3
             return { s };
         }
 
-        constexpr literal_string<wchar_t const*, char_encoding::standard_wide, unused_type>
+        inline literal_string<wchar_t const*, char_encoding::standard_wide, unused_type>
         lit(wchar_t const* s)
         {
             return { s };
@@ -108,7 +109,7 @@ namespace boost { namespace spirit { namespace x3
 #if defined(BOOST_SPIRIT_X3_UNICODE)
     namespace unicode
     {
-        constexpr literal_string<char32_t const*, char_encoding::unicode>
+        inline literal_string<char32_t const*, char_encoding::unicode>
         string(char32_t const* s)
         {
             return { s };
@@ -120,7 +121,7 @@ namespace boost { namespace spirit { namespace x3
             return { s };
         }
 
-        constexpr literal_string<char32_t const*, char_encoding::unicode, unused_type>
+        inline literal_string<char32_t const*, char_encoding::unicode, unused_type>
         lit(char32_t const* s)
         {
             return { s };
@@ -136,7 +137,7 @@ namespace boost { namespace spirit { namespace x3
 
     namespace ascii
     {
-        constexpr literal_string<wchar_t const*, char_encoding::ascii>
+        inline literal_string<wchar_t const*, char_encoding::ascii>
         string(wchar_t const* s)
         {
             return { s };
@@ -148,7 +149,7 @@ namespace boost { namespace spirit { namespace x3
             return { s };
         }
 
-        constexpr literal_string<char const*, char_encoding::ascii, unused_type>
+        inline literal_string<char const*, char_encoding::ascii, unused_type>
         lit(char const* s)
         {
             return { s };
@@ -164,7 +165,7 @@ namespace boost { namespace spirit { namespace x3
 
     namespace iso8859_1
     {
-        constexpr literal_string<wchar_t const*, char_encoding::iso8859_1>
+        inline literal_string<wchar_t const*, char_encoding::iso8859_1>
         string(wchar_t const* s)
         {
             return { s };
@@ -176,7 +177,7 @@ namespace boost { namespace spirit { namespace x3
             return { s };
         }
 
-        constexpr literal_string<char const*, char_encoding::iso8859_1, unused_type>
+        inline literal_string<char const*, char_encoding::iso8859_1, unused_type>
         lit(char const* s)
         {
             return { s };
@@ -208,7 +209,7 @@ namespace boost { namespace spirit { namespace x3
 
             typedef type value_type;
 
-            static constexpr type call(char const* s)
+            static type call(char const* s)
             {
                 return type(s);
             }
@@ -227,7 +228,7 @@ namespace boost { namespace spirit { namespace x3
 
             typedef type value_type;
 
-            static constexpr type call(wchar_t const* s)
+            static type call(wchar_t const* s)
             {
                 return type(s);
             }
@@ -246,7 +247,7 @@ namespace boost { namespace spirit { namespace x3
 
             typedef type value_type;
 
-            static constexpr type call(char const* s)
+            static type call(char const* s)
             {
                 return type(s);
             }

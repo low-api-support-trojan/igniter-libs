@@ -22,7 +22,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/transform.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs>
     constexpr auto unique_t::operator()(Xs&& xs) const {
@@ -70,6 +70,6 @@ namespace boost { namespace hana {
         static constexpr auto apply(Xs&& xs)
         { return unique_impl::apply(static_cast<Xs&&>(xs), hana::equal); }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_UNIQUE_HPP

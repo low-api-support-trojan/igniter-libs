@@ -11,18 +11,17 @@ http://www.boost.org/LICENSE_1_0.txt)
 #include <boost/predef/version_number.h>
 #include <boost/predef/make.h>
 
-/* tag::reference[]
-= `BOOST_PLAT_ANDROID`
+/*`
+[heading `BOOST_PLAT_ANDROID`]
 
-http://en.wikipedia.org/wiki/Android_%28operating_system%29[Android] platform.
+[@http://en.wikipedia.org/wiki/Android_%28operating_system%29 Android] platform.
 
-[options="header"]
-|===
-| {predef_symbol} | {predef_version}
+[table
+    [[__predef_symbol__] [__predef_version__]]
 
-| `+__ANDROID__+` | {predef_detection}
-|===
-*/ // end::reference[]
+    [[`__ANDROID__`] [__predef_detection__]]
+    ]
+ */
 
 #define BOOST_PLAT_ANDROID BOOST_VERSION_NUMBER_NOT_AVAILABLE
 

@@ -19,7 +19,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/make.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename M>
     constexpr auto empty_t<M>::operator()() const {
@@ -48,6 +48,6 @@ namespace boost { namespace hana {
             return hana::make<S>();
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_EMPTY_HPP

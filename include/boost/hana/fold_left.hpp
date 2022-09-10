@@ -20,7 +20,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/unpack.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs, typename State, typename F>
     constexpr decltype(auto) fold_left_t::operator()(Xs&& xs, State&& state, F&& f) const {
@@ -92,6 +92,6 @@ namespace boost { namespace hana {
             );
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FOLD_LEFT_HPP

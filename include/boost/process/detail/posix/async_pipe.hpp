@@ -23,12 +23,6 @@ class async_pipe
 public:
     typedef int native_handle_type;
     typedef ::boost::asio::posix::stream_descriptor handle_type;
-    typedef typename handle_type::executor_type executor_type;
-
-    executor_type get_executor()
-    {
-        return _source.get_executor();
-    }
 
     inline async_pipe(boost::asio::io_context & ios) : async_pipe(ios, ios) {}
 
@@ -50,8 +44,8 @@ public:
     inline async_pipe(const async_pipe& lhs);
     async_pipe(async_pipe&& lhs)  : _source(std::move(lhs._source)), _sink(std::move(lhs._sink))
     {
-        lhs._source = ::boost::asio::posix::stream_descriptor{lhs._source.get_executor()};
-        lhs._sink   = ::boost::asio::posix::stream_descriptor{lhs._sink.  get_executor()};
+        lhs._source.assign (-1);
+        lhs._sink  .assign (-1);
     }
 
     template<class CharT, class Traits = std::char_traits<CharT>>
@@ -76,8 +70,10 @@ public:
 
     ~async_pipe()
     {
-        boost::system::error_code ec;
-        close(ec);
+        if (_sink .native_handle()  != -1)
+            ::close(_sink.native_handle());
+        if (_source.native_handle() != -1)
+            ::close(_source.native_handle());
     }
 
     template<class CharT, class Traits = std::char_traits<CharT>>

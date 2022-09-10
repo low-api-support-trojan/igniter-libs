@@ -16,7 +16,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <cstddef>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Creates an `integral_constant` holding the given compile-time value.
     //! @relates hana::integral_constant
     //!
@@ -36,7 +36,7 @@ namespace boost { namespace hana {
     //! -------
     //! @snippet example/integral_constant.cpp integral_c
     template <typename T, T v>
-    BOOST_HANA_INLINE_VARIABLE constexpr integral_constant<T, v> integral_c{};
+    constexpr integral_constant<T, v> integral_c{};
 
 
     //! @relates hana::integral_constant
@@ -45,19 +45,19 @@ namespace boost { namespace hana {
 
     //! @relates hana::integral_constant
     template <bool b>
-    BOOST_HANA_INLINE_VARIABLE constexpr bool_<b> bool_c{};
+    constexpr bool_<b> bool_c{};
 
     //! @relates hana::integral_constant
     using true_ = bool_<true>;
 
     //! @relates hana::integral_constant
-    BOOST_HANA_INLINE_VARIABLE constexpr auto true_c = bool_c<true>;
+    constexpr auto true_c = bool_c<true>;
 
     //! @relates hana::integral_constant
     using false_ = bool_<false>;
 
     //! @relates hana::integral_constant
-    BOOST_HANA_INLINE_VARIABLE constexpr auto false_c = bool_c<false>;
+    constexpr auto false_c = bool_c<false>;
 
 
     //! @relates hana::integral_constant
@@ -66,7 +66,7 @@ namespace boost { namespace hana {
 
     //! @relates hana::integral_constant
     template <char c>
-    BOOST_HANA_INLINE_VARIABLE constexpr char_<c> char_c{};
+    constexpr char_<c> char_c{};
 
 
     //! @relates hana::integral_constant
@@ -75,7 +75,7 @@ namespace boost { namespace hana {
 
     //! @relates hana::integral_constant
     template <short i>
-    BOOST_HANA_INLINE_VARIABLE constexpr short_<i> short_c{};
+    constexpr short_<i> short_c{};
 
 
     //! @relates hana::integral_constant
@@ -84,7 +84,7 @@ namespace boost { namespace hana {
 
     //! @relates hana::integral_constant
     template <unsigned short i>
-    BOOST_HANA_INLINE_VARIABLE constexpr ushort_<i> ushort_c{};
+    constexpr ushort_<i> ushort_c{};
 
 
     //! @relates hana::integral_constant
@@ -93,7 +93,7 @@ namespace boost { namespace hana {
 
     //! @relates hana::integral_constant
     template <int i>
-    BOOST_HANA_INLINE_VARIABLE constexpr int_<i> int_c{};
+    constexpr int_<i> int_c{};
 
 
     //! @relates hana::integral_constant
@@ -102,7 +102,7 @@ namespace boost { namespace hana {
 
     //! @relates hana::integral_constant
     template <unsigned int i>
-    BOOST_HANA_INLINE_VARIABLE constexpr uint<i> uint_c{};
+    constexpr uint<i> uint_c{};
 
 
     //! @relates hana::integral_constant
@@ -111,7 +111,7 @@ namespace boost { namespace hana {
 
     //! @relates hana::integral_constant
     template <long i>
-    BOOST_HANA_INLINE_VARIABLE constexpr long_<i> long_c{};
+    constexpr long_<i> long_c{};
 
 
     //! @relates hana::integral_constant
@@ -120,7 +120,7 @@ namespace boost { namespace hana {
 
     //! @relates hana::integral_constant
     template <unsigned long i>
-    BOOST_HANA_INLINE_VARIABLE constexpr ulong<i> ulong_c{};
+    constexpr ulong<i> ulong_c{};
 
 
     //! @relates hana::integral_constant
@@ -129,7 +129,7 @@ namespace boost { namespace hana {
 
     //! @relates hana::integral_constant
     template <long long i>
-    BOOST_HANA_INLINE_VARIABLE constexpr llong<i> llong_c{};
+    constexpr llong<i> llong_c{};
 
 
     //! @relates hana::integral_constant
@@ -138,7 +138,7 @@ namespace boost { namespace hana {
 
     //! @relates hana::integral_constant
     template <unsigned long long i>
-    BOOST_HANA_INLINE_VARIABLE constexpr ullong<i> ullong_c{};
+    constexpr ullong<i> ullong_c{};
 
 
     //! @relates hana::integral_constant
@@ -147,7 +147,7 @@ namespace boost { namespace hana {
 
     //! @relates hana::integral_constant
     template <std::size_t i>
-    BOOST_HANA_INLINE_VARIABLE constexpr size_t<i> size_c{};
+    constexpr size_t<i> size_c{};
 
 
     namespace literals {
@@ -170,6 +170,6 @@ namespace boost { namespace hana {
         template <char ...c>
         constexpr auto operator"" _c();
     }
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_INTEGRAL_CONSTANT_HPP

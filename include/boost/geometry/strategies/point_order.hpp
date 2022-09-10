@@ -1,6 +1,6 @@
 // Boost.Geometry
 
-// Copyright (c) 2019-2020, Oracle and/or its affiliates.
+// Copyright (c) 2019, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -11,7 +11,7 @@
 #define BOOST_GEOMETRY_STRATEGIES_POINT_ORDER_HPP
 
 
-#include <boost/geometry/core/static_assert.hpp>
+#include <boost/mpl/assert.hpp>
 
 
 namespace boost { namespace geometry
@@ -29,9 +29,11 @@ namespace services
 template <typename CSTag>
 struct default_strategy
 {
-    BOOST_GEOMETRY_STATIC_ASSERT_FALSE(
-        "Not implemented for this coordinate system.",
-        CSTag);
+    BOOST_MPL_ASSERT_MSG
+        (
+            false, NOT_IMPLEMENTED_FOR_THIS_CS
+            , (types<CSTag>)
+        );
 };
 
 } // namespace services

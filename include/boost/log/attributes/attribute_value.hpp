@@ -98,7 +98,7 @@ public:
         /*!
          * \return The attribute value that refers to self implementation.
          */
-        attribute_value get_value() BOOST_OVERRIDE { return attribute_value(this); }
+        virtual attribute_value get_value() { return attribute_value(this); }
 
         /*!
          * \return The attribute value type
@@ -114,7 +114,7 @@ public:
     /*!
      * Default constructor. Creates an empty (absent) attribute value.
      */
-    BOOST_DEFAULTED_FUNCTION(attribute_value(), BOOST_NOEXCEPT {})
+    BOOST_DEFAULTED_FUNCTION(attribute_value(), {})
 
     /*!
      * Copy constructor

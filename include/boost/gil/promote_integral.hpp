@@ -2,8 +2,6 @@
 //
 // Copyright (c) 2015, Oracle and/or its affiliates.
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
-// 
-// Copyright (c) 2020, Debabrata Mandal <mandaldebabrata123@gmail.com>
 //
 // Licensed under the Boost Software License version 1.0.
 // http://www.boost.org/users/license.html
@@ -14,12 +12,15 @@
 //  - Rename include guards
 //  - Remove support for boost::multiprecision types
 //  - Remove support for 128-bit integer types
-//  - Replace mpl meta functions with mp11 equivalents
 //
 #ifndef BOOST_GIL_PROMOTE_INTEGRAL_HPP
 #define BOOST_GIL_PROMOTE_INTEGRAL_HPP
 
-#include <boost/mp11/list.hpp>
+#include <boost/mpl/begin.hpp>
+#include <boost/mpl/deref.hpp>
+#include <boost/mpl/end.hpp>
+#include <boost/mpl/list.hpp>
+#include <boost/mpl/next.hpp>
 
 #include <climits>
 #include <cstddef>
@@ -46,13 +47,13 @@ struct bit_size<T, true> : std::integral_constant<std::size_t, (CHAR_BIT * sizeo
 template
 <
     typename T,
-    typename IntegralTypes,
+    typename Iterator,
+    typename EndIterator,
     std::size_t MinSize
 >
 struct promote_to_larger
 {
-    using current_type = boost::mp11::mp_first<IntegralTypes>;
-    using list_after_front = boost::mp11::mp_rest<IntegralTypes>;
+    using current_type = typename boost::mpl::deref<Iterator>::type;
 
     using type = typename std::conditional
         <
@@ -61,7 +62,8 @@ struct promote_to_larger
             typename promote_to_larger
                 <
                     T,
-                    list_after_front,
+                    typename boost::mpl::next<Iterator>::type,
+                    EndIterator,
                     MinSize
                 >::type
         >::type;
@@ -69,8 +71,8 @@ struct promote_to_larger
 
 // The following specialization is required to finish the loop over
 // all list elements
-template <typename T, std::size_t MinSize>
-struct promote_to_larger<T, boost::mp11::mp_list<>, MinSize>
+template <typename T, typename EndIterator, std::size_t MinSize>
+struct promote_to_larger<T, EndIterator, EndIterator, MinSize>
 {
     // if promotion fails, keep the number T
     // (and cross fingers that overflow will not occur)
@@ -146,7 +148,7 @@ private:
 
     // Define the list of signed integral types we are going to use
     // for promotion
-    using signed_integral_types = boost::mp11::mp_list
+    using signed_integral_types = boost::mpl::list
         <
             short, int, long
 #if defined(BOOST_HAS_LONG_LONG)
@@ -156,7 +158,7 @@ private:
 
     // Define the list of unsigned integral types we are going to use
     // for promotion
-    using unsigned_integral_types = boost::mp11::mp_list
+    using unsigned_integral_types = boost::mpl::list
         <
             unsigned short, unsigned int, unsigned long, std::size_t
 #if defined(BOOST_HAS_LONG_LONG)
@@ -178,7 +180,8 @@ public:
     using type = typename detail::promote_integral::promote_to_larger
         <
             T,
-            integral_types,
+            typename boost::mpl::begin<integral_types>::type,
+            typename boost::mpl::end<integral_types>::type,
             min_bit_size_type::value
         >::type;
 };

@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     // Note: This function is documented per datatype/concept only.
     //! @cond
     template <typename S, typename = void>
@@ -26,7 +26,7 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&&, Ys&&) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr difference_t difference{};
-}} // end namespace boost::hana
+    constexpr difference_t difference{};
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_DIFFERENCE_HPP

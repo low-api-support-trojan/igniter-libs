@@ -52,7 +52,7 @@ public:
 
 #if defined(_MSC_VER) && ! defined(__clang__)
 # define BOOST_BEAST_UNREACHABLE() __assume(false)
-# define BOOST_BEAST_UNREACHABLE_RETURN(v) return v
+# define BOOST_BEAST_UNREACHABLE_RETURN(v) __assume(false)
 #else
 # define BOOST_BEAST_UNREACHABLE() __builtin_unreachable()
 # define BOOST_BEAST_UNREACHABLE_RETURN(v) \

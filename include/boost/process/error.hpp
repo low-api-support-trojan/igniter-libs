@@ -59,7 +59,7 @@ namespace detail {
 
 struct throw_on_error_ : ::boost::process::detail::api::handler_base_ext
 {
-    constexpr throw_on_error_() = default;
+    constexpr throw_on_error_() {};
 
     template <class Executor>
     void on_error(Executor&, const std::error_code & ec) const
@@ -72,7 +72,7 @@ struct throw_on_error_ : ::boost::process::detail::api::handler_base_ext
 
 struct ignore_error_ : ::boost::process::detail::api::handler_base_ext
 {
-    constexpr ignore_error_() = default;
+    constexpr ignore_error_() {};
 };
 
 struct set_on_error : ::boost::process::detail::api::handler_base_ext
@@ -81,7 +81,7 @@ struct set_on_error : ::boost::process::detail::api::handler_base_ext
     explicit set_on_error(std::error_code &ec) : ec_(ec) {}
 
     template <class Executor>
-    void on_error(Executor&, const std::error_code & ec) const noexcept
+    void on_error(Executor&, const std::error_code & ec) const
     {
         ec_ = ec;
     }
@@ -92,7 +92,7 @@ private:
 
 struct error_
 {
-    constexpr error_() = default;
+    constexpr error_() {}
     set_on_error operator()(std::error_code &ec) const {return set_on_error(ec);}
     set_on_error operator= (std::error_code &ec) const {return set_on_error(ec);}
 

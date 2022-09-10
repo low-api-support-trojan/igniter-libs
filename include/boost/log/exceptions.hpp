@@ -83,12 +83,12 @@ public:
     /*!
      * Destructor
      */
-    ~bad_alloc() throw() BOOST_OVERRIDE;
+    ~bad_alloc() throw();
 
     /*!
      * Error message accessor.
      */
-    const char* what() const throw() BOOST_OVERRIDE;
+    const char* what() const throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line, const char* descr);
@@ -114,7 +114,7 @@ public:
     /*!
      * Destructor
      */
-    ~capacity_limit_reached() throw() BOOST_OVERRIDE;
+    ~capacity_limit_reached() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line, const char* descr);
@@ -140,7 +140,7 @@ public:
     /*!
      * Destructor
      */
-    ~runtime_error() throw() BOOST_OVERRIDE;
+    ~runtime_error() throw();
 };
 
 /*!
@@ -161,7 +161,7 @@ public:
     /*!
      * Destructor
      */
-    ~missing_value() throw() BOOST_OVERRIDE;
+    ~missing_value() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line);
@@ -190,7 +190,7 @@ public:
     /*!
      * Destructor
      */
-    ~invalid_type() throw() BOOST_OVERRIDE;
+    ~invalid_type() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line);
@@ -223,7 +223,7 @@ public:
     /*!
      * Destructor
      */
-    ~invalid_value() throw() BOOST_OVERRIDE;
+    ~invalid_value() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line);
@@ -250,7 +250,7 @@ public:
     /*!
      * Destructor
      */
-    ~parse_error() throw() BOOST_OVERRIDE;
+    ~parse_error() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line);
@@ -281,7 +281,7 @@ public:
     /*!
      * Destructor
      */
-    ~conversion_error() throw() BOOST_OVERRIDE;
+    ~conversion_error() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line);
@@ -304,7 +304,7 @@ public:
     /*!
      * Destructor
      */
-    ~system_error() throw() BOOST_OVERRIDE;
+    ~system_error() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line, const char* descr, int system_error_code);
@@ -331,7 +331,7 @@ public:
     /*!
      * Destructor
      */
-    ~logic_error() throw() BOOST_OVERRIDE;
+    ~logic_error() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line, const char* descr);
@@ -357,7 +357,7 @@ public:
     /*!
      * Destructor
      */
-    ~odr_violation() throw() BOOST_OVERRIDE;
+    ~odr_violation() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line);
@@ -384,7 +384,7 @@ public:
     /*!
      * Destructor
      */
-    ~unexpected_call() throw() BOOST_OVERRIDE;
+    ~unexpected_call() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line);
@@ -411,7 +411,7 @@ public:
     /*!
      * Destructor
      */
-    ~setup_error() throw() BOOST_OVERRIDE;
+    ~setup_error() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line);
@@ -438,7 +438,7 @@ public:
     /*!
      * Destructor
      */
-    ~limitation_error() throw() BOOST_OVERRIDE;
+    ~limitation_error() throw();
 
 #ifndef BOOST_LOG_DOXYGEN_PASS
     static BOOST_LOG_NORETURN void throw_(const char* file, std::size_t line);

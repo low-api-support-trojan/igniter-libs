@@ -20,8 +20,7 @@
 #include <boost/preprocessor/repetition/enum.hpp>
 #include <boost/preprocessor/array/enum.hpp>
 #include <boost/preprocessor/array/size.hpp>
-#include <boost/tti/detail/denclosing_type.hpp>
-#include <boost/tti/gen/namespace_gen.hpp>
+#include <boost/type_traits/is_class.hpp>
 
 #if !defined(BOOST_MPL_CFG_NO_HAS_XXX_TEMPLATE)
 
@@ -207,7 +206,7 @@ BOOST_PP_ARRAY_ELEM(BOOST_PP_ADD(4,n),args) \
     typedef typename \
       boost::mpl::eval_if \
         < \
-        BOOST_TTI_NAMESPACE::detail::enclosing_type<BOOST_TTI_DETAIL_TP_T>, \
+        boost::is_class<BOOST_TTI_DETAIL_TP_T>, \
         BOOST_PP_CAT(trait,_detail_cp_op)<BOOST_TTI_DETAIL_TP_T>, \
         boost::mpl::false_ \
         >::type type; \

@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     // Note: This function is documented per datatype/concept only.
     //! @cond
     template <typename T, typename = void>
@@ -26,7 +26,7 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(Set&& set, Args&& ...args) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr insert_t insert{};
+    constexpr insert_t insert{};
 
 
     //! Insert a value at a given index in a sequence.
@@ -55,6 +55,6 @@ namespace boost { namespace hana {
         return tag-dispatched;
     };
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_INSERT_HPP

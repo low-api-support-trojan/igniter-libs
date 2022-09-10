@@ -21,7 +21,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/while.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     template <typename L>
     struct Logical
         : hana::integral_constant<bool,
@@ -30,6 +30,6 @@ namespace boost { namespace hana {
             !is_default<while_impl<typename tag_of<L>::type>>::value
         >
     { };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_CONCEPT_LOGICAL_HPP

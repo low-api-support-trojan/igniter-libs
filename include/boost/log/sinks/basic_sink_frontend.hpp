@@ -26,8 +26,6 @@
 #include <boost/log/expressions/filter.hpp>
 #include <boost/log/expressions/formatter.hpp>
 #if !defined(BOOST_LOG_NO_THREADS)
-#include <boost/memory_order.hpp>
-#include <boost/atomic/atomic.hpp>
 #include <boost/thread/exceptions.hpp>
 #include <boost/thread/tss.hpp>
 #include <boost/log/detail/locks.hpp>
@@ -124,7 +122,7 @@ public:
      *
      * \param attrs A set of attribute values of a logging record
      */
-    bool will_consume(attribute_value_set const& attrs) BOOST_OVERRIDE
+    bool will_consume(attribute_value_set const& attrs)
     {
         BOOST_LOG_EXPR_IF_MT(boost::log::aux::shared_lock_guard< mutex_type > lock(m_Mutex);)
         try
@@ -314,7 +312,7 @@ private:
 
         formatting_context() :
 #if !defined(BOOST_LOG_NO_THREADS)
-            m_Version(0u),
+            m_Version(0),
 #endif
             m_FormattingStream(m_FormattedRecord)
         {
@@ -336,7 +334,7 @@ private:
 #if !defined(BOOST_LOG_NO_THREADS)
 
     //! State version
-    boost::atomic< unsigned int > m_Version;
+    volatile unsigned int m_Version;
 
     //! Formatter functor
     formatter_type m_Formatter;
@@ -362,7 +360,7 @@ public:
     explicit basic_formatting_sink_frontend(bool cross_thread) :
         basic_sink_frontend(cross_thread)
 #if !defined(BOOST_LOG_NO_THREADS)
-        , m_Version(0u)
+        , m_Version(0)
 #endif
     {
     }
@@ -376,7 +374,7 @@ public:
 #if !defined(BOOST_LOG_NO_THREADS)
         boost::log::aux::exclusive_lock_guard< mutex_type > lock(this->frontend_mutex());
         m_Formatter = formatter;
-        m_Version.opaque_add(1u, boost::memory_order_relaxed);
+        ++m_Version;
 #else
         m_Context.m_Formatter = formatter;
 #endif
@@ -389,7 +387,7 @@ public:
 #if !defined(BOOST_LOG_NO_THREADS)
         boost::log::aux::exclusive_lock_guard< mutex_type > lock(this->frontend_mutex());
         m_Formatter.reset();
-        m_Version.opaque_add(1u, boost::memory_order_relaxed);
+        ++m_Version;
 #else
         m_Context.m_Formatter.reset();
 #endif
@@ -415,7 +413,7 @@ public:
 #if !defined(BOOST_LOG_NO_THREADS)
         boost::log::aux::exclusive_lock_guard< mutex_type > lock(this->frontend_mutex());
         m_Locale = loc;
-        m_Version.opaque_add(1u, boost::memory_order_relaxed);
+        ++m_Version;
 #else
         m_Context.m_FormattingStream.imbue(loc);
 #endif
@@ -440,11 +438,11 @@ protected:
 
 #if !defined(BOOST_LOG_NO_THREADS)
         context = m_pContext.get();
-        if (!context || context->m_Version != m_Version.load(boost::memory_order_relaxed))
+        if (!context || context->m_Version != m_Version)
         {
             {
                 boost::log::aux::shared_lock_guard< mutex_type > lock(this->frontend_mutex());
-                context = new formatting_context(m_Version.load(boost::memory_order_relaxed), m_Locale, m_Formatter);
+                context = new formatting_context(m_Version, m_Locale, m_Formatter);
             }
             m_pContext.reset(context);
         }

@@ -13,7 +13,7 @@ namespace boost {
 namespace histogram {
 namespace detail {
 
-template <class T>
+template <typename T>
 constexpr T lowest() {
   return std::numeric_limits<T>::lowest();
 }
@@ -28,7 +28,7 @@ constexpr float lowest() {
   return -std::numeric_limits<float>::infinity();
 }
 
-template <class T>
+template <typename T>
 constexpr T highest() {
   return (std::numeric_limits<T>::max)();
 }

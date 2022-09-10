@@ -1,3 +1,4 @@
+
 //  (C) Copyright John Maddock 2006.
 //  Use, modification and distribution are subject to the
 //  Boost Software License, Version 1.0. (See accompanying file
@@ -12,17 +13,15 @@
 
 #include <utility>
 #include <vector>
-#include <type_traits>
 #include <boost/math/special_functions/math_fwd.hpp>
 #include <boost/math/special_functions/factorials.hpp>
 #include <boost/math/tools/roots.hpp>
 #include <boost/math/tools/config.hpp>
-#include <boost/math/tools/cxx03_warn.hpp>
 
 namespace boost{
 namespace math{
 
-// Recurrence relation for legendre P and Q polynomials:
+// Recurrance relation for legendre P and Q polynomials:
 template <class T1, class T2, class T3>
 inline typename tools::promote_args<T1, T2, T3>::type
    legendre_next(unsigned l, T1 x, T2 Pl, T3 Plm1)
@@ -33,7 +32,7 @@ inline typename tools::promote_args<T1, T2, T3>::type
 
 namespace detail{
 
-// Implement Legendre P and Q polynomials via recurrence:
+// Implement Legendre P and Q polynomials via recurrance:
 template <class T, class Policy>
 T legendre_imp(unsigned l, T x, const Policy& pol, bool second = false)
 {
@@ -149,7 +148,7 @@ struct legendre_p_zero_func
       T Pn;
       T Pn_prime = detail::legendre_p_prime_imp(n, x, pol, &Pn);
       return std::pair<T, T>(Pn, Pn_prime); 
-   }
+   };
 };
 
 template <class T, class Policy>
@@ -163,7 +162,7 @@ std::vector<T> legendre_p_zeros_imp(int n, const Policy& pol)
     using boost::math::constants::half;
     using boost::math::tools::newton_raphson_iterate;
 
-    BOOST_MATH_ASSERT(n >= 0);
+    BOOST_ASSERT(n >= 0);
     std::vector<T> zeros;
     if (n == 0)
     {
@@ -198,7 +197,7 @@ std::vector<T> legendre_p_zeros_imp(int n, const Policy& pol)
         T sin_nk = sin(theta_nk);
         T x_nk_guess = (1 - inv_n_sq/static_cast<T>(8) + inv_n_sq /static_cast<T>(8*n) - (inv_n_sq*inv_n_sq/384)*(39  - 28 / (sin_nk*sin_nk) ) )*cos_nk;
 
-        std::uintmax_t number_of_iterations = policies::get_max_root_iterations<Policy>();
+        boost::uintmax_t number_of_iterations = policies::get_max_root_iterations<Policy>();
 
         legendre_p_zero_func<T, Policy> f(n, pol);
 
@@ -207,8 +206,8 @@ std::vector<T> legendre_p_zeros_imp(int n, const Policy& pol)
                                               policies::digits<T, Policy>(),
                                               number_of_iterations);
 
-        BOOST_MATH_ASSERT(lower_bound < x_nk);
-        BOOST_MATH_ASSERT(upper_bound > x_nk);
+        BOOST_ASSERT(lower_bound < x_nk);
+        BOOST_ASSERT(upper_bound > x_nk);
         zeros[k] = x_nk;
         ++k;
     }
@@ -218,7 +217,7 @@ std::vector<T> legendre_p_zeros_imp(int n, const Policy& pol)
 } // namespace detail
 
 template <class T, class Policy>
-inline typename std::enable_if<policies::is_policy<Policy>::value, typename tools::promote_args<T>::type>::type
+inline typename boost::enable_if_c<policies::is_policy<Policy>::value, typename tools::promote_args<T>::type>::type
    legendre_p(int l, T x, const Policy& pol)
 {
    typedef typename tools::promote_args<T>::type result_type;
@@ -231,7 +230,7 @@ inline typename std::enable_if<policies::is_policy<Policy>::value, typename tool
 
 
 template <class T, class Policy>
-inline typename std::enable_if<policies::is_policy<Policy>::value, typename tools::promote_args<T>::type>::type
+inline typename boost::enable_if_c<policies::is_policy<Policy>::value, typename tools::promote_args<T>::type>::type
    legendre_p_prime(int l, T x, const Policy& pol)
 {
    typedef typename tools::promote_args<T>::type result_type;
@@ -273,7 +272,7 @@ inline std::vector<T> legendre_p_zeros(int l)
 }
 
 template <class T, class Policy>
-inline typename std::enable_if<policies::is_policy<Policy>::value, typename tools::promote_args<T>::type>::type
+inline typename boost::enable_if_c<policies::is_policy<Policy>::value, typename tools::promote_args<T>::type>::type
    legendre_q(unsigned l, T x, const Policy& pol)
 {
    typedef typename tools::promote_args<T>::type result_type;
@@ -302,7 +301,6 @@ namespace detail{
 template <class T, class Policy>
 T legendre_p_imp(int l, int m, T x, T sin_theta_power, const Policy& pol)
 {
-   BOOST_MATH_STD_USING
    // Error handling:
    if((x < -1) || (x > 1))
       return policies::raise_domain_error<T>(
@@ -312,18 +310,6 @@ T legendre_p_imp(int l, int m, T x, T sin_theta_power, const Policy& pol)
    // Handle negative arguments first:
    if(l < 0)
       return legendre_p_imp(-l-1, m, x, sin_theta_power, pol);
-   if ((l == 0) && (m == -1))
-   {
-      return sqrt((1 - x) / (1 + x));
-   }
-   if ((l == 1) && (m == 0))
-   {
-      return x;
-   }
-   if (-m == l)
-   {
-      return pow((1 - x * x) / 4, T(l) / 2) / boost::math::tgamma(l + 1, pol);
-   }
    if(m < 0)
    {
       int sign = (m&1) ? -1 : 1;
@@ -371,7 +357,7 @@ inline typename tools::promote_args<T>::type
 {
    typedef typename tools::promote_args<T>::type result_type;
    typedef typename policies::evaluation<result_type, Policy>::type value_type;
-   return policies::checked_narrowing_cast<result_type, Policy>(detail::legendre_p_imp(l, m, static_cast<value_type>(x), pol), "boost::math::legendre_p<%1%>(int, int, %1%)");
+   return policies::checked_narrowing_cast<result_type, Policy>(detail::legendre_p_imp(l, m, static_cast<value_type>(x), pol), "bost::math::legendre_p<%1%>(int, int, %1%)");
 }
 
 template <class T>

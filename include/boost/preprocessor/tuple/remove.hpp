@@ -13,6 +13,9 @@
 # define BOOST_PREPROCESSOR_TUPLE_REMOVE_HPP
 #
 # include <boost/preprocessor/config/config.hpp>
+#
+# if BOOST_PP_VARIADICS
+#
 # include <boost/preprocessor/array/remove.hpp>
 # include <boost/preprocessor/array/to_tuple.hpp>
 # include <boost/preprocessor/comparison/greater.hpp>
@@ -55,5 +58,7 @@
 /**/
 #
 # define BOOST_PP_TUPLE_REMOVE_D_RETURN(d, tuple, i) tuple
+#
+# endif // BOOST_PP_VARIADICS
 #
 # endif // BOOST_PREPROCESSOR_TUPLE_REMOVE_HPP

@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Conditionally execute one of two branches based on a condition.
     //! @ingroup group-Logical
     //!
@@ -148,8 +148,8 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(Cond&& cond, Then&& then, Else&& else_) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr eval_if_t eval_if{};
+    constexpr eval_if_t eval_if{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_EVAL_IF_HPP

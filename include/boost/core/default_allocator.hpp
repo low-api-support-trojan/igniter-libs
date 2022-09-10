@@ -10,6 +10,11 @@ Distributed under the Boost Software License, Version 1.0.
 
 #include <boost/config.hpp>
 #include <new>
+#include <climits>
+
+#if defined(BOOST_LIBSTDCXX_VERSION) && BOOST_LIBSTDCXX_VERSION < 60000
+#define BOOST_CORE_NO_CXX11_ALLOCATOR
+#endif
 
 namespace boost {
 
@@ -76,9 +81,16 @@ struct default_allocator {
     BOOST_CONSTEXPR default_allocator(const default_allocator<U>&)
         BOOST_NOEXCEPT { }
 
+#if defined(PTRDIFF_MAX) && defined(SIZE_MAX)
     BOOST_CONSTEXPR std::size_t max_size() const BOOST_NOEXCEPT {
-        return static_cast<std::size_t>(-1) / (2 < sizeof(T) ? sizeof(T) : 2);
+        return PTRDIFF_MAX < SIZE_MAX / sizeof(T)
+            ? PTRDIFF_MAX : SIZE_MAX / sizeof(T);
     }
+#else
+    BOOST_CONSTEXPR std::size_t max_size() const BOOST_NOEXCEPT {
+        return ~static_cast<std::size_t>(0) / sizeof(T);
+    }
+#endif
 
 #if !defined(BOOST_NO_EXCEPTIONS)
     T* allocate(std::size_t n) {
@@ -108,8 +120,7 @@ struct default_allocator {
     }
 #endif
 
-#if (defined(BOOST_LIBSTDCXX_VERSION) && BOOST_LIBSTDCXX_VERSION < 60000) || \
-    defined(BOOST_NO_CXX11_ALLOCATOR)
+#if defined(BOOST_NO_CXX11_ALLOCATOR) || defined(BOOST_CORE_NO_CXX11_ALLOCATOR)
     template<class U, class V>
     void construct(U* p, const V& v) {
         ::new(p) U(v);
@@ -118,7 +129,6 @@ struct default_allocator {
     template<class U>
     void destroy(U* p) {
         p->~U();
-        (void)p;
     }
 #endif
 };

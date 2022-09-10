@@ -40,7 +40,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <cstddef>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename X, typename Y>
     constexpr auto equal_t::operator()(X&& x, Y&& y) const {
@@ -191,16 +191,13 @@ namespace boost { namespace hana {
     }
 
     template <typename S>
-    struct equal_impl<S, S, when<
-        hana::Struct<S>::value &&
-        !detail::EqualityComparable<S, S>::value
-    >> {
+    struct equal_impl<S, S, when<hana::Struct<S>::value>> {
         template <typename X, typename Y>
         static constexpr auto apply(X const& x, Y const& y) {
             return hana::all_of(hana::accessors<S>(),
                 detail::compare_struct_members<X, Y>{x, y});
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_EQUAL_HPP

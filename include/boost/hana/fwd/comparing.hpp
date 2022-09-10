@@ -13,7 +13,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/config.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns a function performing `equal` after applying a transformation
     //! to both arguments.
     //! @ingroup group-Comparable
@@ -58,8 +58,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(F&& f) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr comparing_t comparing{};
+    constexpr comparing_t comparing{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_COMPARING_HPP

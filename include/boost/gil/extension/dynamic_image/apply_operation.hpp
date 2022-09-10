@@ -8,34 +8,65 @@
 #ifndef BOOST_GIL_EXTENSION_DYNAMIC_IMAGE_APPLY_OPERATION_HPP
 #define BOOST_GIL_EXTENSION_DYNAMIC_IMAGE_APPLY_OPERATION_HPP
 
-#include <boost/variant2/variant.hpp>
+#include <boost/gil/detail/mp11.hpp>
+
+#include <boost/variant/apply_visitor.hpp>
+
+#ifdef BOOST_GIL_DOXYGEN_ONLY
+#undef BOOST_GIL_REDUCE_CODE_BLOAT
+#endif
+
+// Implements apply_operation for variants.
+// Optionally performs type reduction.
+#ifdef BOOST_GIL_REDUCE_CODE_BLOAT
+
+#include <boost/gil/extension/dynamic_image/reduce.hpp>
+
+#else
 
 namespace boost { namespace gil {
 
 /// \ingroup Variant
-/// \brief Applies the visitor op to the variants
-template <typename Variant1, typename Visitor>
+/// \brief Invokes a generic mutable operation (represented as a unary function object) on a variant
+template <typename Types, typename UnaryOp>
 BOOST_FORCEINLINE
-auto apply_operation(Variant1&& arg1, Visitor&& op)
+auto apply_operation(variant<Types>& arg, UnaryOp op)
 #if defined(BOOST_NO_CXX14_DECLTYPE_AUTO) || defined(BOOST_NO_CXX11_DECLTYPE_N3276)
-    -> decltype(variant2::visit(std::forward<Visitor>(op), std::forward<Variant1>(arg1)))
+    -> typename UnaryOp::result_type
 #endif
 {
-    return variant2::visit(std::forward<Visitor>(op), std::forward<Variant1>(arg1));
+    return apply_visitor(op, arg);
 }
 
 /// \ingroup Variant
-/// \brief Applies the visitor op to the variants
-template <typename Variant1, typename Variant2, typename Visitor>
+/// \brief Invokes a generic constant operation (represented as a unary function object) on a variant
+template <typename Types, typename UnaryOp>
 BOOST_FORCEINLINE
-auto apply_operation(Variant1&& arg1, Variant2&& arg2, Visitor&& op)
+auto apply_operation(variant<Types> const& arg, UnaryOp op)
 #if defined(BOOST_NO_CXX14_DECLTYPE_AUTO) || defined(BOOST_NO_CXX11_DECLTYPE_N3276)
-    -> decltype(variant2::visit(std::forward<Visitor>(op), std::forward<Variant1>(arg1), std::forward<Variant2>(arg2)))
+    -> typename UnaryOp::result_type
 #endif
 {
-    return variant2::visit(std::forward<Visitor>(op), std::forward<Variant1>(arg1), std::forward<Variant2>(arg2));
+    return apply_visitor(op, arg);
+}
+
+/// \ingroup Variant
+/// \brief Invokes a generic constant operation (represented as a binary function object) on two variants
+template <typename Types1, typename Types2, typename BinaryOp>
+BOOST_FORCEINLINE
+auto apply_operation(
+    variant<Types1> const& arg1,
+    variant<Types2> const& arg2,
+    BinaryOp op)
+#if defined(BOOST_NO_CXX14_DECLTYPE_AUTO) || defined(BOOST_NO_CXX11_DECLTYPE_N3276)
+    -> typename BinaryOp::result_type
+#endif
+{
+    return apply_visitor(op, arg1, arg2);
 }
 
 }}  // namespace boost::gil
+
+#endif // defined(BOOST_GIL_REDUCE_CODE_BLOAT)
 
 #endif

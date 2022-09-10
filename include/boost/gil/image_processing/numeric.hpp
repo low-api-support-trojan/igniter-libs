@@ -32,7 +32,7 @@ namespace boost { namespace gil {
 ///
 inline double normalized_sinc(double x)
 {
-    return std::sin(x * boost::gil::detail::pi) / (x * boost::gil::detail::pi);
+    return std::sin(x * boost::gil::pi) / (x * boost::gil::pi);
 }
 
 /// \brief Lanczos response at point x
@@ -54,11 +54,6 @@ inline double lanczos(double x, std::ptrdiff_t a)
     return 0;
 }
 
-#if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)
-#pragma warning(push)
-#pragma warning(disable:4244) // 'argument': conversion from 'const Channel' to 'BaseChannelValue', possible loss of data
-#endif
-
 inline void compute_tensor_entries(
     boost::gil::gray16s_view_t dx,
     boost::gil::gray16s_view_t dy,
@@ -76,10 +71,6 @@ inline void compute_tensor_entries(
         }
     }
 }
-
-#if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)
-#pragma warning(pop)
-#endif
 
 /// \brief Generate mean kernel
 /// \ingroup ImageProcessingMath
@@ -132,7 +123,7 @@ inline detail::kernel_2d<T, Allocator> generate_gaussian_kernel(std::size_t side
         throw std::invalid_argument("kernel dimensions should be odd and equal");
 
 
-    const double denominator = 2 * boost::gil::detail::pi * sigma * sigma;
+    const double denominator = 2 * boost::gil::pi * sigma * sigma;
     auto middle = side_length / 2;
     std::vector<T, Allocator> values(side_length * side_length);
     for (std::size_t y = 0; y < side_length; ++y)
@@ -165,12 +156,12 @@ inline detail::kernel_2d<T, Allocator> generate_dx_sobel(unsigned int degree = 1
     {
         case 0:
         {
-            return detail::get_identity_kernel<T, Allocator>();
+            return get_identity_kernel<T, Allocator>();
         }
         case 1:
         {
             detail::kernel_2d<T, Allocator> result(3, 1, 1);
-            std::copy(detail::dx_sobel.begin(), detail::dx_sobel.end(), result.begin());
+            std::copy(dx_sobel.begin(), dx_sobel.end(), result.begin());
             return result;
         }
         default:
@@ -195,12 +186,12 @@ inline detail::kernel_2d<T, Allocator> generate_dx_scharr(unsigned int degree = 
     {
         case 0:
         {
-            return detail::get_identity_kernel<T, Allocator>();
+            return get_identity_kernel<T, Allocator>();
         }
         case 1:
         {
             detail::kernel_2d<T, Allocator> result(3, 1, 1);
-            std::copy(detail::dx_scharr.begin(), detail::dx_scharr.end(), result.begin());
+            std::copy(dx_scharr.begin(), dx_scharr.end(), result.begin());
             return result;
         }
         default:
@@ -225,12 +216,12 @@ inline detail::kernel_2d<T, Allocator> generate_dy_sobel(unsigned int degree = 1
     {
         case 0:
         {
-            return detail::get_identity_kernel<T, Allocator>();
+            return get_identity_kernel<T, Allocator>();
         }
         case 1:
         {
             detail::kernel_2d<T, Allocator> result(3, 1, 1);
-            std::copy(detail::dy_sobel.begin(), detail::dy_sobel.end(), result.begin());
+            std::copy(dy_sobel.begin(), dy_sobel.end(), result.begin());
             return result;
         }
         default:
@@ -255,12 +246,12 @@ inline detail::kernel_2d<T, Allocator> generate_dy_scharr(unsigned int degree = 
     {
         case 0:
         {
-            return detail::get_identity_kernel<T, Allocator>();
+            return get_identity_kernel<T, Allocator>();
         }
         case 1:
         {
             detail::kernel_2d<T, Allocator> result(3, 1, 1);
-            std::copy(detail::dy_scharr.begin(), detail::dy_scharr.end(), result.begin());
+            std::copy(dy_scharr.begin(), dy_scharr.end(), result.begin());
             return result;
         }
         default:

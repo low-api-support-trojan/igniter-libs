@@ -20,7 +20,6 @@
 #endif
 
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
-#include <boost/container/detail/workaround.hpp>
 
 namespace boost {
 namespace container {

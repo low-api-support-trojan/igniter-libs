@@ -131,8 +131,3 @@
 // to ensure the correct libraries are selected at link time.
 // #define BOOST_LIB_BUILDID amd64
 
-// Android defines
-// There is problem with std::atomic on android (and some other platforms).
-// See this link for more info:
-// https://code.google.com/p/android/issues/detail?id=42735#makechanges
-#define BOOST_ASIO_DISABLE_STD_ATOMIC 1

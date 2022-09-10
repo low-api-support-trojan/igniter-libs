@@ -11,9 +11,6 @@
 #define BOOST_BEAST_DETAIL_GET_IO_CONTEXT_HPP
 
 #include <boost/beast/core/stream_traits.hpp>
-#ifdef BOOST_ASIO_NO_TS_EXECUTORS
-#include <boost/asio/execution.hpp>
-#endif
 #include <boost/asio/executor.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/strand.hpp>
@@ -37,7 +34,7 @@ inline
 net::io_context*
 get_io_context(net::io_context::executor_type const& ex)
 {
-    return std::addressof(net::query(ex, net::execution::context));
+    return std::addressof(ex.context());
 }
 
 inline
@@ -45,7 +42,8 @@ net::io_context*
 get_io_context(net::strand<
     net::io_context::executor_type> const& ex)
 {
-    return get_io_context(ex.get_inner_executor());
+    return std::addressof(
+        ex.get_inner_executor().context());
 }
 
 template<class Executor>
@@ -58,7 +56,7 @@ get_io_context(net::strand<Executor> const& ex)
 template<
     class T,
     class = typename std::enable_if<
-        std::is_same<T, net::executor>::value || std::is_same<T, net::any_io_executor>::value>::type>
+        std::is_same<T, net::executor>::value>::type>
 net::io_context*
 get_io_context(T const& ex)
 {
@@ -66,7 +64,7 @@ get_io_context(T const& ex)
         net::io_context::executor_type>();
     if(! p)
         return nullptr;
-    return get_io_context(*p);
+    return std::addressof(p->context());
 }
 
 inline

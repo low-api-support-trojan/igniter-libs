@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Return the number of elements in the structure that compare equal to
     //! a given value.
     //! @ingroup group-Foldable
@@ -50,8 +50,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Xs&& xs, Value&& value) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr count_t count{};
+    constexpr count_t count{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_COUNT_HPP

@@ -27,7 +27,6 @@
 #include <boost/spirit/home/support/nonterminal/locals.hpp>
 #include <boost/spirit/repository/home/support/subrule_context.hpp>
 
-#include <boost/static_assert.hpp>
 #include <boost/fusion/include/as_map.hpp>
 #include <boost/fusion/include/at_key.hpp>
 #include <boost/fusion/include/cons.hpp>
@@ -42,9 +41,7 @@
 #include <boost/mpl/identity.hpp>
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/vector.hpp>
-#include <boost/proto/extends.hpp>
-#include <boost/proto/traits.hpp>
-#include <boost/type_traits/is_reference.hpp>
+#include <boost/type_traits/add_reference.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 
@@ -416,10 +413,7 @@ namespace boost { namespace spirit { namespace repository { namespace qi
         typedef typename
             spirit::detail::attr_from_sig<sig_type>::type
         attr_type;
-        BOOST_STATIC_ASSERT_MSG(
-            !is_reference<attr_type>::value,
-            "Reference qualifier on Qi subrule attribute type is meaningless");
-        typedef attr_type& attr_reference_type;
+        typedef typename add_reference<attr_type>::type attr_reference_type;
 
         // parameter_types is a sequence of types passed as parameters to the subrule
         typedef typename
@@ -489,7 +483,7 @@ namespace boost { namespace spirit { namespace repository { namespace qi
                 def_type(compile<spirit::qi::domain>(expr), name_)));
         }
 
-#define BOOST_SPIRIT_SUBRULE_MODULUS_ASSIGN_OPERATOR(lhs_ref, rhs_ref)        \
+#define SUBRULE_MODULUS_ASSIGN_OPERATOR(lhs_ref, rhs_ref)                     \
         template <typename Expr>                                              \
         friend typename group_type_helper<Expr, true>::type                   \
         operator%=(subrule lhs_ref sr, Expr rhs_ref expr)                     \
@@ -503,20 +497,20 @@ namespace boost { namespace spirit { namespace repository { namespace qi
         /**/
 
         // non-const versions needed to suppress proto's %= kicking in
-        BOOST_SPIRIT_SUBRULE_MODULUS_ASSIGN_OPERATOR(const&, const&)
+        SUBRULE_MODULUS_ASSIGN_OPERATOR(const&, const&)
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-        BOOST_SPIRIT_SUBRULE_MODULUS_ASSIGN_OPERATOR(const&, &&)
+        SUBRULE_MODULUS_ASSIGN_OPERATOR(const&, &&)
 #else
-        BOOST_SPIRIT_SUBRULE_MODULUS_ASSIGN_OPERATOR(const&, &)
+        SUBRULE_MODULUS_ASSIGN_OPERATOR(const&, &)
 #endif
-        BOOST_SPIRIT_SUBRULE_MODULUS_ASSIGN_OPERATOR(&, const&)
+        SUBRULE_MODULUS_ASSIGN_OPERATOR(&, const&)
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-        BOOST_SPIRIT_SUBRULE_MODULUS_ASSIGN_OPERATOR(&, &&)
+        SUBRULE_MODULUS_ASSIGN_OPERATOR(&, &&)
 #else
-        BOOST_SPIRIT_SUBRULE_MODULUS_ASSIGN_OPERATOR(&, &)
+        SUBRULE_MODULUS_ASSIGN_OPERATOR(&, &)
 #endif
 
-#undef BOOST_SPIRIT_SUBRULE_MODULUS_ASSIGN_OPERATOR
+#undef SUBRULE_MODULUS_ASSIGN_OPERATOR
 
         std::string const& name() const
         {

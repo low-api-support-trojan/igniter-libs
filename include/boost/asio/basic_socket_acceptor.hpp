@@ -2,7 +2,7 @@
 // basic_socket_acceptor.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2021 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2019 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -16,7 +16,6 @@
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
 #include <boost/asio/detail/config.hpp>
-#include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/basic_socket.hpp>
 #include <boost/asio/detail/handler_type_requirements.hpp>
 #include <boost/asio/detail/io_object_impl.hpp>
@@ -25,14 +24,13 @@
 #include <boost/asio/detail/type_traits.hpp>
 #include <boost/asio/error.hpp>
 #include <boost/asio/execution_context.hpp>
+#include <boost/asio/executor.hpp>
 #include <boost/asio/socket_base.hpp>
 
 #if defined(BOOST_ASIO_WINDOWS_RUNTIME)
 # include <boost/asio/detail/null_socket_service.hpp>
 #elif defined(BOOST_ASIO_HAS_IOCP)
 # include <boost/asio/detail/win_iocp_socket_service.hpp>
-#elif defined(BOOST_ASIO_HAS_IO_URING_AS_DEFAULT)
-# include <boost/asio/detail/io_uring_socket_service.hpp>
 #else
 # include <boost/asio/detail/reactive_socket_service.hpp>
 #endif
@@ -50,7 +48,7 @@ namespace asio {
 #define BOOST_ASIO_BASIC_SOCKET_ACCEPTOR_FWD_DECL
 
 // Forward declaration with defaulted arguments.
-template <typename Protocol, typename Executor = any_io_executor>
+template <typename Protocol, typename Executor = executor>
 class basic_socket_acceptor;
 
 #endif // !defined(BOOST_ASIO_BASIC_SOCKET_ACCEPTOR_FWD_DECL)
@@ -63,12 +61,6 @@ class basic_socket_acceptor;
  * @par Thread Safety
  * @e Distinct @e objects: Safe.@n
  * @e Shared @e objects: Unsafe.
- *
- * Synchronous @c accept operations are thread safe, if the underlying
- * operating system calls are also thread safe. This means that it is permitted
- * to perform concurrent calls to synchronous @c accept operations on a single
- * socket object. Other synchronous operations, such as @c open or @c close, are
- * not thread safe.
  *
  * @par Example
  * Opening a socket acceptor with the SO_REUSEADDR option enabled:
@@ -106,9 +98,6 @@ public:
 #elif defined(BOOST_ASIO_HAS_IOCP)
   typedef typename detail::win_iocp_socket_service<
     Protocol>::native_handle_type native_handle_type;
-#elif defined(BOOST_ASIO_HAS_IO_URING_AS_DEFAULT)
-  typedef typename detail::io_uring_socket_service<
-    Protocol>::native_handle_type native_handle_type;
 #else
   typedef typename detail::reactive_socket_service<
     Protocol>::native_handle_type native_handle_type;
@@ -131,7 +120,7 @@ public:
    * acceptor.
    */
   explicit basic_socket_acceptor(const executor_type& ex)
-    : impl_(0, ex)
+    : impl_(ex)
   {
   }
 
@@ -147,10 +136,10 @@ public:
    */
   template <typename ExecutionContext>
   explicit basic_socket_acceptor(ExecutionContext& context,
-      typename constraint<
+      typename enable_if<
         is_convertible<ExecutionContext&, execution_context&>::value
-      >::type = 0)
-    : impl_(0, 0, context)
+      >::type* = 0)
+    : impl_(context)
   {
   }
 
@@ -167,7 +156,7 @@ public:
    * @throws boost::system::system_error Thrown on failure.
    */
   basic_socket_acceptor(const executor_type& ex, const protocol_type& protocol)
-    : impl_(0, ex)
+    : impl_(ex)
   {
     boost::system::error_code ec;
     impl_.get_service().open(impl_.get_implementation(), protocol, ec);
@@ -189,11 +178,10 @@ public:
   template <typename ExecutionContext>
   basic_socket_acceptor(ExecutionContext& context,
       const protocol_type& protocol,
-      typename constraint<
-        is_convertible<ExecutionContext&, execution_context&>::value,
-        defaulted_constraint
-      >::type = defaulted_constraint())
-    : impl_(0, 0, context)
+      typename enable_if<
+        is_convertible<ExecutionContext&, execution_context&>::value
+      >::type* = 0)
+    : impl_(context)
   {
     boost::system::error_code ec;
     impl_.get_service().open(impl_.get_implementation(), protocol, ec);
@@ -229,7 +217,7 @@ public:
    */
   basic_socket_acceptor(const executor_type& ex,
       const endpoint_type& endpoint, bool reuse_addr = true)
-    : impl_(0, ex)
+    : impl_(ex)
   {
     boost::system::error_code ec;
     const protocol_type protocol = endpoint.protocol();
@@ -278,10 +266,10 @@ public:
   template <typename ExecutionContext>
   basic_socket_acceptor(ExecutionContext& context,
       const endpoint_type& endpoint, bool reuse_addr = true,
-      typename constraint<
+      typename enable_if<
         is_convertible<ExecutionContext&, execution_context&>::value
-      >::type = 0)
-    : impl_(0, 0, context)
+      >::type* = 0)
+    : impl_(context)
   {
     boost::system::error_code ec;
     const protocol_type protocol = endpoint.protocol();
@@ -317,7 +305,7 @@ public:
    */
   basic_socket_acceptor(const executor_type& ex,
       const protocol_type& protocol, const native_handle_type& native_acceptor)
-    : impl_(0, ex)
+    : impl_(ex)
   {
     boost::system::error_code ec;
     impl_.get_service().assign(impl_.get_implementation(),
@@ -343,10 +331,10 @@ public:
   template <typename ExecutionContext>
   basic_socket_acceptor(ExecutionContext& context,
       const protocol_type& protocol, const native_handle_type& native_acceptor,
-      typename constraint<
+      typename enable_if<
         is_convertible<ExecutionContext&, execution_context&>::value
-      >::type = 0)
-    : impl_(0, 0, context)
+      >::type* = 0)
+    : impl_(context)
   {
     boost::system::error_code ec;
     impl_.get_service().assign(impl_.get_implementation(),
@@ -366,7 +354,7 @@ public:
    * constructed using the @c basic_socket_acceptor(const executor_type&)
    * constructor.
    */
-  basic_socket_acceptor(basic_socket_acceptor&& other) BOOST_ASIO_NOEXCEPT
+  basic_socket_acceptor(basic_socket_acceptor&& other)
     : impl_(std::move(other.impl_))
   {
   }
@@ -406,10 +394,10 @@ public:
    */
   template <typename Protocol1, typename Executor1>
   basic_socket_acceptor(basic_socket_acceptor<Protocol1, Executor1>&& other,
-      typename constraint<
+      typename enable_if<
         is_convertible<Protocol1, Protocol>::value
           && is_convertible<Executor1, Executor>::value
-      >::type = 0)
+      >::type* = 0)
     : impl_(std::move(other.impl_))
   {
   }
@@ -427,7 +415,7 @@ public:
    * constructor.
    */
   template <typename Protocol1, typename Executor1>
-  typename constraint<
+  typename enable_if<
     is_convertible<Protocol1, Protocol>::value
       && is_convertible<Executor1, Executor>::value,
     basic_socket_acceptor&
@@ -1230,16 +1218,6 @@ public:
    *     boost::asio::ip::tcp::acceptor::wait_read,
    *     wait_handler);
    * @endcode
-   *
-   * @par Per-Operation Cancellation
-   * On POSIX or Windows operating systems, this asynchronous operation supports
-   * cancellation for the following boost::asio::cancellation_type values:
-   *
-   * @li @c cancellation_type::terminal
-   *
-   * @li @c cancellation_type::partial
-   *
-   * @li @c cancellation_type::total
    */
   template <
       BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code))
@@ -1275,9 +1253,9 @@ public:
    */
   template <typename Protocol1, typename Executor1>
   void accept(basic_socket<Protocol1, Executor1>& peer,
-      typename constraint<
+      typename enable_if<
         is_convertible<Protocol, Protocol1>::value
-      >::type = 0)
+      >::type* = 0)
   {
     boost::system::error_code ec;
     impl_.get_service().accept(impl_.get_implementation(),
@@ -1311,9 +1289,9 @@ public:
   template <typename Protocol1, typename Executor1>
   BOOST_ASIO_SYNC_OP_VOID accept(
       basic_socket<Protocol1, Executor1>& peer, boost::system::error_code& ec,
-      typename constraint<
+      typename enable_if<
         is_convertible<Protocol, Protocol1>::value
-      >::type = 0)
+      >::type* = 0)
   {
     impl_.get_service().accept(impl_.get_implementation(),
         peer, static_cast<endpoint_type*>(0), ec);
@@ -1357,16 +1335,6 @@ public:
    * boost::asio::ip::tcp::socket socket(my_context);
    * acceptor.async_accept(socket, accept_handler);
    * @endcode
-   *
-   * @par Per-Operation Cancellation
-   * On POSIX or Windows operating systems, this asynchronous operation supports
-   * cancellation for the following boost::asio::cancellation_type values:
-   *
-   * @li @c cancellation_type::terminal
-   *
-   * @li @c cancellation_type::partial
-   *
-   * @li @c cancellation_type::total
    */
   template <typename Protocol1, typename Executor1,
       BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code))
@@ -1376,9 +1344,9 @@ public:
   async_accept(basic_socket<Protocol1, Executor1>& peer,
       BOOST_ASIO_MOVE_ARG(AcceptHandler) handler
         BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type),
-      typename constraint<
+      typename enable_if<
         is_convertible<Protocol, Protocol1>::value
-      >::type = 0)
+      >::type* = 0)
   {
     return async_initiate<AcceptHandler, void (boost::system::error_code)>(
         initiate_async_accept(this), handler,
@@ -1480,16 +1448,6 @@ public:
    * not, the handler will not be invoked from within this function. On
    * immediate completion, invocation of the handler will be performed in a
    * manner equivalent to using boost::asio::post().
-   *
-   * @par Per-Operation Cancellation
-   * On POSIX or Windows operating systems, this asynchronous operation supports
-   * cancellation for the following boost::asio::cancellation_type values:
-   *
-   * @li @c cancellation_type::terminal
-   *
-   * @li @c cancellation_type::partial
-   *
-   * @li @c cancellation_type::total
    */
   template <typename Executor1,
       BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code))
@@ -1612,16 +1570,6 @@ public:
    * ...
    * acceptor.async_accept(accept_handler);
    * @endcode
-   *
-   * @par Per-Operation Cancellation
-   * On POSIX or Windows operating systems, this asynchronous operation supports
-   * cancellation for the following boost::asio::cancellation_type values:
-   *
-   * @li @c cancellation_type::terminal
-   *
-   * @li @c cancellation_type::partial
-   *
-   * @li @c cancellation_type::total
    */
   template <
       BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code,
@@ -1671,10 +1619,9 @@ public:
   template <typename Executor1>
   typename Protocol::socket::template rebind_executor<Executor1>::other
   accept(const Executor1& ex,
-      typename constraint<
+      typename enable_if<
         is_executor<Executor1>::value
-          || execution::is_executor<Executor1>::value
-      >::type = 0)
+      >::type* = 0)
   {
     boost::system::error_code ec;
     typename Protocol::socket::template
@@ -1711,9 +1658,9 @@ public:
   typename Protocol::socket::template rebind_executor<
       typename ExecutionContext::executor_type>::other
   accept(ExecutionContext& context,
-      typename constraint<
+      typename enable_if<
         is_convertible<ExecutionContext&, execution_context&>::value
-      >::type = 0)
+      >::type* = 0)
   {
     boost::system::error_code ec;
     typename Protocol::socket::template rebind_executor<
@@ -1754,10 +1701,9 @@ public:
   template <typename Executor1>
   typename Protocol::socket::template rebind_executor<Executor1>::other
   accept(const Executor1& ex, boost::system::error_code& ec,
-      typename constraint<
+      typename enable_if<
         is_executor<Executor1>::value
-          || execution::is_executor<Executor1>::value
-      >::type = 0)
+      >::type* = 0)
   {
     typename Protocol::socket::template
       rebind_executor<Executor1>::other peer(ex);
@@ -1797,9 +1743,9 @@ public:
   typename Protocol::socket::template rebind_executor<
       typename ExecutionContext::executor_type>::other
   accept(ExecutionContext& context, boost::system::error_code& ec,
-      typename constraint<
+      typename enable_if<
         is_convertible<ExecutionContext&, execution_context&>::value
-      >::type = 0)
+      >::type* = 0)
   {
     typename Protocol::socket::template rebind_executor<
         typename ExecutionContext::executor_type>::other peer(context);
@@ -1848,16 +1794,6 @@ public:
    * ...
    * acceptor.async_accept(my_context2, accept_handler);
    * @endcode
-   *
-   * @par Per-Operation Cancellation
-   * On POSIX or Windows operating systems, this asynchronous operation supports
-   * cancellation for the following boost::asio::cancellation_type values:
-   *
-   * @li @c cancellation_type::terminal
-   *
-   * @li @c cancellation_type::partial
-   *
-   * @li @c cancellation_type::total
    */
   template <typename Executor1,
       BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code,
@@ -1871,10 +1807,9 @@ public:
   async_accept(const Executor1& ex,
       BOOST_ASIO_MOVE_ARG(MoveAcceptHandler) handler
         BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type),
-      typename constraint<
+      typename enable_if<
         is_executor<Executor1>::value
-          || execution::is_executor<Executor1>::value
-      >::type = 0)
+      >::type* = 0)
   {
     typedef typename Protocol::socket::template rebind_executor<
       Executor1>::other other_socket_type;
@@ -1928,16 +1863,6 @@ public:
    * ...
    * acceptor.async_accept(my_context2, accept_handler);
    * @endcode
-   *
-   * @par Per-Operation Cancellation
-   * On POSIX or Windows operating systems, this asynchronous operation supports
-   * cancellation for the following boost::asio::cancellation_type values:
-   *
-   * @li @c cancellation_type::terminal
-   *
-   * @li @c cancellation_type::partial
-   *
-   * @li @c cancellation_type::total
    */
   template <typename ExecutionContext,
       BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code,
@@ -1951,9 +1876,9 @@ public:
   async_accept(ExecutionContext& context,
       BOOST_ASIO_MOVE_ARG(MoveAcceptHandler) handler
         BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type),
-      typename constraint<
+      typename enable_if<
         is_convertible<ExecutionContext&, execution_context&>::value
-      >::type = 0)
+      >::type* = 0)
   {
     typedef typename Protocol::socket::template rebind_executor<
       typename ExecutionContext::executor_type>::other other_socket_type;
@@ -2086,16 +2011,6 @@ public:
    * boost::asio::ip::tcp::endpoint endpoint;
    * acceptor.async_accept(endpoint, accept_handler);
    * @endcode
-   *
-   * @par Per-Operation Cancellation
-   * On POSIX or Windows operating systems, this asynchronous operation supports
-   * cancellation for the following boost::asio::cancellation_type values:
-   *
-   * @li @c cancellation_type::terminal
-   *
-   * @li @c cancellation_type::partial
-   *
-   * @li @c cancellation_type::total
    */
   template <
       BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code,
@@ -2150,10 +2065,9 @@ public:
   template <typename Executor1>
   typename Protocol::socket::template rebind_executor<Executor1>::other
   accept(const Executor1& ex, endpoint_type& peer_endpoint,
-      typename constraint<
+      typename enable_if<
         is_executor<Executor1>::value
-          || execution::is_executor<Executor1>::value
-      >::type = 0)
+      >::type* = 0)
   {
     boost::system::error_code ec;
     typename Protocol::socket::template
@@ -2196,9 +2110,9 @@ public:
   typename Protocol::socket::template rebind_executor<
       typename ExecutionContext::executor_type>::other
   accept(ExecutionContext& context, endpoint_type& peer_endpoint,
-      typename constraint<
+      typename enable_if<
         is_convertible<ExecutionContext&, execution_context&>::value
-      >::type = 0)
+      >::type* = 0)
   {
     boost::system::error_code ec;
     typename Protocol::socket::template rebind_executor<
@@ -2246,10 +2160,9 @@ public:
   typename Protocol::socket::template rebind_executor<Executor1>::other
   accept(const executor_type& ex,
       endpoint_type& peer_endpoint, boost::system::error_code& ec,
-      typename constraint<
+      typename enable_if<
         is_executor<Executor1>::value
-          || execution::is_executor<Executor1>::value
-      >::type = 0)
+      >::type* = 0)
   {
     typename Protocol::socket::template
       rebind_executor<Executor1>::other peer(ex);
@@ -2296,9 +2209,9 @@ public:
       typename ExecutionContext::executor_type>::other
   accept(ExecutionContext& context,
       endpoint_type& peer_endpoint, boost::system::error_code& ec,
-      typename constraint<
+      typename enable_if<
         is_convertible<ExecutionContext&, execution_context&>::value
-      >::type = 0)
+      >::type* = 0)
   {
     typename Protocol::socket::template rebind_executor<
         typename ExecutionContext::executor_type>::other peer(context);
@@ -2354,16 +2267,6 @@ public:
    * boost::asio::ip::tcp::endpoint endpoint;
    * acceptor.async_accept(my_context2, endpoint, accept_handler);
    * @endcode
-   *
-   * @par Per-Operation Cancellation
-   * On POSIX or Windows operating systems, this asynchronous operation supports
-   * cancellation for the following boost::asio::cancellation_type values:
-   *
-   * @li @c cancellation_type::terminal
-   *
-   * @li @c cancellation_type::partial
-   *
-   * @li @c cancellation_type::total
    */
   template <typename Executor1,
       BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code,
@@ -2377,10 +2280,9 @@ public:
   async_accept(const Executor1& ex, endpoint_type& peer_endpoint,
       BOOST_ASIO_MOVE_ARG(MoveAcceptHandler) handler
         BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type),
-      typename constraint<
+      typename enable_if<
         is_executor<Executor1>::value
-          || execution::is_executor<Executor1>::value
-      >::type = 0)
+      >::type* = 0)
   {
     typedef typename Protocol::socket::template rebind_executor<
       Executor1>::other other_socket_type;
@@ -2440,16 +2342,6 @@ public:
    * boost::asio::ip::tcp::endpoint endpoint;
    * acceptor.async_accept(my_context2, endpoint, accept_handler);
    * @endcode
-   *
-   * @par Per-Operation Cancellation
-   * On POSIX or Windows operating systems, this asynchronous operation supports
-   * cancellation for the following boost::asio::cancellation_type values:
-   *
-   * @li @c cancellation_type::terminal
-   *
-   * @li @c cancellation_type::partial
-   *
-   * @li @c cancellation_type::total
    */
   template <typename ExecutionContext,
       BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code,
@@ -2464,9 +2356,9 @@ public:
       endpoint_type& peer_endpoint,
       BOOST_ASIO_MOVE_ARG(MoveAcceptHandler) handler
         BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type),
-      typename constraint<
+      typename enable_if<
         is_convertible<ExecutionContext&, execution_context&>::value
-      >::type = 0)
+      >::type* = 0)
   {
     typedef typename Protocol::socket::template rebind_executor<
       typename ExecutionContext::executor_type>::other other_socket_type;
@@ -2509,8 +2401,8 @@ private:
 
       detail::non_const_lvalue<WaitHandler> handler2(handler);
       self_->impl_.get_service().async_wait(
-          self_->impl_.get_implementation(), w,
-          handler2.value, self_->impl_.get_executor());
+          self_->impl_.get_implementation(), w, handler2.value,
+          self_->impl_.get_implementation_executor());
     }
 
   private:
@@ -2544,7 +2436,7 @@ private:
       detail::non_const_lvalue<AcceptHandler> handler2(handler);
       self_->impl_.get_service().async_accept(
           self_->impl_.get_implementation(), *peer, peer_endpoint,
-          handler2.value, self_->impl_.get_executor());
+          handler2.value, self_->impl_.get_implementation_executor());
     }
 
   private:
@@ -2578,7 +2470,7 @@ private:
       detail::non_const_lvalue<MoveAcceptHandler> handler2(handler);
       self_->impl_.get_service().async_move_accept(
           self_->impl_.get_implementation(), peer_ex, peer_endpoint,
-          handler2.value, self_->impl_.get_executor());
+          handler2.value, self_->impl_.get_implementation_executor());
     }
 
   private:
@@ -2591,9 +2483,6 @@ private:
 #elif defined(BOOST_ASIO_HAS_IOCP)
   detail::io_object_impl<
     detail::win_iocp_socket_service<Protocol>, Executor> impl_;
-#elif defined(BOOST_ASIO_HAS_IO_URING_AS_DEFAULT)
-  detail::io_object_impl<
-    detail::io_uring_socket_service<Protocol>, Executor> impl_;
 #else
   detail::io_object_impl<
     detail::reactive_socket_service<Protocol>, Executor> impl_;

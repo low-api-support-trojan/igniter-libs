@@ -17,8 +17,6 @@
 
 #if BOOST_WINAPI_PARTITION_APP_SYSTEM
 
-#include <boost/winapi/detail/header.hpp>
-
 #if !defined( BOOST_USE_WINDOWS_H )
 extern "C" {
 struct _ACL;
@@ -29,11 +27,11 @@ typedef _SECURITY_DESCRIPTOR *PSECURITY_DESCRIPTOR;
 typedef boost::winapi::PVOID_ PSECURITY_DESCRIPTOR;
 #endif
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
 InitializeSecurityDescriptor(
     PSECURITY_DESCRIPTOR pSecurityDescriptor,
     boost::winapi::DWORD_ dwRevision);
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC
 SetSecurityDescriptorDacl(
     PSECURITY_DESCRIPTOR pSecurityDescriptor,
     boost::winapi::BOOL_ bDaclPresent,
@@ -66,24 +64,17 @@ typedef struct BOOST_MAY_ALIAS _SECURITY_DESCRIPTOR {
     PACL_ Dacl;
 } SECURITY_DESCRIPTOR_, *PISECURITY_DESCRIPTOR_;
 
-// To abstract away the different ::PSECURITY_DESCRIPTOR on MinGW, we use PVOID_ universally here
-// and cast the pointers to ::PSECURITY_DESCRIPTOR in wrapper functions.
-typedef PVOID_ PSECURITY_DESCRIPTOR_;
+typedef ::PSECURITY_DESCRIPTOR PSECURITY_DESCRIPTOR_;
 
-BOOST_FORCEINLINE BOOL_ InitializeSecurityDescriptor(PSECURITY_DESCRIPTOR_ pSecurityDescriptor, DWORD_ dwRevision)
-{
-    return ::InitializeSecurityDescriptor(reinterpret_cast< ::PSECURITY_DESCRIPTOR >(pSecurityDescriptor), dwRevision);
-}
+using ::InitializeSecurityDescriptor;
 
 BOOST_FORCEINLINE BOOL_ SetSecurityDescriptorDacl(PSECURITY_DESCRIPTOR_ pSecurityDescriptor, BOOL_ bDaclPresent, PACL_ pDacl, BOOL_ bDaclDefaulted)
 {
-    return ::SetSecurityDescriptorDacl(reinterpret_cast< ::PSECURITY_DESCRIPTOR >(pSecurityDescriptor), bDaclPresent, reinterpret_cast< ::_ACL* >(pDacl), bDaclDefaulted);
+    return ::SetSecurityDescriptorDacl(pSecurityDescriptor, bDaclPresent, reinterpret_cast< ::_ACL* >(pDacl), bDaclDefaulted);
 }
 
 }
 }
-
-#include <boost/winapi/detail/footer.hpp>
 
 #endif // BOOST_WINAPI_PARTITION_APP_SYSTEM
 #endif // BOOST_WINAPI_SECURITY_HPP_INCLUDED_

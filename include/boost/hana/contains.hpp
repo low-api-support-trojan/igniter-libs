@@ -19,7 +19,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/equal.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @cond
     template <typename Xs, typename Key>
     constexpr auto contains_t::operator()(Xs&& xs, Key&& key) const {
@@ -46,6 +46,6 @@ namespace boost { namespace hana {
                     hana::equal.to(static_cast<X&&>(x)));
         }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_CONTAINS_HPP

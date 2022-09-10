@@ -359,7 +359,7 @@ class tc_optional_base : public optional_tag
     template<class Expr>
     void construct ( Expr const& factory, in_place_factory_base const* )
      {
-       boost_optional_detail::construct<value_type>(factory, boost::addressof(m_storage));
+       boost_optional_detail::construct<value_type>(factory, m_storage.address());
        m_initialized = true ;
      }
 

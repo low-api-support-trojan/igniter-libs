@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Create a monadic structure by combining a lifted value with itself
     //! `n` times.
     //! @ingroup group-MonadPlus
@@ -71,8 +71,8 @@ namespace boost { namespace hana {
     };
 
     template <typename M>
-    BOOST_HANA_INLINE_VARIABLE constexpr replicate_t<M> replicate{};
+    constexpr replicate_t<M> replicate{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_REPLICATE_HPP

@@ -2,10 +2,6 @@
 
 // Copyright (c) 2018-2019 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2020-2021.
-// Modifications copyright (c) 2020-2021 Oracle and/or its affiliates.
-// Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
-
 // Use, modification and distribution is subject to the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
@@ -15,13 +11,12 @@
 
 #include <cstddef>
 
-#include <boost/range/value_type.hpp>
+#include <boost/range.hpp>
 
-#include <boost/geometry/srs/spheroid.hpp>
-#include <boost/geometry/strategies/buffer.hpp>
-#include <boost/geometry/strategies/geographic/parameters.hpp>
 #include <boost/geometry/util/math.hpp>
-#include <boost/geometry/util/select_calculation_type.hpp>
+
+#include <boost/geometry/strategies/buffer.hpp>
+
 
 namespace boost { namespace geometry
 {
@@ -76,9 +71,10 @@ public :
     {
         typedef typename boost::range_value<OutputRange>::type output_point_type;
 
-        typedef typename select_calculation_type
+        typedef typename select_most_precise
             <
-                Point, output_point_type,
+                typename geometry::coordinate_type<Point>::type,
+                typename geometry::coordinate_type<output_point_type>::type,
                 CalculationType
                 //double
             >::type calculation_type;

@@ -20,7 +20,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <type_traits>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     template <typename C, bool condition>
     struct value_impl<C, when<condition>> : default_ {
         template <typename ...Args>
@@ -51,6 +51,6 @@ namespace boost { namespace hana {
         static constexpr auto apply()
         { return C::value; }
     };
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_VALUE_HPP

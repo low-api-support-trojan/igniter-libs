@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Return the inverse of an element of a group.
     //! @ingroup group-Group
     //!
@@ -35,8 +35,8 @@ namespace boost { namespace hana {
         constexpr decltype(auto) operator()(X&& x) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr negate_t negate{};
+    constexpr negate_t negate{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_NEGATE_HPP

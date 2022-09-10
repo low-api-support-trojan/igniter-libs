@@ -16,7 +16,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <utility>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! @ingroup group-functional
     //! Return a function computing the fixed point of a function.
     //!
@@ -59,7 +59,7 @@ namespace boost { namespace hana {
     template <typename F>
     struct fix_t;
 
-    BOOST_HANA_INLINE_VARIABLE constexpr detail::create<fix_t> fix{};
+    constexpr detail::create<fix_t> fix{};
 
     template <typename F>
     struct fix_t {
@@ -78,6 +78,6 @@ namespace boost { namespace hana {
         { return std::move(f)(fix(f), static_cast<X&&>(x)...); }
     };
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FUNCTIONAL_FIX_HPP

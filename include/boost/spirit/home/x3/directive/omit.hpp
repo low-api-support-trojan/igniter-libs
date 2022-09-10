@@ -24,7 +24,7 @@ namespace boost { namespace spirit { namespace x3
         static bool const has_attribute = false;
 
         typedef Subject subject_type;
-        constexpr omit_directive(Subject const& subject)
+        omit_directive(Subject const& subject)
           : base_type(subject) {}
 
         template <typename Iterator, typename Context, typename RContext>
@@ -38,14 +38,14 @@ namespace boost { namespace spirit { namespace x3
     struct omit_gen
     {
         template <typename Subject>
-        constexpr omit_directive<typename extension::as_parser<Subject>::value_type>
+        omit_directive<typename extension::as_parser<Subject>::value_type>
         operator[](Subject const& subject) const
         {
             return { as_parser(subject) };
         }
     };
 
-    constexpr auto omit = omit_gen{};
+    auto const omit = omit_gen{};
 }}}
 
 #endif

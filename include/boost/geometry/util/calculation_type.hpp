@@ -4,8 +4,8 @@
 // Copyright (c) 2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2012 Mateusz Loskot, London, UK.
 
-// This file was modified by Oracle on 2018-2020.
-// Modifications copyright (c) 2018-2020, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2018.
+// Modifications copyright (c) 2018, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -16,8 +16,12 @@
 #ifndef BOOST_GEOMETRY_UTIL_CALCULATION_TYPE_HPP
 #define BOOST_GEOMETRY_UTIL_CALCULATION_TYPE_HPP
 
-
+#include <boost/config.hpp>
+#include <boost/mpl/if.hpp>
 #include <boost/static_assert.hpp>
+#include <boost/type_traits/is_floating_point.hpp>
+#include <boost/type_traits/is_fundamental.hpp>
+#include <boost/type_traits/is_void.hpp>
 
 #include <boost/geometry/util/select_coordinate_type.hpp>
 #include <boost/geometry/util/select_most_precise.hpp>
@@ -34,13 +38,17 @@ namespace detail
 
 struct default_integral
 {
-    typedef long long type;
+#ifdef BOOST_HAS_LONG_LONG
+    typedef boost::long_long_type type;
+#else
+    typedef int type;
+#endif
 };
 
 /*!
 \details Selects the most appropriate:
     - if calculation type is specified (not void), that one is used
-    - else if type is non-fundamental (user defined e.g. Boost.Multiprecision), that one
+    - else if type is non-fundamental (user defined e.g. ttmath), that one
     - else if type is floating point, the specified default FP is used
     - else it is integral and the specified default integral is used
  */
@@ -54,25 +62,25 @@ template
 struct calculation_type
 {
     BOOST_STATIC_ASSERT((
-        std::is_fundamental
+        boost::is_fundamental
             <
                 DefaultFloatingPointCalculationType
-            >::value
+            >::type::value
         ));
     BOOST_STATIC_ASSERT((
-        std::is_fundamental
+        boost::is_fundamental
             <
                 DefaultIntegralCalculationType
-            >::value
+            >::type::value
         ));
 
 
-    typedef std::conditional_t
+    typedef typename boost::mpl::if_
         <
-            std::is_void<CalculationType>::value,
-            std::conditional_t
+            boost::is_void<CalculationType>,
+            typename boost::mpl::if_
                 <
-                    std::is_floating_point<Type>::value,
+                    boost::is_floating_point<Type>,
                     typename select_most_precise
                         <
                             DefaultFloatingPointCalculationType,
@@ -83,9 +91,9 @@ struct calculation_type
                             DefaultIntegralCalculationType,
                             Type
                         >::type
-                >,
+                >::type,
             CalculationType
-        > type;
+        >::type type;
 };
 
 } // namespace detail

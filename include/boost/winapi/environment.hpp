@@ -16,8 +16,6 @@
 
 #if BOOST_WINAPI_PARTITION_DESKTOP || BOOST_WINAPI_PARTITION_SYSTEM
 
-#include <boost/winapi/detail/header.hpp>
-
 #if defined(GetEnvironmentStrings)
 // Unlike most of the WinAPI, GetEnvironmentStrings is a real function and GetEnvironmentStringsA is a macro.
 // In UNICODE builds, GetEnvironmentStrings is also defined as a macro that redirects to GetEnvironmentStringsW,
@@ -32,31 +30,31 @@
 #if !defined( BOOST_USE_WINDOWS_H )
 extern "C" {
 #if !defined( BOOST_NO_ANSI_APIS )
-BOOST_WINAPI_IMPORT boost::winapi::LPSTR_ BOOST_WINAPI_WINAPI_CC GetEnvironmentStrings();
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC FreeEnvironmentStringsA(boost::winapi::LPSTR_);
+BOOST_SYMBOL_IMPORT boost::winapi::LPSTR_ BOOST_WINAPI_WINAPI_CC GetEnvironmentStrings();
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC FreeEnvironmentStringsA(boost::winapi::LPSTR_);
 
-BOOST_WINAPI_IMPORT boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC GetEnvironmentVariableA(
+BOOST_SYMBOL_IMPORT boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC GetEnvironmentVariableA(
     boost::winapi::LPCSTR_ lpName,
     boost::winapi::LPSTR_ lpBuffer,
     boost::winapi::DWORD_ nSize
 );
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC SetEnvironmentVariableA(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC SetEnvironmentVariableA(
     boost::winapi::LPCSTR_ lpName,
     boost::winapi::LPCSTR_ lpValue
 );
 #endif // !defined( BOOST_NO_ANSI_APIS )
 
-BOOST_WINAPI_IMPORT boost::winapi::LPWSTR_ BOOST_WINAPI_WINAPI_CC GetEnvironmentStringsW();
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC FreeEnvironmentStringsW(boost::winapi::LPWSTR_);
+BOOST_SYMBOL_IMPORT boost::winapi::LPWSTR_ BOOST_WINAPI_WINAPI_CC GetEnvironmentStringsW();
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC FreeEnvironmentStringsW(boost::winapi::LPWSTR_);
 
-BOOST_WINAPI_IMPORT boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC GetEnvironmentVariableW(
+BOOST_SYMBOL_IMPORT boost::winapi::DWORD_ BOOST_WINAPI_WINAPI_CC GetEnvironmentVariableW(
     boost::winapi::LPCWSTR_ lpName,
     boost::winapi::LPWSTR_ lpBuffer,
     boost::winapi::DWORD_ nSize
 );
 
-BOOST_WINAPI_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC SetEnvironmentVariableW(
+BOOST_SYMBOL_IMPORT boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC SetEnvironmentVariableW(
     boost::winapi::LPCWSTR_ lpName,
     boost::winapi::LPCWSTR_ lpValue
 );
@@ -138,8 +136,6 @@ BOOST_FORCEINLINE BOOL_ set_environment_variable(LPCWSTR_ name, LPCWSTR_ value)
 #endif
 #undef BOOST_WINAPI_DETAIL_GET_ENVIRONMENT_STRINGS_UNDEFINED
 #endif // defined(BOOST_WINAPI_DETAIL_GET_ENVIRONMENT_STRINGS_UNDEFINED)
-
-#include <boost/winapi/detail/footer.hpp>
 
 #endif // BOOST_WINAPI_PARTITION_DESKTOP || BOOST_WINAPI_PARTITION_SYSTEM
 

@@ -51,7 +51,7 @@ public:
                                         bool            text_or_binary    = true );
 
     // Destructor
-    ~output_test_stream() BOOST_OVERRIDE;
+    virtual ~output_test_stream();
 
     //! Checks if the stream is empty
     //!

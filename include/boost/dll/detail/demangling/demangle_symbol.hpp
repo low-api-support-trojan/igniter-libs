@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <memory>
 
-#if defined(_MSC_VER) // MSVC, Clang-cl, and ICC on Windows
+#if defined(BOOST_MSVC) || defined(BOOST_MSVC_FULL_VER)
 
 namespace boost
 {

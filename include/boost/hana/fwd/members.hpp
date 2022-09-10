@@ -14,7 +14,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/hana/core/when.hpp>
 
 
-namespace boost { namespace hana {
+BOOST_HANA_NAMESPACE_BEGIN
     //! Returns a `Sequence` containing the members of a `Struct`.
     //! @ingroup group-Struct
     //!
@@ -39,8 +39,8 @@ namespace boost { namespace hana {
         constexpr auto operator()(Object&& object) const;
     };
 
-    BOOST_HANA_INLINE_VARIABLE constexpr members_t members{};
+    constexpr members_t members{};
 #endif
-}} // end namespace boost::hana
+BOOST_HANA_NAMESPACE_END
 
 #endif // !BOOST_HANA_FWD_MEMBERS_HPP
